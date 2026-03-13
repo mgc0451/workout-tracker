@@ -565,11 +565,7 @@ function completeSession() {
   setState({ view: 'select', sessionType: null, activeSession: null, history });
 }
 
-function selectExercise(exercise) {
-  const history    = getExerciseHistory(exercise.name);
-  const lastWeight = history[0]?.sets[0].weight ?? exercise.weight;
-  setState({ view: 'exercise', activeExercise: exercise, sets: [], weight: lastWeight, repInput: '' });
-}
+
 
 function addSet() {
   const reps = parseInt(state.repInput);
@@ -824,10 +820,10 @@ function renderExercise() {
         <div class="label mb-1">REPS — SET ${state.sets.length + 1}</div>
         <input id="repInput" type="number" inputmode="numeric" value="${state.repInput}"
                placeholder="${placeholder}" class="input-reps"
-               oninput="state.repInput=this.value"
+               oninput="state.repInput=this.value; document.getElementById('btnLogSet').disabled=!(this.value && Number(this.value)>0);"
                onkeydown="if(event.key==='Enter')addSet()" />
       </div>
-      <button class="btn-log" onclick="addSet()" ${!state.repInput || Number(state.repInput) <= 0 ? 'disabled' : ''}>
+      <button id="btnLogSet" class="btn-log" onclick="addSet()" ${!state.repInput || Number(state.repInput) <= 0 ? 'disabled' : ''}>
         ${icons.plus} LOG SET ${state.sets.length + 1}
       </button>`;
   } else {
