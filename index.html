@@ -8,387 +8,633 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --black:      #000000;
-      --slate-950:  #020617;
-      --slate-900:  #0f172a;
-      --slate-800:  #1e293b;
-      --slate-700:  #334155;
-      --slate-600:  #475569;
-      --slate-500:  #64748b;
-      --slate-400:  #94a3b8;
-      --slate-300:  #cbd5e1;
-      --white:      #ffffff;
-      --cyan-400:   #22d3ee;
-      --cyan-600:   #0891b2;
-      --cyan-700:   #0e7490;
-      --green-400:  #4ade80;
-      --green-600:  #16a34a;
-      --green-700:  #15803d;
-      --green-950:  #052e16;
-      --blue-300:   #93c5fd;
-      --blue-400:   #60a5fa;
-      --blue-600:   #2563eb;
-      --blue-700:   #1d4ed8;
-      --blue-800:   #1e40af;
-      --blue-900:   #1e3a8a;
-      --blue-950:   #172554;
-      --red-400:    #f87171;
-      --red-500:    #ef4444;
-      --red-600:    #dc2626;
-      --red-800:    #991b1b;
-      --red-900:    #7f1d1d;
-      --red-950:    #450a0a;
-      --yellow-400: #facc15;
-      --yellow-600: #ca8a04;
-      --yellow-900: #713f12;
-      --yellow-950: #422006;
+      --bg:         #070b14;
+      --bg-card:    #0d1424;
+      --bg-inner:   #111d35;
+      --bg-deep:    #080f1e;
+      --border:     #1a2540;
+      --border-mid: #243050;
+      --border-hi:  #2e3f6a;
+      --cyan:       #f59e0b;
+      --cyan-dim:   #b45309;
+      --cyan-glow:  rgba(245,158,11,0.12);
+      --cyan-glow2: rgba(245,158,11,0.06);
+      --white:      #f0f6ff;
+      --muted:      #3d5275;
+      --text-mid:   #6b8ab5;
+      --text-dim:   #4a6080;
+      --green:      #22c55e;
+      --green-dim:  #14532d;
+      --green-bg:   #071a0f;
+      --blue:       #60a5fa;
+      --blue-dim:   #1e3a8a;
+      --blue-bg:    #060f25;
+      --red:        #f87171;
+      --red-dim:    #7f1d1d;
+      --red-bg:     #1a0808;
+      --yellow:     #fbbf24;
+      --yellow-dim: #78350f;
+      --yellow-bg:  #1a1000;
+      --orange:     #fb923c;
+      --violet:       #a78bfa;
+      --violet-dim:   #5b21b6;
+      --violet-mid:   #7c3aed;
+      --violet-glow:  rgba(167,139,250,0.14);
+      --violet-glow2: rgba(167,139,250,0.07);
     }
 
     html, body {
-      background: var(--black);
+      background: var(--bg);
       color: var(--white);
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
       min-height: 100vh;
       -webkit-tap-highlight-color: transparent;
     }
 
-    #app { min-height: 100vh; }
+    /* Subtle noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
 
-    /* ── Layout ── */
-    .screen        { min-height: 100vh; padding: 12px; background: var(--black); }
-    .container     { max-width: 448px; margin: 0 auto; padding-top: 8px; }
-    .container--home { padding-top: 24px; }
+    #app { min-height: 100vh; position: relative; z-index: 1; }
+
+    /* ── Screen fade ── */
+    .screen {
+      min-height: 100vh;
+      padding: 12px 12px 32px;
+      animation: fadeIn 0.18s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    .container      { max-width: 448px; margin: 0 auto; padding-top: 8px; }
+    .container--home { padding-top: 28px; }
 
     /* ── Typography ── */
-    .title-xl  { font-size: 1.5rem; font-weight: 700; color: var(--white); }
-    .title-lg  { font-size: 1.125rem; font-weight: 600; color: var(--white); }
-    .title-sm  { font-size: 0.875rem; font-weight: 600; color: var(--white); }
-    .label     { font-size: 0.75rem; color: var(--slate-600); }
-    .text-xs   { font-size: 0.75rem; }
-    .text-sm   { font-size: 0.875rem; }
-    .text-cyan { color: var(--cyan-400); }
-    .text-muted { color: var(--slate-500); }
+    .title-xl  { font-size: 1.5rem;   font-weight: 800; color: var(--white);    letter-spacing: -0.02em; }
+    .title-lg  { font-size: 1.125rem; font-weight: 700; color: var(--white); }
+    .title-sm  { font-size: 0.75rem;  font-weight: 700; color: var(--text-mid); letter-spacing: 0.08em; text-transform: uppercase; }
+    .label     { font-size: 0.7rem;   color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; }
+    .text-cyan { color: var(--cyan); }
+    .text-muted { color: var(--muted); }
 
     /* ── Cards ── */
     .card {
-      background: var(--slate-950);
-      border: 1px solid var(--slate-900);
-      border-radius: 8px;
-      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      position: relative;
+    }
+    .card--glow {
+      box-shadow: 0 0 0 1px var(--border), inset 0 1px 0 rgba(255,255,255,0.04);
     }
     .card--inner {
-      background: var(--slate-900);
-      border-radius: 6px;
-      padding: 8px;
+      background: var(--bg-inner);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+    .card--deep {
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
     }
 
     /* ── Buttons ── */
-    button { cursor: pointer; border: none; font-family: inherit; transition: background 0.15s, border-color 0.15s, color 0.15s; }
+    button { cursor: pointer; border: none; font-family: inherit; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent; }
 
     .btn-back {
       background: none;
-      color: var(--slate-600);
+      color: var(--text-dim);
       font-size: 0.75rem;
       padding: 0;
-      margin-bottom: 12px;
-      display: block;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
-    .btn-back:hover { color: var(--cyan-400); }
+    .btn-back:hover { color: var(--cyan); }
 
     .btn-primary {
       width: 100%;
-      background: var(--green-700);
+      background: linear-gradient(135deg, #16a34a, #15803d);
       color: var(--white);
-      padding: 12px;
-      border-radius: 8px;
+      padding: 14px;
+      border-radius: 10px;
       font-weight: 700;
       font-size: 0.875rem;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      box-shadow: 0 4px 12px rgba(22,163,74,0.3);
+      letter-spacing: 0.02em;
     }
-    .btn-primary:hover { background: var(--green-600); }
+    .btn-primary:hover  { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 4px 16px rgba(22,163,74,0.45); }
+    .btn-primary:active { transform: scale(0.98); }
 
     .btn-secondary {
       width: 100%;
-      background: var(--slate-900);
-      border: 1px solid var(--slate-800);
-      color: var(--slate-400);
-      padding: 8px;
-      border-radius: 6px;
+      background: transparent;
+      border: 1px solid var(--border-mid);
+      color: var(--text-mid);
+      padding: 10px;
+      border-radius: 8px;
       font-size: 0.75rem;
+      letter-spacing: 0.04em;
     }
-    .btn-secondary:hover { background: var(--slate-800); }
+    .btn-secondary:hover { border-color: var(--border-hi); color: var(--white); }
 
     .btn-danger {
       width: 100%;
-      background: var(--red-950);
-      border: 1px solid var(--red-900);
-      color: var(--red-400);
-      padding: 8px;
-      border-radius: 6px;
+      background: var(--red-bg);
+      border: 1px solid var(--red-dim);
+      color: var(--red);
+      padding: 10px;
+      border-radius: 8px;
       font-size: 0.75rem;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+      letter-spacing: 0.04em;
     }
-    .btn-danger:hover { background: var(--red-900); }
+    .btn-danger:hover { background: rgba(127,29,29,0.3); }
 
     .btn-log {
       width: 100%;
-      background: var(--slate-900);
-      border: 1px solid var(--slate-800);
+      background: linear-gradient(135deg, var(--bg-inner), var(--bg-card));
+      border: 1px solid var(--border-hi);
       color: var(--white);
-      padding: 12px;
-      border-radius: 6px;
+      padding: 14px;
+      border-radius: 10px;
       font-weight: 700;
       font-size: 0.875rem;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      letter-spacing: 0.02em;
     }
-    .btn-log:hover:not(:disabled) { background: var(--slate-800); }
-    .btn-log:disabled { background: var(--slate-950); border-color: var(--slate-900); cursor: not-allowed; color: var(--slate-600); }
+    .btn-log:hover:not(:disabled) { border-color: var(--cyan-dim); background: linear-gradient(135deg, rgba(245,158,11,0.08), var(--bg-card)); box-shadow: 0 0 12px var(--cyan-glow); }
+    .btn-log:active:not(:disabled) { transform: scale(0.98); }
+    .btn-log:disabled { opacity: 0.35; cursor: not-allowed; }
 
     .btn-complete-ex {
       width: 100%;
-      background: var(--slate-800);
-      border: 1px solid var(--slate-700);
-      color: var(--white);
-      padding: 12px;
-      border-radius: 6px;
+      background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.06));
+      border: 1px solid var(--cyan-dim);
+      color: var(--cyan);
+      padding: 14px;
+      border-radius: 10px;
       font-weight: 700;
       font-size: 0.875rem;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      box-shadow: 0 0 16px var(--cyan-glow);
+      letter-spacing: 0.02em;
     }
-    .btn-complete-ex:hover { background: var(--slate-700); }
+    .btn-complete-ex:hover  { background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(245,158,11,0.1)); box-shadow: 0 0 24px rgba(245,158,11,0.2); }
+    .btn-complete-ex:active { transform: scale(0.98); }
 
     .btn-session {
       width: 100%;
-      background: var(--slate-950);
-      border: 1px solid var(--slate-800);
-      border-radius: 6px;
-      padding: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
       text-align: left;
       display: flex;
       align-items: center;
       justify-content: space-between;
       color: var(--white);
+      position: relative;
+      overflow: hidden;
     }
-    .btn-session:hover { border-color: var(--cyan-700); }
+    .btn-session::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--violet-glow2), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-session:hover { border-color: var(--violet-dim); }
+    .btn-session:hover::before { opacity: 1; }
+    .btn-session.next-session {
+      border-color: var(--violet-mid);
+      box-shadow: 0 0 14px var(--violet-glow), inset 0 1px 0 rgba(167,139,250,0.1);
+    }
+    .btn-session.next-session::before { opacity: 1; background: linear-gradient(135deg, var(--violet-glow), transparent); }
 
-    .btn-history {
+    .btn-nav {
       width: 100%;
-      background: var(--slate-950);
-      border: 1px solid var(--slate-800);
-      color: var(--slate-400);
-      padding: 8px;
-      border-radius: 6px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 10px;
+      border-radius: 8px;
       font-size: 0.75rem;
+      letter-spacing: 0.04em;
     }
-    .btn-history:hover { border-color: var(--cyan-700); }
+    .btn-nav:hover { border-color: var(--border-hi); color: var(--text-mid); }
 
     .btn-resume {
       flex: 1;
-      background: var(--blue-600);
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
       color: var(--white);
-      padding: 8px;
-      border-radius: 6px;
+      padding: 10px;
+      border-radius: 8px;
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.04em;
     }
-    .btn-resume:hover { background: var(--blue-700); }
+    .btn-resume:hover { background: linear-gradient(135deg, #3b82f6, #2563eb); }
 
     .btn-abandon {
       flex: 1;
-      background: var(--slate-800);
-      border: 1px solid var(--slate-700);
-      color: var(--slate-400);
-      padding: 8px;
-      border-radius: 6px;
+      background: transparent;
+      border: 1px solid var(--border-mid);
+      color: var(--text-mid);
+      padding: 10px;
+      border-radius: 8px;
       font-size: 0.75rem;
     }
-    .btn-abandon:hover { background: var(--slate-700); }
+    .btn-abandon:hover { border-color: var(--red-dim); color: var(--red); }
 
     .btn-clear-all {
       background: none;
-      color: var(--red-600);
-      border: 1px solid var(--red-900);
-      font-size: 0.75rem;
-      padding: 4px 8px;
-      border-radius: 4px;
+      color: var(--red-dim);
+      border: 1px solid var(--red-dim);
+      font-size: 0.7rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
     }
-    .btn-clear-all:hover { color: var(--red-400); border-color: #b91c1c; }
+    .btn-clear-all:hover { color: var(--red); border-color: var(--red); }
 
     .btn-delete-day {
       background: none;
-      color: var(--red-800);
-      padding: 2px;
+      color: var(--red-dim);
+      padding: 4px;
       line-height: 1;
+      border-radius: 4px;
     }
-    .btn-delete-day:hover { color: var(--red-500); }
+    .btn-delete-day:hover { color: var(--red); }
 
     .btn-weight {
-      background: var(--slate-900);
+      background: var(--bg-inner);
+      border: 1px solid var(--border-mid);
       color: var(--white);
-      width: 40px;
-      height: 40px;
-      border-radius: 6px;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
       font-weight: 700;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .btn-weight:hover { background: var(--slate-800); }
+    .btn-weight:hover  { border-color: var(--cyan-dim); color: var(--cyan); }
+    .btn-weight:active { transform: scale(0.93); }
+
+    .btn-export {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border-hi);
+      color: var(--cyan);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+    }
+    .btn-export:hover { background: var(--cyan-glow); }
 
     /* ── Inputs ── */
-    input[type="number"] {
-      background: var(--slate-900);
-      color: var(--cyan-400);
-      border: none;
-      border-radius: 6px;
+    input[type="number"], input[type="text"] {
+      background: var(--bg-inner);
+      color: var(--white);
+      border: 1px solid var(--border-mid);
+      border-radius: 8px;
       text-align: center;
       font-family: inherit;
       outline: none;
       width: 100%;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    input[type="number"]:focus { box-shadow: 0 0 0 1px var(--slate-700); }
+    input[type="number"]:focus, input[type="text"]:focus {
+      border-color: var(--cyan-dim);
+      box-shadow: 0 0 0 3px var(--cyan-glow);
+    }
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-    .input-weight { font-size: 1.25rem; font-weight: 700; padding: 8px; flex: 1; }
-    .input-reps   { font-size: 1.5rem;  font-weight: 700; padding: 12px; }
-
+    .input-weight {
+      font-size: 1.375rem;
+      font-weight: 700;
+      padding: 10px;
+      flex: 1;
+      color: var(--cyan);
+    }
+    .input-reps {
+      font-size: 2rem;
+      font-weight: 800;
+      padding: 14px;
+      color: var(--cyan);
+      letter-spacing: -0.02em;
+    }
     /* ── Progress bar ── */
     .progress-bar-wrap {
-      background: var(--slate-950);
-      border: 1px solid var(--slate-900);
-      border-radius: 8px;
-      padding: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
     }
     .progress-bar-track {
-      background: var(--slate-900);
+      background: var(--bg-deep);
       border-radius: 9999px;
-      height: 6px;
+      height: 5px;
       overflow: hidden;
-      margin-top: 4px;
+      margin-top: 6px;
     }
     .progress-bar-fill {
-      background: linear-gradient(to right, var(--cyan-600), var(--cyan-400));
+      background: linear-gradient(to right, var(--violet-mid), var(--cyan));
       height: 100%;
       border-radius: 9999px;
-      transition: width 0.3s ease;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 8px rgba(245,158,11,0.4);
     }
-    .progress-bar-labels { display: flex; justify-content: space-between; font-size: 0.75rem; }
+    .progress-bar-labels { display: flex; justify-content: space-between; }
 
     /* ── Exercise list item ── */
     .exercise-item {
       width: 100%;
-      background: var(--slate-950);
-      border: 1px solid var(--slate-900);
-      border-radius: 6px;
-      padding: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
       text-align: left;
       display: flex;
       align-items: center;
       justify-content: space-between;
       color: var(--white);
+      transition: border-color 0.15s, background 0.15s;
     }
-    .exercise-item:hover { border-color: var(--slate-800); }
-    .exercise-item.done  { border-color: var(--slate-700); background: var(--slate-900); }
+    .exercise-item:hover  { border-color: var(--border-hi); }
+    .exercise-item:active { transform: scale(0.99); }
+    .exercise-item.done   { border-color: var(--border); background: rgba(245,158,11,0.03); }
 
-    /* ── Set rows ── */
+    /* ── Set rows (with slide-in animation) ── */
+    .set-row-wrap {
+      animation: slideIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-12px) scale(0.97); }
+      to   { opacity: 1; transform: none; }
+    }
     .set-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: var(--slate-900);
-      padding: 8px;
-      border-radius: 6px;
+      background: var(--bg-inner);
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 8px;
     }
 
-    /* ── PR badges ── */
-    .pr-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
-    .pr-badge  {
-      background: var(--yellow-950);
-      color: var(--yellow-600);
+    /* ── PR badges (with pop animation) ── */
+    .pr-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+    .pr-badge {
+      background: linear-gradient(135deg, rgba(167,139,250,0.18), rgba(167,139,250,0.08));
+      border: 1px solid rgba(167,139,250,0.35);
+      color: var(--violet);
       border-radius: 9999px;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
-      padding: 2px 8px;
+      padding: 3px 10px;
       display: flex;
       align-items: center;
       gap: 4px;
+      animation: prPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      letter-spacing: 0.02em;
+    }
+    @keyframes prPop {
+      from { opacity: 0; transform: scale(0.6); }
+      to   { opacity: 1; transform: scale(1); }
     }
 
     /* ── Progression status ── */
     .progression {
-      padding: 8px;
-      border-radius: 6px;
+      padding: 10px 12px;
+      border-radius: 8px;
       font-size: 0.75rem;
       margin-bottom: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
     }
-    .progression.increase { background: var(--green-950); border: 1px solid #14532d; color: var(--green-400); }
-    .progression.good     { background: var(--blue-950);  border: 1px solid var(--blue-900); color: var(--blue-400); }
-    .progression.maintain { background: var(--yellow-950); border: 1px solid var(--yellow-900); color: var(--yellow-400); }
+    .progression.increase { background: var(--green-bg);  border: 1px solid var(--green-dim);  color: var(--green); }
+    .progression.good     { background: var(--blue-bg);   border: 1px solid var(--blue-dim);   color: var(--blue); }
+    .progression.maintain { background: var(--yellow-bg); border: 1px solid var(--yellow-dim); color: var(--yellow); }
 
-    /* ── Stats grid ── */
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center; }
+
+
+    /* ── Exercise accent bar ── */
+    .ex-header {
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+      margin-bottom: 14px;
+    }
+    .ex-accent-bar {
+      width: 3px;
+      border-radius: 9999px;
+      flex-shrink: 0;
+    }
+    .ex-accent-bar.session-A { background: linear-gradient(to bottom, var(--violet), var(--violet-dim)); }
+    .ex-accent-bar.session-B { background: linear-gradient(to bottom, var(--cyan), var(--cyan-dim)); }
+    .ex-accent-bar.session-C { background: linear-gradient(to bottom, var(--blue), var(--blue-dim)); }
+
+    /* ── Filled checkmark ── */
+    .check-circle {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 8px rgba(34,197,94,0.4);
+    }
+    .check-circle svg { display: block; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 24px 16px;
+      border: 1px dashed var(--border-mid);
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .empty-state-icon { font-size: 2rem; margin-bottom: 8px; }
+    .empty-state-title { font-size: 0.875rem; font-weight: 700; color: var(--text-mid); margin-bottom: 4px; }
+    .empty-state-sub { font-size: 0.75rem; color: var(--text-dim); line-height: 1.5; }
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat-item { text-align: center; padding: 10px 6px; }
 
     /* ── Resume banner ── */
-    .resume-banner { background: var(--blue-950); border: 1px solid var(--blue-800); border-radius: 8px; padding: 12px; }
+    .resume-banner {
+      background: linear-gradient(135deg, rgba(37,99,235,0.15), rgba(37,99,235,0.06));
+      border: 1px solid #1e3a8a;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    /* ── Next session badge ── */
+    .next-badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--violet);
+      background: var(--violet-glow);
+      border: 1px solid var(--violet-dim);
+      border-radius: 9999px;
+      padding: 2px 8px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+
 
     /* ── Utility ── */
     .space-y-2 > * + * { margin-top: 8px; }
     .space-y-3 > * + * { margin-top: 12px; }
-    .flex        { display: flex; }
-    .flex-row    { display: flex; gap: 8px; }
-    .gap-2       { gap: 8px; }
-    .mt-2        { margin-top: 8px; }
-    .mt-3        { margin-top: 12px; }
-    .mt-4        { margin-top: 16px; }
-    .mb-2        { margin-bottom: 8px; }
-    .mb-3        { margin-bottom: 12px; }
-    .mb-4        { margin-bottom: 16px; }
-    .mb-6        { margin-bottom: 24px; }
+    .flex       { display: flex; }
+    .flex-row   { display: flex; gap: 8px; }
+    .gap-2      { gap: 8px; }
+    .mt-1       { margin-top: 4px; }
+    .mt-2       { margin-top: 8px; }
+    .mt-3       { margin-top: 12px; }
+    .mt-4       { margin-top: 16px; }
+    .mb-1       { margin-bottom: 4px; }
+    .mb-2       { margin-bottom: 8px; }
+    .mb-3       { margin-bottom: 12px; }
+    .mb-4       { margin-bottom: 16px; }
+    .mb-6       { margin-bottom: 24px; }
     .text-center { text-align: center; }
-    .strikethrough { text-decoration: line-through; color: var(--slate-500); }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.75rem; }
-    .line-through { text-decoration: line-through; }
-
-    /* ── Export button ── */
-    .btn-export {
-      width: 100%;
-      background: var(--slate-950);
-      border: 1px solid var(--slate-700);
-      color: var(--cyan-400);
-      padding: 8px;
-      border-radius: 6px;
+    .grid-2     { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.75rem; }
+    .divider    { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-inner);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      padding: 3px 10px;
+      font-size: 0.7rem;
+      color: var(--text-mid);
+    }
+    .note-box {
+      background: rgba(251,191,36,0.06);
+      border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 8px;
+      padding: 8px 10px;
       font-size: 0.75rem;
+      color: var(--yellow);
+    }
+    .modified-label { color: var(--yellow); font-size: 0.7rem; margin-top: 6px; text-align: center; }
+    .chevron { color: var(--muted); flex-shrink: 0; }
+
+    /* ── Calendar ── */
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 2px;
       margin-top: 8px;
     }
-    .btn-export:hover { border-color: var(--cyan-600); }
-
-    /* ── Note box ── */
-    .note-box {
-      background: var(--slate-900);
-      border: 1px solid var(--slate-800);
-      border-radius: 6px;
-      padding: 8px;
-      font-size: 0.75rem;
-      color: var(--slate-500);
+    .cal-day-label {
+      text-align: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+    .cal-day {
+      height: 30px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      background: transparent;
+      position: relative;
+    }
+    .cal-day.empty { pointer-events: none; }
+    .cal-day.today { color: var(--white); }
+    .cal-day.today::after {
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--cyan);
+    }
+    .cal-day.worked-A {
+      background: linear-gradient(135deg, rgba(167,139,250,0.35), rgba(124,58,237,0.2));
+      border: 1px solid rgba(167,139,250,0.3);
+      color: var(--violet);
+      font-weight: 800;
+    }
+    .cal-day.worked-B {
+      background: linear-gradient(135deg, rgba(245,158,11,0.3), rgba(180,83,9,0.18));
+      border: 1px solid rgba(245,158,11,0.3);
+      color: var(--cyan);
+      font-weight: 800;
+    }
+    .cal-day.worked-C {
+      background: linear-gradient(135deg, rgba(96,165,250,0.25), rgba(30,58,138,0.2));
+      border: 1px solid rgba(96,165,250,0.25);
+      color: var(--blue);
+      font-weight: 800;
+    }
+    .cal-nav {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      line-height: 1;
+    }
+    .cal-nav:hover { color: var(--white); }
 
-    /* ── Modified label ── */
-    .modified-label { color: var(--yellow-600); font-size: 0.75rem; margin-top: 4px; text-align: center; }
-
-    /* chevron svg */
-    .chevron { color: var(--slate-700); flex-shrink: 0; }
+    /* ── Section label ── */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 16px 0 10px;
+    }
+    .section-label span { font-size: 0.65rem; font-weight: 700; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+    .section-label::before, .section-label::after { content: ''; flex: 1; border-top: 1px solid var(--border); }
   </style>
 </head>
 <body>
@@ -427,33 +673,50 @@ const WORKOUTS = {
   ],
 };
 
+const SESSION_ORDER = ['B', 'C', 'A'];
 const MAX_SETS = 3;
+
+// ============================================================
+// GOOGLE SHEETS SYNC
+// ============================================================
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyuEmiw_M-mMHS0IWN-9y4VbWJhzGZYysQizYEOSMISxnlz8aukSqRrzVQPijodigne/exec';
+
+async function syncToSheets(entries) {
+  if (!SHEETS_URL) return;
+  try {
+    await fetch(SHEETS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entries),
+    });
+  } catch(e) { console.warn('Sheets sync failed:', e); }
+}
 
 // ============================================================
 // STORAGE
 // ============================================================
-const loadLS = (key)        => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
-const saveLS = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-const removeLS = (key)      => localStorage.removeItem(key);
+const loadLS   = (key)        => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
+const saveLS   = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+const removeLS = (key)        => localStorage.removeItem(key);
 
 // ============================================================
 // STATE
 // ============================================================
 let state = {
-  view:           'select',   // 'select' | 'workout' | 'exercise' | 'history' | 'settings'
+  view:           'select',
   sessionType:    null,
   activeSession:  null,
   activeExercise: null,
-  // exercise screen local state
   sets:           [],
   weight:         0,
   repInput:       '',
   history:        [],
+  calOffset:      0,    // months back from current (0 = this month)
 };
 
 function initState() {
-  state.history       = loadLS('workoutHistory') || [];
-  state.activeSession = loadLS('currentSession') || null;
+  state.history       = loadLS('workoutHistory')  || [];
+  state.activeSession = loadLS('currentSession')  || null;
 }
 
 function setState(patch) {
@@ -488,58 +751,59 @@ function detectPRs(exerciseName, newSet, currentSets) {
 function getProgressionStatus(exercise, sets) {
   if (sets.length < MAX_SETS) return null;
   const [min, max] = exercise.targetReps.split('-').map(Number);
-  if (sets.every(s => s.reps >= max)) return { status: 'increase', message: '✓ MAXED — increase weight next time!' };
-  if (sets.every(s => s.reps >= min)) return { status: 'good',     message: '✓ Good progress' };
-  return                                      { status: 'maintain', message: 'Push for higher reps' };
+  if (sets.every(s => s.reps >= max)) return { status: 'increase', message: '✓ MAXED — increase weight next session' };
+  if (sets.every(s => s.reps >= min)) return { status: 'good',     message: '✓ Good — keep pushing' };
+  return                                      { status: 'maintain', message: '↑ Push for more reps' };
 }
 
 function getExerciseHistory(name) {
   return state.history.filter(e => e.exercise === name).slice(0, 5);
 }
 
-function getQuickStats() {
-  if (!state.history.length) return null;
-  const dates   = [...new Set(state.history.map(e => new Date(e.date).toDateString()))];
-  const daysAgo = Math.floor((Date.now() - new Date(dates[0])) / 86400000);
-  const weekAgo = new Date(Date.now() - 7 * 86400000);
-  return {
-    lastWorkout:      daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo}d ago`,
-    thisWeekSessions: dates.filter(d => new Date(d) >= weekAgo).length,
-  };
-}
-
 function completedExercises() {
   return state.activeSession?.exercises.map(e => e.exercise) || [];
 }
 
-// ============================================================
-// GOOGLE SHEETS SYNC
-// ============================================================
-// Paste your Apps Script Web App URL here after setup:
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyuEmiw_M-mMHS0IWN-9y4VbWJhzGZYysQizYEOSMISxnlz8aukSqRrzVQPijodigne/exec';
+function getNextSession() {
+  if (!state.history.length) return 'B';
+  const lastSessions = [...new Set(state.history.map(e => e.session))];
+  const last = lastSessions[0];
+  const idx  = SESSION_ORDER.indexOf(last);
+  return SESSION_ORDER[(idx + 1) % SESSION_ORDER.length];
+}
 
-async function syncToSheets(entries) {
-  if (!SHEETS_URL) return; // not configured yet
-  try {
-    await fetch(SHEETS_URL, {
-      method:  'POST',
-      mode:    'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(entries),
-    });
-  } catch (e) {
-    console.warn('Sheets sync failed:', e);
-  }
+function getQuickStats() {
+  const sessionDates = [...new Set(state.history.map(e => new Date(e.date).toDateString()))];
+  if (!sessionDates.length) return null;
+  const daysAgo = Math.floor((Date.now() - new Date(sessionDates[0])) / 86400000);
+  const weekAgo = new Date(Date.now() - 7 * 86400000);
+  // Count unique session days (not exercises)
+  const totalSessions = sessionDates.length;
+  const thisWeek      = sessionDates.filter(d => new Date(d) >= weekAgo).length;
+  return {
+    lastWorkout: daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo}d ago`,
+    totalSessions,
+    thisWeek,
+  };
+}
+
+function getBestSet(exerciseName) {
+  const all = state.history.filter(e => e.exercise === exerciseName).flatMap(e => e.sets);
+  if (!all.length) return null;
+  // Best = highest volume set, then show weight × reps
+  return all.reduce((best, s) => (s.weight * s.reps > best.weight * best.reps ? s : best));
 }
 
 // ============================================================
 // ACTIONS
 // ============================================================
 function startSession(type) {
-  const existing = state.activeSession;
-  const session  = (existing && existing.sessionType === type)
-    ? existing
-    : { sessionType: type, exercises: [], startedAt: new Date().toISOString() };
+  if (state.activeSession?.sessionType === type) {
+    saveLS('currentSession', state.activeSession);
+    setState({ view: 'workout', sessionType: type });
+    return;
+  }
+  const session = { sessionType: type, exercises: [], startedAt: new Date().toISOString() };
   saveLS('currentSession', session);
   setState({ view: 'workout', sessionType: type, activeSession: session });
 }
@@ -561,19 +825,15 @@ function completeSession() {
   const history = [...entries, ...state.history];
   saveLS('workoutHistory', history);
   removeLS('currentSession');
-  syncToSheets(entries); // fire-and-forget to Google Sheets
+  syncToSheets(entries);
   setState({ view: 'select', sessionType: null, activeSession: null, history });
 }
 
-
-
-function addSet() {
-  const reps = parseInt(state.repInput);
-  if (!reps || reps <= 0) return;
-  const newSet  = { reps, weight: state.weight, prs: detectPRs(state.activeExercise.name, { reps, weight: state.weight }, state.sets) };
-  const sets    = [...state.sets, newSet];
-  const repInput = sets.length < MAX_SETS ? String(reps) : '';
-  setState({ sets, repInput });
+function selectExercise(idx) {
+  const ex         = WORKOUTS[state.sessionType][idx];
+  const history    = getExerciseHistory(ex.name);
+  const lastWeight = history[0]?.sets[0].weight ?? ex.weight;
+  setState({ view: 'exercise', activeExercise: ex, sets: [], weight: lastWeight, repInput: '' });
 }
 
 function removeLastSet() {
@@ -603,16 +863,12 @@ function clearAllHistory() {
 function exportHistory() {
   const data = JSON.stringify(state.history, null, 2);
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(data).then(() => alert('History copied to clipboard! Paste it into your chat with Claude.'));
+    navigator.clipboard.writeText(data).then(() => alert('Copied! Paste into Claude.'));
   } else {
-    // fallback for older browsers
     const ta = document.createElement('textarea');
-    ta.value = data;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    alert('History copied to clipboard! Paste it into your chat with Claude.');
+    ta.value = data; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    alert('Copied! Paste into Claude.');
   }
 }
 
@@ -620,25 +876,27 @@ function exportHistory() {
 // SVG ICONS
 // ============================================================
 const icons = {
-  chevron: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="9 18 15 12 9 6"/></svg>`,
-  check:   `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-  check24: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-  plus:    `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
-  x:       `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  chevron: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron"><polyline points="9 18 15 12 9 6"/></svg>`,
+  checkFill: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  check24: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  plus:    `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  x:       `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
   x14:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
-  cal:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  cal:     `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  weight:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/></svg>`,
+  back:    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`,
 };
 
 // ============================================================
-// PROGRESS BAR HTML
+// PROGRESS BAR
 // ============================================================
 function progressBarHTML(completed, total, sessionType) {
   const pct = total > 0 ? (completed / total) * 100 : 0;
   return `
     <div class="progress-bar-wrap mb-4">
-      <div class="progress-bar-labels">
-        <span class="text-cyan" style="font-size:0.75rem">SESSION ${sessionType}</span>
-        <span class="text-muted" style="font-size:0.75rem">${completed}/${total} COMPLETE</span>
+      <div class="progress-bar-labels mb-1">
+        <span class="label" style="color:var(--cyan)">SESSION ${sessionType}</span>
+        <span class="label">${completed}/${total}</span>
       </div>
       <div class="progress-bar-track">
         <div class="progress-bar-fill" style="width:${pct}%"></div>
@@ -647,118 +905,191 @@ function progressBarHTML(completed, total, sessionType) {
 }
 
 // ============================================================
-// RENDER SCREENS
+// CALENDAR BUILDER
+// ============================================================
+function buildCalendarHTML() {
+  const now    = new Date();
+  const target = new Date(now.getFullYear(), now.getMonth() - state.calOffset, 1);
+  const year   = target.getFullYear();
+  const month  = target.getMonth();
+
+  // Build a set of worked dates → session type
+  const workedDays = {};
+  state.history.forEach(e => {
+    const d   = new Date(e.date);
+    if (d.getFullYear() === year && d.getMonth() === month) {
+      const key = d.getDate();
+      if (!workedDays[key]) workedDays[key] = e.session;
+    }
+  });
+
+  const monthName  = target.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startDay   = new Date(year, month, 1).getDay(); // 0=Sun
+  const todayDate  = (now.getMonth() === month && now.getFullYear() === year) ? now.getDate() : -1;
+
+  const dayLabels  = ['Su','Mo','Tu','We','Th','Fr','Sa'].map(d =>
+    `<div class="cal-day-label">${d}</div>`).join('');
+
+  // Empty cells before day 1
+  const empties = Array(startDay).fill(`<div class="cal-day empty"></div>`).join('');
+
+  // Day cells
+  const days = Array.from({ length: daysInMonth }, (_, i) => {
+    const day     = i + 1;
+    const session = workedDays[day];
+    const isToday = day === todayDate;
+    const cls     = ['cal-day', session ? `worked-${session}` : '', isToday && !session ? 'today' : ''].filter(Boolean).join(' ');
+    return `<div class="${cls}">${day}</div>`;
+  }).join('');
+
+  const canGoForward = state.calOffset > 0;
+
+  return `
+    <div class="card card--glow mb-4">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+        <button class="cal-nav" onclick="setState({calOffset: state.calOffset + 1})">‹</button>
+        <div class="label" style="color:var(--text-mid);font-weight:700">${monthName.toUpperCase()}</div>
+        <button class="cal-nav" onclick="setState({calOffset: Math.max(0, state.calOffset - 1)})" ${!canGoForward ? 'style="opacity:0.2;pointer-events:none"' : ''}>›</button>
+      </div>
+      <div class="cal-grid">
+        ${dayLabels}
+        ${empties}
+        ${days}
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px;justify-content:center">
+        <span style="font-size:0.6rem;color:var(--violet)">■ Session A</span>
+        <span style="font-size:0.6rem;color:var(--cyan)">■ Session B</span>
+        <span style="font-size:0.6rem;color:var(--blue)">■ Session C</span>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// SELECT SCREEN
 // ============================================================
 function renderSelect() {
   const stats   = getQuickStats();
   const session = state.activeSession;
-  const done    = completedExercises();
+  const next    = getNextSession();
 
-  let statsHTML = '';
-  if (stats) {
-    statsHTML = `
-      <div class="card mb-4">
-        <div class="stats-grid">
-          <div>
-            <div class="text-cyan" style="font-size:1.125rem;font-weight:700">${stats.lastWorkout}</div>
-            <div class="label">Last workout</div>
-          </div>
-          <div>
-            <div class="text-cyan" style="font-size:1.125rem;font-weight:700">${stats.thisWeekSessions}</div>
-            <div class="label">This week</div>
-          </div>
+  const statsHTML = stats ? `
+    <div class="card card--glow mb-4">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div style="font-size:1.375rem;font-weight:800;color:var(--cyan);letter-spacing:-0.02em">${stats.lastWorkout}</div>
+          <div class="label mt-1">Last session</div>
         </div>
-      </div>`;
-  }
-
-  let resumeHTML = '';
-  if (session && session.exercises.length > 0) {
-    resumeHTML = `
-      <div class="resume-banner mb-4">
-        <div style="font-weight:700;font-size:0.875rem;color:var(--blue-300);margin-bottom:2px">Session ${session.sessionType} in progress</div>
-        <div style="font-size:0.75rem;color:var(--blue-400);margin-bottom:8px">${session.exercises.length}/${WORKOUTS[session.sessionType].length} exercises complete</div>
-        <div class="flex-row">
-          <button class="btn-resume" onclick="resumeSession()">RESUME</button>
-          <button class="btn-abandon" onclick="abandonSession()">ABANDON</button>
+        <div class="stat-item">
+          <div style="font-size:1.375rem;font-weight:800;color:var(--cyan);letter-spacing:-0.02em">${stats.totalSessions}</div>
+          <div class="label mt-1">Total sessions</div>
         </div>
-      </div>`;
-  }
+        <div class="stat-item">
+          <div style="font-size:1.375rem;font-weight:800;color:var(--cyan);letter-spacing:-0.02em">${stats.thisWeek}</div>
+          <div class="label mt-1">This week</div>
+        </div>
+      </div>
+    </div>` : `
+    <div class="empty-state mb-4">
+      <div class="empty-state-icon">🏋️</div>
+      <div class="empty-state-title">No sessions yet</div>
+      <div class="empty-state-sub">Pick a session below to get started.<br>Your stats will appear here after your first workout.</div>
+    </div>`;
 
-  const sessionBtns = ['A', 'B', 'C'].map(s => `
-    <button class="btn-session" onclick="startSession('${s}')">
+  const resumeHTML = (session?.exercises.length > 0) ? `
+    <div class="resume-banner mb-4">
+      <div style="font-weight:700;font-size:0.875rem;color:var(--blue);margin-bottom:2px">Session ${session.sessionType} in progress</div>
+      <div class="label mb-3">${session.exercises.length}/${WORKOUTS[session.sessionType].length} exercises complete</div>
+      <div class="flex-row">
+        <button class="btn-resume" onclick="resumeSession()">RESUME</button>
+        <button class="btn-abandon" onclick="abandonSession()">ABANDON</button>
+      </div>
+    </div>` : '';
+
+  const sessionBtns = ['A', 'B', 'C'].map(s => {
+    const isNext = s === next && !session;
+    return `
+    <button class="btn-session ${isNext ? 'next-session' : ''}" onclick="startSession('${s}')">
       <div>
-        <div style="font-size:1.125rem;font-weight:700;color:var(--white)">Session ${s}</div>
-        <div style="font-size:0.75rem;font-weight:600;color:var(--slate-600)">${WORKOUTS[s].length} exercises · ${WORKOUTS[s].length * MAX_SETS} sets</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+          <span style="font-size:1.125rem;font-weight:800;color:var(--white)">Session ${s}</span>
+          ${isNext ? '<span class="next-badge">NEXT</span>' : ''}
+        </div>
+        <div class="label">${WORKOUTS[s].length} exercises · ${WORKOUTS[s].length * MAX_SETS} sets</div>
       </div>
       ${icons.chevron}
-    </button>`).join('');
+    </button>`;
+  }).join('');
 
   return `
     <div class="screen">
       <div class="container container--home">
         <div class="text-center mb-6">
-          <h1 class="title-xl mb-1">Workout Tracker</h1>
-          <p class="label">Select session</p>
+          <div class="label mb-1">MATT · ${new Date().toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'short'})}</div>
+          <h1 class="title-xl">Workout Tracker</h1>
         </div>
         ${statsHTML}
         ${resumeHTML}
-        <div class="space-y-2 mb-4">${sessionBtns}</div>
-        <button class="btn-history" onclick="setState({view:'history'})">VIEW HISTORY</button>
-        <button class="btn-history mt-2" onclick="setState({view:'settings'})" style="color:var(--slate-500)">⚙️ SETTINGS</button>
-        <button class="btn-export" onclick="exportHistory()">📋 EXPORT HISTORY FOR CLAUDE</button>
+        <div class="space-y-2 mb-6">${sessionBtns}</div>
+        ${buildCalendarHTML()}
+        <div class="space-y-2">
+          <button class="btn-nav" onclick="setState({view:'history'})">View History</button>
+          <button class="btn-nav" onclick="setState({view:'settings'})" style="color:var(--text-dim)">⚙ Settings</button>
+        </div>
       </div>
     </div>`;
 }
 
+// ============================================================
+// WORKOUT SCREEN
+// ============================================================
 function renderWorkout() {
-  const type     = state.sessionType;
+  const type      = state.sessionType;
   const exercises = WORKOUTS[type];
-  const done     = completedExercises();
+  const done      = completedExercises();
 
   const items = exercises.map((ex, idx) => {
-    const history   = getExerciseHistory(ex.name);
-    const recent    = history[0];
-    const maxWeight = history.length ? Math.max(...history.flatMap(h => h.sets.map(s => s.weight))) : 0;
-    const isDone    = done.includes(ex.name);
+    const history  = getExerciseHistory(ex.name);
+    const recent   = history[0];
+    const best     = getBestSet(ex.name);
+    const isDone   = done.includes(ex.name);
 
     let recentHTML = '';
     if (recent) {
+      const bestStr = best ? `⭐ ${best.weight}kg × ${best.reps}` : '';
       recentHTML = `
-        <div class="flex-row mt-2" style="gap:6px">
-          <span style="background:var(--slate-900);color:var(--slate-500);padding:2px 6px;border-radius:4px;font-size:0.75rem">${recent.sets.map(s => s.reps).join('-')}</span>
-          ${maxWeight > 0 ? `<span style="background:var(--yellow-950);color:var(--yellow-600);padding:2px 6px;border-radius:4px;font-size:0.75rem">⭐${maxWeight}kg</span>` : ''}
+        <div class="flex-row mt-2" style="gap:6px;flex-wrap:wrap">
+          <span class="chip">${recent.sets.map(s => s.reps).join('-')} @ ${recent.sets[0].weight}kg</span>
+          ${bestStr ? `<span class="chip" style="color:var(--yellow);border-color:rgba(251,191,36,0.2)">${bestStr}</span>` : ''}
         </div>`;
     }
 
     return `
       <button class="exercise-item ${isDone ? 'done' : ''}" onclick="selectExercise(${idx})">
         <div style="flex:1">
-          <div class="flex-row mb-1" style="align-items:center">
-            <div style="font-size:0.875rem;font-weight:600;${isDone ? 'text-decoration:line-through;color:var(--slate-500)' : 'color:var(--white)'}">${ex.name}</div>
-            ${isDone ? '<span style="color:var(--green-600);font-size:0.75rem">✓</span>' : ''}
+          <div class="flex-row mb-1" style="align-items:center;gap:8px">
+            <div style="font-size:0.875rem;font-weight:700;${isDone ? 'text-decoration:line-through;color:var(--muted)' : 'color:var(--white)'}">${ex.name}</div>
+            ${isDone ? `<span class="check-circle">${icons.checkFill}</span>` : ''}
           </div>
-          <div style="font-size:0.75rem;color:var(--slate-600)">${ex.weight > 0 ? ex.weight + 'kg' : 'BW'} × ${ex.targetReps}</div>
+          <div class="label">${ex.weight > 0 ? ex.weight + 'kg' : 'BW'} · ${ex.targetReps} reps</div>
           ${recentHTML}
         </div>
         ${icons.chevron}
       </button>`;
   }).join('');
 
-  let bottomHTML = '';
-  if (done.length > 0) {
-    bottomHTML = `
-      <div class="mt-4 space-y-2">
-        <button class="btn-primary" onclick="completeSession()">
-          ${icons.check} COMPLETE SESSION (${done.length}/${exercises.length})
-        </button>
-        <button class="btn-secondary" onclick="abandonSession()">Abandon Session</button>
-      </div>`;
-  }
+  const bottomHTML = done.length > 0 ? `
+    <div class="mt-4 space-y-2">
+      <button class="btn-primary" onclick="completeSession()">
+        ${icons.check} COMPLETE SESSION (${done.length}/${exercises.length})
+      </button>
+      <button class="btn-secondary" onclick="abandonSession()">Abandon Session</button>
+    </div>` : '';
 
   return `
     <div class="screen">
       <div class="container">
-        <button class="btn-back" onclick="setState({view:'select',sessionType:null})">← BACK</button>
+        <button class="btn-back" onclick="setState({view:'select',sessionType:null})">${icons.back} Back</button>
         ${progressBarHTML(done.length, exercises.length, type)}
         <div class="space-y-2">${items}</div>
         ${bottomHTML}
@@ -766,6 +1097,9 @@ function renderWorkout() {
     </div>`;
 }
 
+// ============================================================
+// EXERCISE SCREEN
+// ============================================================
 function renderExercise() {
   const ex          = state.activeExercise;
   const history     = getExerciseHistory(ex.name);
@@ -774,58 +1108,49 @@ function renderExercise() {
   const total       = WORKOUTS[state.sessionType].length;
   const progression = state.sets.length === MAX_SETS ? getProgressionStatus(ex, state.sets) : null;
 
-  // Last session panel
-  let lastHTML = '';
-  if (lastSession) {
-    lastHTML = `
-      <div class="card--inner mb-3">
-        <div class="label mb-1">LAST SESSION:</div>
-        <div style="font-size:0.875rem;color:var(--slate-400)">${lastSession.sets.map(s => s.reps).join('-')} @ ${lastSession.sets[0].weight}kg</div>
-      </div>`;
-  }
+  // Last session
+  const lastHTML = lastSession ? `
+    <div class="card--deep mb-3">
+      <div class="label mb-1">Last session</div>
+      <div style="font-size:0.875rem;color:var(--text-mid);font-weight:600">${lastSession.sets.map(s => s.reps).join('-')} @ ${lastSession.sets[0].weight}kg</div>
+    </div>` : '';
 
   // Weight modified warning
   const modifiedHTML = (lastSession && state.weight !== lastSession.sets[0].weight)
-    ? `<div class="modified-label">Modified from last session (${lastSession.sets[0].weight}kg)</div>`
-    : '';
+    ? `<div class="modified-label">↕ Modified from last session (${lastSession.sets[0].weight}kg)</div>` : '';
 
   // Sets list
-  let setsHTML = state.sets.length === 0
-    ? `<p class="text-muted text-center" style="padding:12px 0;font-size:0.75rem">NO SETS LOGGED</p>`
+  const setsHTML = state.sets.length === 0
+    ? `<p style="text-align:center;padding:14px 0;font-size:0.75rem;color:var(--muted)">No sets logged yet</p>`
     : state.sets.map((set, idx) => `
-        <div>
+        <div class="set-row-wrap">
           <div class="set-row">
-            <span style="font-size:0.75rem;color:var(--slate-500)">SET ${idx + 1}</span>
-            <span style="font-weight:600">${set.weight}kg × ${set.reps}</span>
+            <span class="label">Set ${idx + 1}</span>
+            <span style="font-weight:700;font-size:0.9rem">${set.weight}kg × ${set.reps}</span>
           </div>
           ${set.prs?.length > 0 ? `<div class="pr-badges">${set.prs.map(p => `<div class="pr-badge">${p.icon} ${p.message}</div>`).join('')}</div>` : ''}
         </div>`).join('');
 
-  // Remove last set button
-  const removeHTML = state.sets.length > 0
-    ? `<button class="btn-danger mb-3" onclick="removeLastSet()">${icons.x} REMOVE LAST SET</button>`
-    : '';
+  const removeHTML = state.sets.length > 0 ? `
+    <button class="btn-danger mb-3" onclick="removeLastSet()">${icons.x} Remove last set</button>` : '';
 
-  // Progression
-  const progHTML = progression
-    ? `<div class="progression ${progression.status}">${progression.message}</div>`
-    : '';
+  const progHTML = progression ? `
+    <div class="progression ${progression.status}">${progression.message}</div>` : '';
 
-  // Rep input + log button OR complete button
   let actionHTML = '';
   if (state.sets.length < MAX_SETS) {
     const placeholder = (lastSession && state.sets.length === 0) ? lastSession.sets[0].reps.toString() : '0';
     actionHTML = `
-      <div class="mb-2">
-        <div class="label mb-1">REPS — SET ${state.sets.length + 1}</div>
+      <div class="mb-3">
+        <div class="label mb-2">Reps — Set ${state.sets.length + 1}</div>
         <input id="repInput" type="number" inputmode="numeric" value="${state.repInput}"
-               placeholder="${placeholder}" class="input-reps"
+               placeholder="${placeholder}" class="input-reps mb-3"
                oninput="state.repInput=this.value; document.getElementById('btnLogSet').disabled=!(this.value && Number(this.value)>0);"
                onkeydown="if(event.key==='Enter')addSet()" />
-      </div>
-      <button id="btnLogSet" class="btn-log" onclick="addSet()" ${!state.repInput || Number(state.repInput) <= 0 ? 'disabled' : ''}>
-        ${icons.plus} LOG SET ${state.sets.length + 1}
-      </button>`;
+        <button id="btnLogSet" class="btn-log" onclick="addSet()" ${!state.repInput || Number(state.repInput) <= 0 ? 'disabled' : ''}>
+          ${icons.plus} LOG SET ${state.sets.length + 1}
+        </button>
+      </div>`;
   } else {
     actionHTML = `
       <button class="btn-complete-ex" onclick="completeExercise()">
@@ -833,55 +1158,54 @@ function renderExercise() {
       </button>`;
   }
 
-  // Notes
-  const notesHTML = ex.notes
-    ? `<div class="note-box mt-3">💡 ${ex.notes}</div>`
-    : '';
+  const notesHTML = ex.notes ? `<div class="note-box mb-3">💡 ${ex.notes}</div>` : '';
 
-  // History (older entries)
-  let historyHTML = '';
-  if (history.length > 1) {
-    historyHTML = `
-      <div class="card">
-        <div class="title-sm mb-2">HISTORY</div>
-        <div class="space-y-2">
-          ${history.slice(1).map(entry => `
-            <div class="card--inner">
-              <div class="label mb-1">${new Date(entry.date).toLocaleDateString()}</div>
-              <div style="font-size:0.75rem;color:var(--white)">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0].weight}kg</div>
-            </div>`).join('')}
-        </div>
-      </div>`;
-  }
+  const historyHTML = history.length > 1 ? `
+    <div class="section-label"><span>Previous sessions</span></div>
+    <div class="space-y-2">
+      ${history.slice(1).map(entry => `
+        <div class="card--inner">
+          <div class="label mb-1">${new Date(entry.date).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>
+          <div style="font-size:0.8rem;color:var(--text-mid);font-weight:600">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0].weight}kg</div>
+        </div>`).join('')}
+    </div>` : '';
 
   return `
     <div class="screen">
       <div class="container">
-        <button class="btn-back" onclick="setState({view:'workout',activeExercise:null,sets:[],repInput:''})">← BACK</button>
+        <button class="btn-back" onclick="setState({view:'workout',activeExercise:null,sets:[],repInput:''})">${icons.back} Back</button>
         ${progressBarHTML(done.length, total, state.sessionType)}
 
-        <div class="card mb-3">
-          <h2 class="title-lg mb-2">${ex.name}</h2>
-          ${lastHTML}
+        <div class="card card--glow mb-3">
+          <div class="ex-header">
+            <div class="ex-accent-bar session-${state.sessionType}"></div>
+            <div style="flex:1">
+              <div class="label mb-1">Session ${state.sessionType}</div>
+              <h2 class="title-lg mb-3">${ex.name}</h2>
+              ${lastHTML}
+
           <div class="mb-3">
-            <div class="label mb-1">WEIGHT (KG)</div>
+            <div class="label mb-2">Weight (kg)</div>
             <div class="flex-row" style="align-items:center">
-              <button class="btn-weight" onclick="setState({weight:Math.max(0,state.weight-2.5)})">−</button>
+              <button class="btn-weight" onclick="setState({weight:Math.max(0,+(state.weight-2.5).toFixed(2))})">−</button>
               <input type="number" inputmode="decimal" value="${state.weight}" class="input-weight"
                      onchange="setState({weight:Math.max(0,parseFloat(this.value)||0)})" />
-              <button class="btn-weight" onclick="setState({weight:state.weight+2.5})">+</button>
+              <button class="btn-weight" onclick="setState({weight:+(state.weight+2.5).toFixed(2)})">+</button>
             </div>
             ${modifiedHTML}
           </div>
-          <div class="grid-2 mb-3">
-            <div class="card--inner"><span class="label">TARGET: </span><span>${ex.targetReps}</span></div>
-            <div class="card--inner"><span class="label">REST: </span><span>${ex.rest}</span></div>
+
+          <div class="grid-2 mb-2">
+            <div class="card--deep"><span class="label">Target </span><span style="font-weight:600">${ex.targetReps} reps</span></div>
+            <div class="card--deep"><span class="label">Rest </span><span style="font-weight:600">${ex.rest}</span></div>
           </div>
           ${notesHTML}
+            </div>
+          </div>
         </div>
 
-        <div class="card mb-3">
-          <div class="title-sm mb-3">SETS (${state.sets.length}/${MAX_SETS})</div>
+        <div class="card card--glow mb-3">
+          <div class="title-sm mb-3">Sets ${state.sets.length}/${MAX_SETS}</div>
           ${state.sets.length > 0 ? `<div class="space-y-2 mb-3">${setsHTML}</div>` : setsHTML}
           ${removeHTML}
           ${progHTML}
@@ -893,45 +1217,43 @@ function renderExercise() {
     </div>`;
 }
 
+// ============================================================
+// HISTORY SCREEN
+// ============================================================
 function renderHistory() {
   const grouped = state.history.reduce((acc, entry) => {
     const date = new Date(entry.date).toLocaleDateString();
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(entry);
+    (acc[date] ??= []).push(entry);
     return acc;
   }, {});
 
-  const clearBtn = state.history.length > 0
-    ? `<button class="btn-clear-all" onclick="clearAllHistory()">CLEAR ALL</button>`
-    : '';
-
-  let bodyHTML = '';
-  if (Object.keys(grouped).length === 0) {
-    bodyHTML = `<div class="card text-center" style="padding:24px"><p style="color:var(--slate-600);font-size:0.875rem">NO HISTORY YET</p></div>`;
-  } else {
-    bodyHTML = `<div class="space-y-3">` + Object.entries(grouped).map(([date, entries]) => `
-      <div class="card">
-        <div class="flex mb-2" style="justify-content:space-between;align-items:center">
-          <div class="label flex" style="gap:6px;align-items:center">${icons.cal} ${date}</div>
-          <button class="btn-delete-day" onclick="deleteHistoryDay('${date}')">${icons.x14}</button>
-        </div>
-        <div class="space-y-2">
-          ${entries.map(entry => `
-            <div class="card--inner">
-              <div style="font-weight:600;font-size:0.75rem;margin-bottom:2px">${entry.session}: ${entry.exercise}</div>
-              <div style="font-size:0.75rem;color:var(--slate-400)">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0].weight}kg</div>
-            </div>`).join('')}
-        </div>
-      </div>`).join('') + `</div>`;
-  }
+  const bodyHTML = Object.keys(grouped).length === 0
+    ? `<div class="card text-center" style="padding:32px"><p style="color:var(--muted);font-size:0.875rem">No history yet</p></div>`
+    : `<div class="space-y-3">${Object.entries(grouped).map(([date, entries]) => `
+        <div class="card card--glow">
+          <div class="flex mb-3" style="justify-content:space-between;align-items:center">
+            <div style="display:flex;align-items:center;gap:6px;color:var(--text-mid);font-size:0.75rem;font-weight:600">
+              ${icons.cal} ${date}
+              <span class="chip" style="margin-left:4px">${entries[0].session}</span>
+            </div>
+            <button class="btn-delete-day" onclick="deleteHistoryDay('${date}')">${icons.x14}</button>
+          </div>
+          <div class="space-y-2">
+            ${entries.map(entry => `
+              <div class="card--inner">
+                <div style="font-weight:700;font-size:0.8rem;margin-bottom:2px;color:var(--white)">${entry.exercise}</div>
+                <div style="font-size:0.75rem;color:var(--text-mid)">${entry.sets.map(s => `${s.reps}@${s.weight}kg`).join(' · ')}</div>
+              </div>`).join('')}
+          </div>
+        </div>`).join('')}</div>`;
 
   return `
     <div class="screen">
       <div class="container">
-        <button class="btn-back" onclick="setState({view:'select'})">← BACK</button>
+        <button class="btn-back" onclick="setState({view:'select'})">${icons.back} Back</button>
         <div class="flex mb-4" style="justify-content:space-between;align-items:center">
-          <h2 class="title-xl">HISTORY</h2>
-          ${clearBtn}
+          <h2 class="title-xl">History</h2>
+          ${state.history.length > 0 ? `<button class="btn-clear-all" onclick="clearAllHistory()">CLEAR ALL</button>` : ''}
         </div>
         ${bodyHTML}
       </div>
@@ -939,48 +1261,28 @@ function renderHistory() {
 }
 
 // ============================================================
-// EXERCISE INDEX → OBJECT (used by workout screen onclick)
-// ============================================================
-function selectExercise(idx) {
-  const ex = WORKOUTS[state.sessionType][idx];
-  const history    = getExerciseHistory(ex.name);
-  const lastWeight = history[0]?.sets[0].weight ?? ex.weight;
-  setState({ view: 'exercise', activeExercise: ex, sets: [], weight: lastWeight, repInput: '' });
-}
-
-// ============================================================
 // SETTINGS SCREEN
 // ============================================================
 function renderSettings() {
-  const configured = !!SHEETS_URL;
   return `
     <div class="screen">
       <div class="container">
-        <button class="btn-back" onclick="setState({view:'select'})">← BACK</button>
-        <h2 class="title-xl mb-4">SETTINGS</h2>
+        <button class="btn-back" onclick="setState({view:'select'})">${icons.back} Back</button>
+        <h2 class="title-xl mb-4">Settings</h2>
 
-        <div class="card mb-3">
+        <div class="card card--glow mb-3">
           <div class="title-sm mb-2">Google Sheets Sync</div>
-          <div style="font-size:0.75rem;color:var(--slate-500);margin-bottom:12px;line-height:1.5">
-            ${configured
-              ? '✅ Connected — sessions auto-sync after completion.'
-              : '⚠️ Not configured. Follow the setup steps below to enable auto-sync.'}
-          </div>
-          <div style="font-size:0.75rem;color:var(--slate-400);line-height:1.8">
-            <strong style="color:var(--white)">Setup (one time):</strong><br>
-            1. Create a Google Sheet<br>
-            2. Extensions → Apps Script → paste the script Claude provides<br>
-            3. Deploy → Web App → Anyone → Copy URL<br>
-            4. Edit this HTML file: set <code style="color:var(--cyan-400)">SHEETS_URL = 'your-url'</code>
+          <div style="font-size:0.75rem;color:var(--text-mid);line-height:1.6">
+            ${SHEETS_URL ? '✅ Connected — sessions sync automatically.' : '⚠️ Not configured.'}
           </div>
         </div>
 
-        <div class="card">
-          <div class="title-sm mb-2">Export History</div>
-          <div style="font-size:0.75rem;color:var(--slate-500);margin-bottom:12px">
-            Copy all workout history to clipboard for pasting into Claude.
+        <div class="card card--glow">
+          <div class="title-sm mb-2">Export for Claude</div>
+          <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:12px;line-height:1.5">
+            Copy full workout history to clipboard and paste into your Claude chat.
           </div>
-          <button class="btn-export" onclick="exportHistory()" style="margin-top:0">📋 COPY HISTORY FOR CLAUDE</button>
+          <button class="btn-export" onclick="exportHistory()">📋 Copy History for Claude</button>
         </div>
       </div>
     </div>`;
@@ -998,7 +1300,6 @@ function render() {
     case 'history':  app.innerHTML = renderHistory();  break;
     case 'settings': app.innerHTML = renderSettings(); break;
   }
-  // Re-focus rep input if on exercise screen
   if (state.view === 'exercise' && state.sets.length < MAX_SETS) {
     const input = document.getElementById('repInput');
     if (input) input.focus();
