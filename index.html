@@ -836,6 +836,15 @@ function selectExercise(idx) {
   setState({ view: 'exercise', activeExercise: ex, sets: [], weight: lastWeight, repInput: '' });
 }
 
+function addSet() {
+  const reps = parseInt(state.repInput);
+  if (!reps || reps <= 0) return;
+  const newSet = { reps, weight: state.weight, prs: detectPRs(state.activeExercise.name, { reps, weight: state.weight }, state.sets) };
+  const sets   = [...state.sets, newSet];
+  const repInput = sets.length < MAX_SETS ? String(reps) : '';
+  setState({ sets, repInput });
+}
+
 function removeLastSet() {
   setState({ sets: state.sets.slice(0, -1) });
 }
