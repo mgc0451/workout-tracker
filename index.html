@@ -35,6 +35,7 @@
       --yellow:     #fbbf24;
       --yellow-dim: #78350f;
       --yellow-bg:  #1a1000;
+      --amber:      #fbbf24;
       --orange:     #fb923c;
       --violet:       #a78bfa;
       --violet-dim:   #5b21b6;
@@ -111,6 +112,10 @@
 
     /* ── Buttons ── */
     button { cursor: pointer; border: none; font-family: inherit; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
+    }
 
     .btn-back {
       background: none;
@@ -1200,9 +1205,9 @@ function buildCalendarHTML() {
   return `
     <div class="card card--glow mb-4">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
-        <button class="cal-nav" onclick="setState({calOffset: state.calOffset + 1})">‹</button>
+        <button type="button" class="cal-nav" aria-label="Previous month" onclick="setState({calOffset: state.calOffset + 1})">‹</button>
         <div class="label" style="color:var(--text-mid);font-weight:700">${monthName.toUpperCase()}</div>
-        <button class="cal-nav" onclick="setState({calOffset: Math.max(0, state.calOffset - 1)})" ${!canGoForward ? 'style="opacity:0.2;pointer-events:none"' : ''}>›</button>
+        <button type="button" class="cal-nav" aria-label="Next month" onclick="setState({calOffset: Math.max(0, state.calOffset - 1)})" ${!canGoForward ? 'style="opacity:0.2;pointer-events:none"' : ''}>›</button>
       </div>
       <div class="cal-grid">
         ${dayLabels}
@@ -1224,9 +1229,9 @@ function renderSelect() {
   const tab = state.homeTab;
 
   const tabBar = `
-    <div class="tab-bar mb-0">
-      <button class="tab-btn ${tab === 'workout' ? 'active' : ''}" onclick="setState({homeTab:'workout'})">Workout</button>
-      <button class="tab-btn ${tab === 'progress' ? 'active' : ''}" onclick="setState({homeTab:'progress'})">Progress</button>
+    <div class="tab-bar mb-0" role="tablist" aria-label="Home tabs">
+      <button type="button" class="tab-btn ${tab === 'workout' ? 'active' : ''}" role="tab" aria-selected="${tab === 'workout'}" onclick="setState({homeTab:'workout'})">Workout</button>
+      <button type="button" class="tab-btn ${tab === 'progress' ? 'active' : ''}" role="tab" aria-selected="${tab === 'progress'}" onclick="setState({homeTab:'progress'})">Progress</button>
     </div>`;
 
   if (tab === 'progress') {
@@ -1277,15 +1282,15 @@ function renderSelect() {
       <div style="font-weight:700;font-size:0.875rem;color:var(--blue);margin-bottom:2px">Session ${session.sessionType} in progress</div>
       <div class="label mb-3">${session.exercises.length}/${WORKOUTS[session.sessionType].length} exercises complete</div>
       <div class="flex-row">
-        <button class="btn-resume" onclick="resumeSession()">RESUME</button>
-        <button class="btn-abandon" onclick="abandonSession()">ABANDON</button>
+        <button type="button" class="btn-resume" onclick="resumeSession()">RESUME</button>
+        <button type="button" class="btn-abandon" onclick="abandonSession()">ABANDON</button>
       </div>
     </div>` : '';
 
   const sessionBtns = ['A', 'B', 'C'].map(s => {
     const isNext = s === next && !session;
     return `
-    <button class="btn-session ${isNext ? 'next-session' : ''}" onclick="startSession('${s}')">
+    <button type="button" class="btn-session ${isNext ? 'next-session' : ''}" onclick="startSession('${s}')">
       <div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
           <span style="font-size:1.125rem;font-weight:800;color:var(--white)">Session ${s}</span>
@@ -1310,8 +1315,8 @@ function renderSelect() {
         <div class="space-y-2 mb-6">${sessionBtns}</div>
         ${buildCalendarHTML()}
         <div class="space-y-2">
-          <button class="btn-nav" onclick="setState({view:'history'})">View History</button>
-          <button class="btn-nav" onclick="setState({view:'settings'})" style="color:var(--text-dim)">⚙ Settings</button>
+          <button type="button" class="btn-nav" onclick="setState({view:'history'})">View History</button>
+          <button type="button" class="btn-nav" onclick="setState({view:'settings'})" style="color:var(--text-dim)">⚙ Settings</button>
         </div>
       </div>
     </div>`;
@@ -1367,7 +1372,7 @@ function renderWorkout() {
     }
 
     return `
-      <button class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''}" onclick="selectExercise(${idx})">
+      <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''}" onclick="selectExercise(${idx})">
         <div style="flex:1">
           <div class="flex-row mb-1" style="align-items:center;gap:8px">
             <div style="font-size:0.875rem;font-weight:700;${isDone ? 'text-decoration:line-through;color:var(--muted)' : 'color:var(--white)'}">${ex.name}</div>
@@ -1382,16 +1387,16 @@ function renderWorkout() {
 
   const bottomHTML = done.length > 0 ? `
     <div class="mt-4 space-y-2">
-      <button class="btn-primary" onclick="completeSession()">
+      <button type="button" class="btn-primary" onclick="completeSession()">
         ${icons.check} COMPLETE SESSION (${done.length}/${exercises.length})
       </button>
-      <button class="btn-secondary" onclick="abandonSession()">Abandon Session</button>
+      <button type="button" class="btn-secondary" onclick="abandonSession()">Abandon Session</button>
     </div>` : '';
 
   return `
     <div class="screen">
       <div class="container">
-        <button class="btn-back" onclick="goBack()">${icons.back} Back</button>
+        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
         ${progressBarHTML(done.length, exercises.length, type)}
         <div class="space-y-2">${items}</div>
         ${bottomHTML}
@@ -1434,7 +1439,7 @@ function renderExercise() {
         </div>`).join('');
 
   const removeHTML = state.sets.length > 0 ? `
-    <button class="btn-danger mb-3" onclick="removeLastSet()">${icons.x} Remove last set</button>` : '';
+    <button type="button" class="btn-danger mb-3" onclick="removeLastSet()">${icons.x} Remove last set</button>` : '';
 
   const progHTML = progression ? `
     <div class="progression ${progression.status}">${progression.message}</div>` : '';
@@ -1443,13 +1448,14 @@ function renderExercise() {
   if (state.sets.length < MAX_SETS) {
     const placeholder = (lastSession && state.sets.length === 0) ? lastSession.sets[0].reps.toString() : '0';
     const saveBackBtn = state.sets.length > 0 ? `
-      <button class="btn-save-back mt-2" onclick="completeExercise()">
+      <button type="button" class="btn-save-back mt-2" onclick="completeExercise()">
         ${icons.check} Save ${state.sets.length} set${state.sets.length > 1 ? 's' : ''} & back
       </button>` : '';
     actionHTML = `
       <div class="mb-3">
         <div class="label mb-2">Reps — Set ${state.sets.length + 1}</div>
         <input id="repInput" type="number" inputmode="numeric" value="${state.repInput}"
+               aria-label="Reps for current set"
                placeholder="${placeholder}" class="input-reps mb-3"
                oninput="state.repInput=this.value; document.getElementById('btnLogSet').disabled=!(this.value && Number(this.value)>0);"
                onkeydown="if(event.key==='Enter')addSet()" />
@@ -1460,7 +1466,7 @@ function renderExercise() {
       </div>`;
   } else {
     actionHTML = `
-      <button class="btn-complete-ex" onclick="completeExercise()">
+      <button type="button" class="btn-complete-ex" onclick="completeExercise()">
         ${icons.check24} COMPLETE EXERCISE
       </button>`;
   }
@@ -1480,7 +1486,7 @@ function renderExercise() {
   return `
     <div class="screen">
       <div class="container">
-        <button class="btn-back" onclick="goBack()">${icons.back} Back</button>
+        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
         ${progressBarHTML(done.length, total, state.sessionType)}
 
         <div class="card card--glow mb-3">
@@ -1494,10 +1500,10 @@ function renderExercise() {
           <div class="mb-3">
             <div class="label mb-2">Weight (kg)</div>
             <div class="flex-row" style="align-items:center">
-              <button class="btn-weight" onclick="setState({weight:Math.max(0,+(state.weight-2.5).toFixed(2))})">−</button>
-              <input type="number" inputmode="decimal" value="${state.weight}" class="input-weight"
+              <button type="button" class="btn-weight" aria-label="Decrease weight" onclick="setState({weight:Math.max(0,+(state.weight-2.5).toFixed(2))})">−</button>
+              <input type="number" inputmode="decimal" value="${state.weight}" class="input-weight" aria-label="Weight in kilograms"
                      onchange="setState({weight:Math.max(0,parseFloat(this.value)||0)})" />
-              <button class="btn-weight" onclick="setState({weight:+(state.weight+2.5).toFixed(2)})">+</button>
+              <button type="button" class="btn-weight" aria-label="Increase weight" onclick="setState({weight:+(state.weight+2.5).toFixed(2)})">+</button>
             </div>
             ${modifiedHTML}
           </div>
@@ -1534,7 +1540,7 @@ function renderHistory() {
 
   const dropdown = `
     <div class="mb-4">
-      <select onchange="setState({historyFilter:this.value})">
+      <select aria-label="Filter history by exercise" onchange="setState({historyFilter:this.value})">
         <option value="" ${!filter ? 'selected' : ''}>All exercises</option>
         ${allExercises.map(ex => `<option value="${ex}" ${filter === ex ? 'selected' : ''}>${ex}</option>`).join('')}
       </select>
@@ -1556,6 +1562,7 @@ function renderHistory() {
         const isEditing = state.editingDate === date;
         const dateHeader = isEditing
           ? `<input type="date" class="date-edit-input" value="${isoVal}"
+               aria-label="Edit entry date"
                onchange="saveEditDate('${date}', this.value)"
                onblur="setState({editingDate:null})"
                autofocus />`
@@ -1567,8 +1574,8 @@ function renderHistory() {
               ${dateHeader}
             </div>
             <div style="display:flex;align-items:center;gap:2px">
-              ${isEditing ? '' : `<button class="btn-edit-day" onclick="setState({editingDate:'${date}'})" title="Edit date">${icons.pencil}</button>`}
-              <button class="btn-delete-day" onclick="deleteHistoryDay('${date}')">${icons.x14}</button>
+              ${isEditing ? '' : `<button type="button" class="btn-edit-day" onclick="setState({editingDate:'${date}'})" title="Edit date" aria-label="Edit date">${icons.pencil}</button>`}
+              <button type="button" class="btn-delete-day" onclick="deleteHistoryDay('${date}')" title="Delete date" aria-label="Delete date">${icons.x14}</button>
             </div>
           </div>
           <div class="space-y-2">
@@ -1584,10 +1591,10 @@ function renderHistory() {
   return `
     <div class="screen">
       <div class="container">
-        <button class="btn-back" onclick="goBack()">${icons.back} Back</button>
+        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
         <div class="flex mb-4" style="justify-content:space-between;align-items:center">
           <h2 class="title-xl">History</h2>
-          ${state.history.length > 0 ? `<button class="btn-clear-all" onclick="clearAllHistory()">CLEAR ALL</button>` : ''}
+          ${state.history.length > 0 ? `<button type="button" class="btn-clear-all" onclick="clearAllHistory()">CLEAR ALL</button>` : ''}
         </div>
         ${dropdown}
         ${bodyHTML}
@@ -1602,7 +1609,7 @@ function renderSettings() {
   return `
     <div class="screen">
       <div class="container">
-        <button class="btn-back" onclick="goBack()">${icons.back} Back</button>
+        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
         <h2 class="title-xl mb-4">Settings</h2>
 
         <div class="card card--glow mb-3">
@@ -1617,7 +1624,7 @@ function renderSettings() {
           <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:12px;line-height:1.5">
             Copy full workout history to clipboard and paste into your Claude chat.
           </div>
-          <button class="btn-export" onclick="exportHistory()">📋 Copy History for Claude</button>
+          <button type="button" class="btn-export" onclick="exportHistory()">📋 Copy History for Claude</button>
         </div>
       </div>
     </div>`;
@@ -1634,7 +1641,7 @@ function renderProgressContent() {
   const mode       = state.progressMode;
 
   const pills = withData.map(e => `
-    <button class="ex-pill ${e.name === selectedEx ? 'active' : ''}"
+    <button type="button" class="ex-pill ${e.name === selectedEx ? 'active' : ''}"
       onclick="setState({progressEx:'${e.name}'})"
     >${e.name}</button>`).join('');
 
@@ -1676,11 +1683,11 @@ function renderProgressContent() {
     <div class="exercise-picker">${pills}</div>
     <div class="card card--glow">
       <div class="graph-toggle">
-        <button class="graph-toggle-btn ${mode === 'weight' ? 'active' : ''}"
+        <button type="button" class="graph-toggle-btn ${mode === 'weight' ? 'active' : ''}"
           onclick="setState({progressMode:'weight'})">Weight</button>
-        <button class="graph-toggle-btn ${mode === '1rm' ? 'active' : ''}"
+        <button type="button" class="graph-toggle-btn ${mode === '1rm' ? 'active' : ''}"
           onclick="setState({progressMode:'1rm'})">Est. 1RM</button>
-        <button class="graph-toggle-btn ${mode === 'volume' ? 'active' : ''}"
+        <button type="button" class="graph-toggle-btn ${mode === 'volume' ? 'active' : ''}"
           onclick="setState({progressMode:'volume'})">Volume</button>
       </div>
       ${graphHTML}
@@ -1692,7 +1699,7 @@ function renderProgress() {
   return `
     <div class="screen">
       <div class="container">
-        <button class="btn-back" onclick="goBack()">${icons.back} Back</button>
+        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
         <h2 class="title-xl mb-4">Progress</h2>
         ${renderProgressContent()}
       </div>
@@ -1805,6 +1812,12 @@ function buildGraphSVG(points, mode) {
     if (isHoriz && isFast && isRight && nearEdge) goBack();
   }, { passive: true });
 })();
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && state.view !== 'select') {
+    goBack();
+  }
+});
 
 // ============================================================
 // RENDER DISPATCHER
