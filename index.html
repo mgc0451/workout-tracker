@@ -1031,7 +1031,8 @@ function selectExercise(idx) {
   const savedEntry = state.activeSession?.exercises.find(e => e.exercise === ex.name);
   const sets       = savedEntry ? savedEntry.sets : [];
   const weight     = sets.length > 0 ? sets[0].weight : lastWeight;
-  setState({ view: 'exercise', activeExercise: ex, sets, weight, repInput: '' });
+  const repInput = sets.length > 0 ? String(sets[sets.length - 1].reps) : '';
+  setState({ view: 'exercise', activeExercise: ex, sets, weight, repInput });
 }
 
 function saveExerciseToSession(sets) {
@@ -1391,7 +1392,8 @@ function renderWorkout() {
       </button>`;
   }).join('');
 
-  const bottomHTML = done.length > 0 ? `
+  const started    = done.length + partial.length;
+  const bottomHTML = started > 0 ? `
     <div class="mt-4 space-y-2">
       <button type="button" class="btn-primary" onclick="completeSession()">
         ${icons.check} COMPLETE SESSION (${done.length}/${exercises.length})
