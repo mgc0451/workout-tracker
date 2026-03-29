@@ -1502,7 +1502,7 @@ function renderExercise() {
             <div class="flex-row" style="align-items:center">
               <button type="button" class="btn-weight" aria-label="Decrease weight" onclick="setState({weight:Math.max(0,+(state.weight-2.5).toFixed(2))})">−</button>
               <input type="number" inputmode="decimal" value="${state.weight}" class="input-weight" aria-label="Weight in kilograms"
-                     onchange="setState({weight:Math.max(0,parseFloat(this.value)||0)})" />
+                     oninput="setState({weight:Math.max(0,parseFloat(this.value)||0)})" />
               <button type="button" class="btn-weight" aria-label="Increase weight" onclick="setState({weight:+(state.weight+2.5).toFixed(2)})">+</button>
             </div>
             ${modifiedHTML}
@@ -1815,6 +1815,8 @@ function buildGraphSVG(points, mode) {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && state.view !== 'select') {
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
     goBack();
   }
 });
