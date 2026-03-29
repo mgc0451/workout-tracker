@@ -1026,7 +1026,7 @@ function completeSession() {
 function selectExercise(idx) {
   const ex         = WORKOUTS[state.sessionType][idx];
   const history    = getExerciseHistory(ex.name);
-  const lastWeight = history[0]?.sets[0].weight ?? ex.weight;
+  const lastWeight = history[0]?.sets[0]?.weight ?? ex.weight;
   // Restore any partial sets already saved for this exercise in the current session
   const savedEntry = state.activeSession?.exercises.find(e => e.exercise === ex.name);
   const sets       = savedEntry ? savedEntry.sets : [];
@@ -1343,10 +1343,10 @@ function renderWorkout() {
 
     let recentHTML = '';
     if (recent && !isDone) {
-      const lastWeight  = recent.sets[0].weight;
+      const lastWeight  = recent.sets[0]?.weight;
       const lastReps    = recent.sets.map(s => s.reps).join('-');
       const prev        = history[1];
-      const prevWeight  = prev ? prev.sets[0].weight : null;
+      const prevWeight  = prev?.sets[0]?.weight ?? null;
       const prevMaxReps = prev ? Math.max(...prev.sets.map(s => s.reps)) : null;
       const lastMaxReps = Math.max(...recent.sets.map(s => s.reps));
 
@@ -1422,11 +1422,11 @@ function renderExercise() {
   const lastHTML = lastSession ? `
     <div class="card--deep mb-3">
       <div class="label mb-1">Last session</div>
-      <div style="font-size:0.875rem;color:var(--text-mid);font-weight:600">${lastSession.sets.map(s => s.reps).join('-')} @ ${lastSession.sets[0].weight}kg</div>
+      <div style="font-size:0.875rem;color:var(--text-mid);font-weight:600">${lastSession.sets.map(s => s.reps).join('-')} @ ${lastSession.sets[0]?.weight ?? '?'}kg</div>
     </div>` : '';
 
   // Weight modified warning
-  const modifiedHTML = (lastSession && state.weight !== lastSession.sets[0].weight)
+  const modifiedHTML = (lastSession && lastSession.sets.length > 0 && state.weight !== lastSession.sets[0].weight)
     ? `<div class="modified-label">↕ Modified from last session (${lastSession.sets[0].weight}kg)</div>` : '';
 
   // Sets list
@@ -1449,7 +1449,7 @@ function renderExercise() {
 
   let actionHTML = '';
   if (state.sets.length < MAX_SETS) {
-    const placeholder = (lastSession && state.sets.length === 0) ? lastSession.sets[0].reps.toString() : '0';
+    const placeholder = (lastSession && lastSession.sets.length > 0 && state.sets.length === 0) ? lastSession.sets[0].reps.toString() : '0';
     const saveBackBtn = state.sets.length > 0 ? `
       <button type="button" class="btn-save-back mt-2" onclick="completeExercise()">
         ${icons.check} Save ${state.sets.length} set${state.sets.length > 1 ? 's' : ''} & back
@@ -1493,7 +1493,7 @@ function renderExercise() {
       ${history.slice(1).map(entry => `
         <div class="card--inner">
           <div class="label mb-1">${new Date(entry.date).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>
-          <div style="font-size:0.8rem;color:var(--text-mid);font-weight:600">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0].weight}kg</div>
+          <div style="font-size:0.8rem;color:var(--text-mid);font-weight:600">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0]?.weight ?? '?'}kg</div>
         </div>`).join('')}
     </div>` : '';
 
@@ -1725,7 +1725,7 @@ function getProgressData(exName, mode) {
   const entries = state.history
     .filter(e => e.exercise === exName)
     .map(e => {
-      const best = e.sets.reduce((b, s) => s.weight > b.weight ? s : b, e.sets[0]);
+      const best = e.sets.reduce((b, s) => s.weight * (1 + s.reps / 30) > b.weight * (1 + b.reps / 30) ? s : b, e.sets[0]);
       let val;
       if (mode === '1rm') {
         val = Math.round(best.weight * (1 + best.reps / 30) * 10) / 10;
