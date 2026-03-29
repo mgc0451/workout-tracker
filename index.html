@@ -358,13 +358,37 @@
       flex: 1;
       color: var(--cyan);
     }
-    .input-reps {
-      font-size: 2rem;
+    .rep-display {
+      font-size: 2.5rem;
       font-weight: 800;
+      text-align: center;
       padding: 14px;
       color: var(--cyan);
       letter-spacing: -0.02em;
+      background: var(--bg-inner);
+      border: 1px solid var(--border-mid);
+      border-radius: 8px;
     }
+    .rep-display.empty { color: var(--text-dim); }
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .numpad-key {
+      background: var(--bg-inner);
+      border: 1px solid var(--border-mid);
+      color: var(--white);
+      border-radius: 10px;
+      padding: 18px 8px;
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+    .numpad-key:hover  { border-color: var(--border-hi); color: var(--cyan); }
+    .numpad-key:active { transform: scale(0.93); }
+    .numpad-key.backspace { color: var(--red); }
+    .numpad-key.zero { grid-column: span 2; }
     /* ── Progress bar ── */
     .progress-bar-wrap {
       background: var(--bg-card);
@@ -1043,6 +1067,22 @@ function saveExerciseToSession(sets) {
   return session;
 }
 
+function numpadKey(k) {
+  if (k === '⌫') {
+    state.repInput = state.repInput.slice(0, -1);
+  } else {
+    if (state.repInput.length >= 2) return;
+    state.repInput += k;
+  }
+  const display = document.getElementById('repDisplay');
+  const btn     = document.getElementById('btnLogSet');
+  if (display) {
+    display.textContent = state.repInput || '—';
+    display.classList.toggle('empty', !state.repInput);
+  }
+  if (btn) btn.disabled = !(state.repInput && Number(state.repInput) > 0);
+}
+
 function addSet() {
   const reps = parseInt(state.repInput);
   if (!reps || reps <= 0) return;
@@ -1438,11 +1478,22 @@ function renderExercise() {
     actionHTML = `
       <div class="mb-3">
         <div class="label mb-2">Reps — Set ${state.sets.length + 1}</div>
-        <input id="repInput" type="number" inputmode="numeric" value="${state.repInput}"
-               aria-label="Reps for current set"
-               placeholder="${placeholder}" class="input-reps mb-3"
-               oninput="state.repInput=this.value; document.getElementById('btnLogSet').disabled=!(this.value && Number(this.value)>0);"
-               onkeydown="if(event.key==='Enter')addSet()" />
+        <div id="repDisplay" class="rep-display mb-3 ${!state.repInput ? 'empty' : ''}" aria-label="Reps for current set">
+          ${state.repInput || placeholder}
+        </div>
+        <div class="numpad mb-3">
+          <button type="button" class="numpad-key" onclick="numpadKey('1')">1</button>
+          <button type="button" class="numpad-key" onclick="numpadKey('2')">2</button>
+          <button type="button" class="numpad-key" onclick="numpadKey('3')">3</button>
+          <button type="button" class="numpad-key" onclick="numpadKey('4')">4</button>
+          <button type="button" class="numpad-key" onclick="numpadKey('5')">5</button>
+          <button type="button" class="numpad-key" onclick="numpadKey('6')">6</button>
+          <button type="button" class="numpad-key" onclick="numpadKey('7')">7</button>
+          <button type="button" class="numpad-key" onclick="numpadKey('8')">8</button>
+          <button type="button" class="numpad-key" onclick="numpadKey('9')">9</button>
+          <button type="button" class="numpad-key backspace" onclick="numpadKey('⌫')">⌫</button>
+          <button type="button" class="numpad-key zero" onclick="numpadKey('0')">0</button>
+        </div>
         <button id="btnLogSet" class="btn-log" onclick="addSet()" ${!state.repInput || Number(state.repInput) <= 0 ? 'disabled' : ''}>
           ${icons.plus} LOG SET ${state.sets.length + 1}
         </button>
@@ -1794,6 +1845,11 @@ function buildGraphSVG(points, mode) {
 })();
 
 document.addEventListener('keydown', e => {
+  if (state.view === 'exercise' && state.sets.length < MAX_SETS) {
+    if (e.key >= '0' && e.key <= '9') { numpadKey(e.key); return; }
+    if (e.key === 'Backspace') { e.preventDefault(); numpadKey('⌫'); return; }
+    if (e.key === 'Enter') { addSet(); return; }
+  }
   if (e.key === 'Escape' && state.view !== 'select') {
     const tag = document.activeElement?.tagName;
     if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
