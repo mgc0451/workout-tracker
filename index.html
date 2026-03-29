@@ -1120,12 +1120,15 @@ function clearAllHistory() {
 function exportHistory() {
   const data = JSON.stringify(state.history, null, 2);
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(data).then(() => alert('Copied! Paste into Claude.'));
+    navigator.clipboard.writeText(data)
+      .then(() => alert('Copied! Paste into Claude.'))
+      .catch(() => alert('Copy failed — try again.'));
   } else {
     const ta = document.createElement('textarea');
     ta.value = data; document.body.appendChild(ta); ta.select();
-    document.execCommand('copy'); document.body.removeChild(ta);
-    alert('Copied! Paste into Claude.');
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert(ok ? 'Copied! Paste into Claude.' : 'Copy failed — try again.');
   }
 }
 
