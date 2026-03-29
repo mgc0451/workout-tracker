@@ -713,27 +713,6 @@
     select option { background: var(--bg-card); color: var(--white); }
 
     /* ── Progress / Graph screen ── */
-    .exercise-picker {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-bottom: 14px;
-    }
-    .ex-pill {
-      background: var(--bg-inner);
-      border: 1px solid var(--border-mid);
-      color: var(--text-mid);
-      border-radius: 9999px;
-      padding: 4px 12px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .ex-pill:hover  { border-color: var(--border-hi); color: var(--white); }
-    .ex-pill.active { background: var(--bg-card); border-color: var(--cyan-dim); color: var(--cyan); }
-
     .graph-toggle {
       display: flex;
       background: var(--bg-deep);
@@ -1668,13 +1647,18 @@ function renderProgressContent() {
   const allEx = ['A','B','C'].flatMap(s => WORKOUTS[s].map(e => ({ name: e.name, session: s })));
   const withData = allEx.filter(e => state.history.some(h => h.exercise === e.name));
 
-  const selectedEx = state.progressEx || (withData[0]?.name ?? null);
+  const selectedEx = (state.progressEx && withData.some(e => e.name === state.progressEx))
+    ? state.progressEx
+    : (withData[0]?.name ?? null);
   const mode       = state.progressMode;
 
-  const pills = withData.map(e => `
-    <button type="button" class="ex-pill ${e.name === selectedEx ? 'active' : ''}"
-      onclick="setState({progressEx:'${e.name}'})"
-    >${e.name}</button>`).join('');
+  const dropdown = withData.length > 0 ? `
+    <div class="mb-4">
+      <label class="label" for="progressExerciseSelect">Exercise</label>
+      <select id="progressExerciseSelect" class="graph-toggle-btn" aria-label="Select exercise" onchange="setState({progressEx:this.value})">
+        ${withData.map(e => `<option value="${e.name}" ${e.name === selectedEx ? 'selected' : ''}>${e.name}</option>`).join('')}
+      </select>
+    </div>` : '';
 
   let graphHTML = '<div class="graph-empty">No data yet</div>';
   let statsHTML = '';
@@ -1711,7 +1695,7 @@ function renderProgressContent() {
   }
 
   return `
-    <div class="exercise-picker">${pills}</div>
+    ${dropdown}
     <div class="card card--glow">
       <div class="graph-toggle">
         <button type="button" class="graph-toggle-btn ${mode === 'weight' ? 'active' : ''}"
