@@ -319,22 +319,6 @@
       color-scheme: dark;
     }
 
-    .btn-weight {
-      background: var(--bg-inner);
-      border: 1px solid var(--border-mid);
-      color: var(--white);
-      width: 44px;
-      height: 44px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 1.2rem;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .btn-weight:hover  { border-color: var(--cyan-dim); color: var(--cyan); }
-    .btn-weight:active { transform: scale(0.93); }
 
     .btn-export {
       width: 100%;
@@ -1499,12 +1483,8 @@ function renderExercise() {
 
           <div class="mb-3">
             <div class="label mb-2">Weight (kg)</div>
-            <div class="flex-row" style="align-items:center">
-              <button type="button" class="btn-weight" aria-label="Decrease weight" onclick="setState({weight:Math.max(0,+(state.weight-2.5).toFixed(2))})">−</button>
-              <input type="number" inputmode="decimal" value="${state.weight}" class="input-weight" aria-label="Weight in kilograms"
-                     oninput="setState({weight:Math.max(0,parseFloat(this.value)||0)})" />
-              <button type="button" class="btn-weight" aria-label="Increase weight" onclick="setState({weight:+(state.weight+2.5).toFixed(2)})">+</button>
-            </div>
+            <input type="number" inputmode="decimal" value="${state.weight}" class="input-weight" aria-label="Weight in kilograms"
+                   oninput="setState({weight:Math.max(0,parseFloat(this.value)||0)})" />
             ${modifiedHTML}
           </div>
 
