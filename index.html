@@ -1494,7 +1494,7 @@ function renderExercise() {
           <button type="button" class="numpad-key backspace" onclick="numpadKey('⌫')">⌫</button>
           <button type="button" class="numpad-key zero" onclick="numpadKey('0')">0</button>
         </div>
-        <button id="btnLogSet" class="btn-log" onclick="addSet()" ${!state.repInput || Number(state.repInput) <= 0 ? 'disabled' : ''}>
+        <button type="button" id="btnLogSet" class="btn-log" onclick="addSet()" ${!state.repInput || Number(state.repInput) <= 0 ? 'disabled' : ''}>
           ${icons.plus} LOG SET ${state.sets.length + 1}
         </button>
         ${saveBackBtn}
