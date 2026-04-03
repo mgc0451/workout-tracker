@@ -961,7 +961,16 @@ function setState(patch) {
 function goBack() {
   _goingBack = true;
   switch (state.view) {
-    case 'workout':  setState({ view: 'select', sessionType: null }); break;
+    case 'workout': {
+      // If the user browsed a different session without logging any sets,
+      // restore the saved session from localStorage so the resume banner stays intact.
+      const savedSession = loadLS('currentSession', null);
+      const shouldRestore = isValidSession(savedSession)
+        && state.activeSession?.exercises?.length === 0
+        && savedSession.sessionType !== state.activeSession?.sessionType;
+      setState({ view: 'select', sessionType: null, ...(shouldRestore ? { activeSession: savedSession } : {}) });
+      break;
+    }
     case 'exercise': setState({ view: 'workout', activeExercise: null, sets: [], repInput: '' }); break;
     case 'history':  setState({ view: 'select' }); break;
     case 'settings': setState({ view: 'select' }); break;
@@ -1062,7 +1071,8 @@ function startSession(type) {
     return;
   }
   const session = { sessionType: type, exercises: [], startedAt: new Date().toISOString() };
-  saveLS('currentSession', session);
+  // Don't commit to localStorage yet — only saved when the first set is added,
+  // so browsing a different session never wipes in-progress progress.
   setState({ view: 'workout', sessionType: type, activeSession: session });
 }
 
