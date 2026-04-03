@@ -1910,9 +1910,13 @@ function buildGraphSVG(points, mode) {
 
 document.addEventListener('keydown', e => {
   if (state.view === 'exercise' && state.sets.length < MAX_SETS) {
-    if (e.key >= '0' && e.key <= '9') { numpadKey(e.key); return; }
-    if (e.key === 'Backspace') { e.preventDefault(); numpadKey('⌫'); return; }
-    if (e.key === 'Enter') { addSet(); return; }
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') { /* let native input handle it */ }
+    else {
+      if (e.key >= '0' && e.key <= '9') { numpadKey(e.key); return; }
+      if (e.key === 'Backspace') { e.preventDefault(); numpadKey('⌫'); return; }
+      if (e.key === 'Enter') { addSet(); return; }
+    }
   }
   if (e.key === 'Escape' && state.view !== 'select') {
     const tag = document.activeElement?.tagName;
