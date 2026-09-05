@@ -399,6 +399,27 @@
     .exercise-item:active { transform: scale(0.99); }
     .exercise-item.done    { border-color: var(--border); background: rgba(245,158,11,0.03); }
     .exercise-item.partial { border-color: var(--cyan-dim); background: rgba(245,158,11,0.03); }
+    .exercise-item.skipped { opacity: 0.5; }
+
+    /* ── Session-local reorder / skip controls ── */
+    .exercise-row-controls {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .exercise-row-controls .icon-btn { flex: 0 0 auto; padding: 10px; }
+    .btn-skip-toggle {
+      flex: 1;
+      background: var(--bg-inner);
+      border: 1px solid var(--border-mid);
+      color: var(--text-dim);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .btn-skip-toggle.active { color: var(--yellow); border-color: var(--yellow-dim); background: var(--yellow-bg); }
 
     /* ── Set rows (with slide-in animation) ── */
     .set-row-wrap {
@@ -417,6 +438,24 @@
       padding: 10px 12px;
       border-radius: 8px;
     }
+    .set-row-tap {
+      width: 100%;
+      text-align: left;
+      color: inherit;
+      font-family: inherit;
+    }
+    .set-edit-hint { color: var(--muted); display: inline-flex; }
+    .set-row-editing {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      border-color: var(--cyan-dim);
+    }
+    .set-edit-fields { display: flex; align-items: center; gap: 8px; }
+    .set-edit-input { flex: 1; padding: 12px 8px; font-size: 1rem; }
+    .set-edit-x { color: var(--text-dim); font-weight: 700; flex-shrink: 0; }
+    .set-edit-actions { display: flex; gap: 8px; }
+    .set-edit-actions .icon-btn { flex: 1; justify-content: center; padding: 12px; }
 
     /* ── PR badges (with pop animation) ── */
     .pr-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
@@ -939,10 +978,15 @@ function isValidHistory(data) {
 }
 
 function isValidSession(data) {
+  // order/skipped are optional session-local additions (Feature: reorder/skip
+  // exercises for the current session) — absent entirely on older in-flight
+  // sessions, which must keep loading, so only type-check them when present.
   return data && typeof data === 'object' &&
          typeof data.sessionType === 'string' &&
          Array.isArray(data.exercises) &&
-         data.exercises.every(ex => ex && typeof ex.exercise === 'string' && Array.isArray(ex.sets));
+         data.exercises.every(ex => ex && typeof ex.exercise === 'string' && Array.isArray(ex.sets)) &&
+         (data.order === undefined || Array.isArray(data.order)) &&
+         (data.skipped === undefined || Array.isArray(data.skipped));
 }
 
 // Lenient by design: only id/name/exercises and each exercise's name/weight/
@@ -1019,6 +1063,7 @@ let state = {
   progressMode:   'weight',
   historyFilter:  '',        // exercise name filter for history screen
   editingDate:    null,      // dateStr currently being edited inline
+  editingSetIdx:  null,      // index into state.sets currently in inline edit mode (exercise screen)
   lastDeletedHistory: null,
 };
 
@@ -1124,7 +1169,7 @@ function goBack() {
       setState({ view: 'select', sessionType: null, ...(shouldRestore ? { activeSession: savedSession } : {}) });
       break;
     }
-    case 'exercise': setState({ view: 'workout', activeExercise: null, sets: [], repInput: '' }); break;
+    case 'exercise': setState({ view: 'workout', activeExercise: null, sets: [], repInput: '', editingSetIdx: null }); break;
     case 'history':  setState({ view: 'select' }); break;
     case 'settings': setState({ view: 'select' }); break;
     case 'workouts':    setState({ view: 'select' }); break;
@@ -1221,6 +1266,45 @@ function orphanedExercises() {
   return (state.activeSession?.exercises || [])
     .filter(e => !names.has(e.exercise) && e.sets.length > 0)
     .map(e => ({ name: e.exercise, sets: e.sets.length }));
+}
+
+// ── Session-local reorder / skip ────────────────────────────────────────
+// The workout definition's exercise order is never touched here — these
+// helpers only resolve a DISPLAY order for the active session, backed by
+// state.activeSession.order (names) and .skipped (names), persisted with the
+// session (not with `workouts`). Resolved defensively, same spirit as
+// orphanedExercises() above: a stored order entry that no longer names a
+// real exercise in the workout is dropped (never rendered as a phantom row),
+// and a workout exercise missing from the stored order (added to the
+// workout after the session started, or the field predates this feature)
+// is appended in the workout's own order.
+function sessionExerciseOrder() {
+  const defNames = (currentWorkout()?.exercises || []).map(e => e.name);
+  const order = state.activeSession?.order;
+  if (!Array.isArray(order) || order.length === 0) return defNames;
+  const defSet = new Set(defNames);
+  const known   = order.filter(n => defSet.has(n));
+  const missing = defNames.filter(n => !known.includes(n));
+  return [...known, ...missing];
+}
+
+// The current workout's exercise defs, in this session's display order.
+function orderedExercises() {
+  const byName = new Map((currentWorkout()?.exercises || []).map(e => [e.name, e]));
+  return sessionExerciseOrder().map(n => byName.get(n)).filter(Boolean);
+}
+
+function isSkipped(name) {
+  return (state.activeSession?.skipped || []).includes(name);
+}
+
+// Exercises counted toward "done/total" — a skipped exercise is excluded
+// from the denominator so skipping the last remaining one lets the session
+// complete cleanly. Nothing is removed from the workout or from the session's
+// logged entries; a skipped exercise with sets already logged still shows,
+// still saves on completion, it just doesn't hold the count back.
+function activeWorkoutExercises() {
+  return (currentWorkout()?.exercises || []).filter(e => !isSkipped(e.name));
 }
 
 function getQuickStats() {
@@ -1362,7 +1446,10 @@ function completeSession() {
 }
 
 function selectExercise(idx) {
-  const ex = currentWorkout()?.exercises[idx];
+  // idx indexes the session's DISPLAY order (orderedExercises), which may
+  // differ from the workout definition's own order once the exercise has
+  // been reordered for this session.
+  const ex = orderedExercises()[idx];
   if (!ex) return;
   const history    = getExerciseHistory(ex.name);
   const lastWeight = history[0]?.sets[0]?.weight ?? ex.weight;
@@ -1371,7 +1458,7 @@ function selectExercise(idx) {
   const sets       = savedEntry ? savedEntry.sets : [];
   const weight     = sets.length > 0 ? sets[sets.length - 1].weight : lastWeight;
   const repInput = sets.length > 0 ? String(sets[sets.length - 1].reps) : '';
-  setState({ view: 'exercise', activeExercise: ex, sets, weight, repInput });
+  setState({ view: 'exercise', activeExercise: ex, sets, weight, repInput, editingSetIdx: null });
 }
 
 function saveExerciseToSession(sets) {
@@ -1444,21 +1531,90 @@ function addSet() {
   setState({ sets, repInput, activeSession: session });
 }
 
+// Shared by removeLastSet/deleteSet/confirmEditSet: persists whatever sets
+// remain for the active exercise, or — if none remain — drops the exercise
+// from the session entirely (same behaviour removeLastSet always had, now
+// reused instead of duplicated per call site).
+function persistSets(sets) {
+  if (sets.length > 0) return saveExerciseToSession(sets);
+  const exercises = state.activeSession.exercises.filter(e => e.exercise !== state.activeExercise.name);
+  const session = { ...state.activeSession, exercises };
+  saveLS('currentSession', session);
+  return session;
+}
+
+// Recomputes every set's `prs` from scratch, in order, so that editing or
+// deleting an earlier set can never leave a later set's PR badge referring to
+// a comparison that no longer holds. Mirrors exactly how addSet() computes a
+// PR — detectPRs(name, thisSet, setsLoggedBeforeIt) — just replayed over the
+// whole (possibly just-edited) array instead of appending one at a time.
+function recomputeSetsPRs(exerciseName, sets) {
+  const result = [];
+  for (const s of sets) {
+    const prs = detectPRs(exerciseName, s, result);
+    result.push({ weight: s.weight, reps: s.reps, prs });
+  }
+  return result;
+}
+
 function removeLastSet() {
   const sets    = state.sets.slice(0, -1);
-  const session = sets.length > 0 ? saveExerciseToSession(sets) : (() => {
-    // Remove exercise from session if no sets left
-    const exercises = state.activeSession.exercises.filter(e => e.exercise !== state.activeExercise.name);
-    const s = { ...state.activeSession, exercises };
-    saveLS('currentSession', s);
-    return s;
-  })();
+  const session = persistSets(sets);
   setState({ sets, activeSession: session });
+}
+
+// ── Per-set inline edit (any logged set, not just the last one) ──────────
+function deleteSet(idx) {
+  const remaining = state.sets.filter((_, i) => i !== idx).map(s => ({ weight: s.weight, reps: s.reps }));
+  const recomputed = recomputeSetsPRs(state.activeExercise.name, remaining);
+  const session = persistSets(recomputed);
+  setState({ sets: recomputed, activeSession: session, editingSetIdx: null });
+}
+
+// The edit row's weight/reps inputs are UNCONTROLLED (same reasoning as the
+// workout editor's harvestEditorDOM) — nothing re-renders while the row is
+// open, so this reads the live DOM values only at confirm time, the single
+// structural action that follows.
+function confirmEditSet(idx) {
+  const set = state.sets[idx];
+  if (!set) { setState({ editingSetIdx: null }); return; }
+  const wEl = document.getElementById('editSetWeight');
+  const rEl = document.getElementById('editSetReps');
+  const wN  = wEl ? parseFloat(wEl.value) : NaN;
+  const weight = Number.isFinite(wN) && wN >= 0 ? wN : set.weight;
+  const rN  = rEl ? parseInt(rEl.value, 10) : NaN;
+  const reps = Number.isFinite(rN) && rN > 0 ? rN : set.reps;
+  const updated    = state.sets.map((s, i) => i === idx ? { weight, reps } : { weight: s.weight, reps: s.reps });
+  const recomputed = recomputeSetsPRs(state.activeExercise.name, updated);
+  const session     = persistSets(recomputed);
+  setState({ sets: recomputed, activeSession: session, editingSetIdx: null });
+}
+
+// ── Session-local reorder / skip (workout definition is never touched) ───
+function moveSessionExercise(idx, dir) {
+  const list = orderedExercises();
+  const j = idx + dir;
+  if (j < 0 || j >= list.length) return;
+  const names = list.map(e => e.name);
+  [names[idx], names[j]] = [names[j], names[idx]];
+  const session = { ...state.activeSession, order: names };
+  saveLS('currentSession', session);
+  setState({ activeSession: session });
+}
+
+function toggleSkipExercise(idx) {
+  const ex = orderedExercises()[idx];
+  if (!ex) return;
+  const skipped = new Set(state.activeSession?.skipped || []);
+  if (skipped.has(ex.name)) skipped.delete(ex.name); else skipped.add(ex.name);
+  const session = { ...state.activeSession, skipped: [...skipped] };
+  saveLS('currentSession', session);
+  setState({ activeSession: session });
 }
 
 function completeExercise() {
   const session = saveExerciseToSession(state.sets);
-  setState({ view: 'workout', activeSession: session, activeExercise: null, sets: [], weight: 0, repInput: '' });
+  setState({ view: 'workout', activeSession: session, activeExercise: null, sets: [], weight: 0, repInput: '', editingSetIdx: null });
 }
 
 function deleteHistoryDay(dateStr) {
@@ -1927,7 +2083,8 @@ function renderSelect() {
 // ============================================================
 function renderWorkout() {
   const workout   = currentWorkout();
-  const exercises = workout?.exercises ?? [];
+  const exercises = orderedExercises();          // session-local display order
+  const total     = activeWorkoutExercises().length; // excludes skipped
   const done      = completedExercises();
   const partial   = partialExercises();
 
@@ -1937,6 +2094,7 @@ function renderWorkout() {
     const isDone     = done.includes(ex.name);
     const partialEx  = partial.find(p => p.name === ex.name);
     const isPartial  = !!partialEx && !isDone;
+    const skipped    = isSkipped(ex.name);
 
     let recentHTML = '';
     if (recent && !isDone) {
@@ -1965,24 +2123,33 @@ function renderWorkout() {
 
     // Status badge
     let statusBadge = '';
-    if (isDone) {
+    if (skipped) {
+      statusBadge = `<span style="font-size:0.65rem;font-weight:700;color:var(--text-dim);background:var(--bg-deep);border:1px solid var(--border-mid);border-radius:9999px;padding:2px 7px;letter-spacing:0.04em">SKIPPED</span>`;
+    } else if (isDone) {
       statusBadge = `<span class="check-circle">${icons.checkFill}</span>`;
     } else if (isPartial) {
       statusBadge = `<span style="font-size:0.65rem;font-weight:700;color:var(--cyan);background:var(--cyan-glow);border:1px solid var(--cyan-dim);border-radius:9999px;padding:2px 7px">${partialEx.sets}/${partialEx.target}</span>`;
     }
 
     return `
-      <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''}" onclick="selectExercise(${idx})">
-        <div style="flex:1">
-          <div class="flex-row mb-1" style="align-items:center;gap:8px">
-            <div style="font-size:0.875rem;font-weight:700;${isDone ? 'text-decoration:line-through;color:var(--muted)' : 'color:var(--white)'}">${esc(ex.name)}</div>
-            ${statusBadge}
+      <div class="exercise-row-wrap" data-idx="${idx}">
+        <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''} ${skipped ? 'skipped' : ''}" onclick="selectExercise(${idx})">
+          <div style="flex:1">
+            <div class="flex-row mb-1" style="align-items:center;gap:8px">
+              <div style="font-size:0.875rem;font-weight:700;${isDone ? 'text-decoration:line-through;color:var(--muted)' : 'color:var(--white)'}">${esc(ex.name)}</div>
+              ${statusBadge}
+            </div>
+            <div class="label">${ex.weight > 0 ? ex.weight + 'kg' : 'BW'} · ${esc(ex.targetReps)} reps</div>
+            ${recentHTML}
           </div>
-          <div class="label">${ex.weight > 0 ? ex.weight + 'kg' : 'BW'} · ${esc(ex.targetReps)} reps</div>
-          ${recentHTML}
+          ${icons.chevron}
+        </button>
+        <div class="exercise-row-controls">
+          <button type="button" class="icon-btn btn-move-up" aria-label="Move up" ${idx === 0 ? 'disabled style="opacity:0.3"' : ''} onclick="moveSessionExercise(${idx}, -1)">${icons.up}</button>
+          <button type="button" class="icon-btn btn-move-down" aria-label="Move down" ${idx === exercises.length - 1 ? 'disabled style="opacity:0.3"' : ''} onclick="moveSessionExercise(${idx}, 1)">${icons.down}</button>
+          <button type="button" class="btn-skip-toggle ${skipped ? 'active' : ''}" aria-label="${skipped ? 'Include this exercise' : 'Skip this exercise'}" onclick="toggleSkipExercise(${idx})">${skipped ? 'INCLUDE' : 'SKIP'}</button>
         </div>
-        ${icons.chevron}
-      </button>`;
+      </div>`;
   }).join('');
 
   // Sets logged against exercises since removed from this workout. Shown so
@@ -2002,7 +2169,7 @@ function renderWorkout() {
   const bottomHTML = started > 0 ? `
     <div class="mt-4 space-y-2">
       <button type="button" class="btn-primary" onclick="completeSession()">
-        ${icons.check} COMPLETE SESSION (${done.length}/${exercises.length})
+        ${icons.check} COMPLETE SESSION (${done.length}/${total})
       </button>
       <button type="button" class="btn-secondary" onclick="abandonSession()">Abandon Session</button>
     </div>` : '';
@@ -2011,7 +2178,7 @@ function renderWorkout() {
     <div class="screen">
       <div class="container">
         <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
-        ${progressBarHTML(done.length, exercises.length, workout?.name ?? '')}
+        ${progressBarHTML(done.length, total, workout?.name ?? '')}
         <div class="space-y-2">${items}</div>
         ${orphansHTML}
         ${bottomHTML}
@@ -2046,17 +2213,46 @@ function renderExercise() {
   const modifiedHTML = `<div id="modifiedLabel" class="modified-label"${modShow ? '' : ' style="display:none"'}>${
     modShow ? `↕ Modified from last session (${modRef}kg)` : ''}</div>`;
 
-  // Sets list
+  // Sets list — any row can be tapped into an inline edit state (tracked in
+  // state.editingSetIdx). The edit row's inputs are UNCONTROLLED (see
+  // confirmEditSet): nothing re-renders while the user is mid-edit, so they
+  // never fight a keystroke-triggered render the way a setState-on-input
+  // field would.
   const setsHTML = state.sets.length === 0
     ? `<p style="text-align:center;padding:14px 0;font-size:0.75rem;color:var(--muted)">No sets logged yet</p>`
-    : state.sets.map((set, idx) => `
+    : state.sets.map((set, idx) => {
+        if (state.editingSetIdx === idx) {
+          return `
+            <div class="set-row-wrap">
+              <div class="set-row set-row-editing">
+                <span class="label">Set ${idx + 1}</span>
+                <div class="set-edit-fields">
+                  <input type="number" inputmode="decimal" step="0.5" min="0" id="editSetWeight"
+                         class="input-field set-edit-input" value="${set.weight}" aria-label="Edit weight for set ${idx + 1}" />
+                  <span class="set-edit-x">×</span>
+                  <input type="number" inputmode="numeric" step="1" min="1" id="editSetReps"
+                         class="input-field set-edit-input" value="${set.reps}" aria-label="Edit reps for set ${idx + 1}" />
+                </div>
+                <div class="set-edit-actions">
+                  <button type="button" class="icon-btn" aria-label="Confirm changes to set ${idx + 1}" onclick="confirmEditSet(${idx})">${icons.check}</button>
+                  <button type="button" class="icon-btn danger" aria-label="Delete set ${idx + 1}" onclick="deleteSet(${idx})">${icons.x14}</button>
+                  <button type="button" class="icon-btn" aria-label="Cancel editing set ${idx + 1}" onclick="setState({editingSetIdx:null})">${icons.x}</button>
+                </div>
+              </div>
+            </div>`;
+        }
+        return `
         <div class="set-row-wrap">
-          <div class="set-row">
+          <button type="button" class="set-row set-row-tap" onclick="setState({editingSetIdx:${idx}})" aria-label="Edit set ${idx + 1}">
             <span class="label">Set ${idx + 1}</span>
-            <span style="font-weight:700;font-size:0.9rem">${set.weight}kg × ${set.reps}</span>
-          </div>
+            <span style="display:flex;align-items:center;gap:6px">
+              <span style="font-weight:700;font-size:0.9rem">${set.weight}kg × ${set.reps}</span>
+              <span class="set-edit-hint">${icons.pencil}</span>
+            </span>
+          </button>
           ${set.prs?.length > 0 ? `<div class="pr-badges">${set.prs.map(p => `<div class="pr-badge">${p.icon} ${p.message}</div>`).join('')}</div>` : ''}
-        </div>`).join('');
+        </div>`;
+      }).join('');
 
   const removeHTML = state.sets.length > 0 ? `
     <button type="button" class="btn-danger mb-3" onclick="removeLastSet()">${icons.x} Remove last set</button>` : '';
