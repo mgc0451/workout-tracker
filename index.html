@@ -936,7 +936,12 @@ const removeLS = (key) => {
 };
 
 function isValidHistory(data) {
-  return Array.isArray(data) && data.every(entry => entry && typeof entry.date === 'string' && typeof entry.exercise === 'string' && Array.isArray(entry.sets));
+  return Array.isArray(data) && data.every(entry =>
+    entry && typeof entry.date === 'string' && typeof entry.exercise === 'string' &&
+    Array.isArray(entry.sets) &&
+    // Set contents matter too: a malformed sets:[null] passes an
+    // Array.isArray check and then throws on s.weight during render.
+    entry.sets.every(s => s && Number.isFinite(s.weight) && Number.isFinite(s.reps)));
 }
 
 function isValidSession(data) {
@@ -1153,6 +1158,11 @@ function detectPRs(exerciseName, newSet, currentSets) {
   const shownTypes = new Set(currentSets.flatMap(s => (s.prs || []).map(p => p.type)));
   const allSets    = ex.flatMap(h => h.sets);
   const prs        = [];
+
+  // No prior history means there is no record to beat. Without this, the
+  // Math.max(0, ...[]) baselines below are 0, so the first set of any newly
+  // added exercise wins weight, rep and volume PRs simultaneously.
+  if (!allSets.length) return prs;
 
   const maxWeight = Math.max(0, ...allSets.map(s => s.weight));
   if (newSet.weight > maxWeight && !shownTypes.has('weight'))
@@ -1444,6 +1454,10 @@ function saveEditDate(oldDateStr, newISODate) {
     updated.setFullYear(y, m - 1, d);
     return { ...e, date: updated.toISOString() };
   });
+  // Re-sort: several reads take history as newest-first (getExerciseHistory's
+  // "Last session", getQuickStats' "last workout", renderWorkout's trend
+  // arrows), and moving an entry's date leaves it in its old array position.
+  history.sort((a, b) => new Date(b.date) - new Date(a.date));
   saveLS('workoutHistory', history);
   setState({ history, editingDate: null });
 }
@@ -2270,17 +2284,6 @@ function renderProgressContent() {
     </div>`;
 }
 
-function renderProgress() {
-  return `
-    <div class="screen">
-      <div class="container">
-        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
-        <h2 class="title-xl mb-4">Progress</h2>
-        ${renderProgressContent()}
-      </div>
-    </div>`;
-}
-
 function getProgressData(exName, mode) {
   const entries = state.history
     .filter(e => e.exercise === exName)
@@ -2536,7 +2539,6 @@ function render() {
     case 'exercise':    app.innerHTML = renderExercise();    break;
     case 'history':     app.innerHTML = renderHistory();     break;
     case 'settings':    app.innerHTML = renderSettings();    break;
-    case 'progress':    app.innerHTML = renderProgress();    break;
     case 'workouts':    app.innerHTML = renderWorkouts();    break;
     case 'workoutEdit': app.innerHTML = renderWorkoutEdit(); break;
   }
