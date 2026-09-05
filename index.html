@@ -3089,9 +3089,15 @@ function renderWorkoutEdit() {
   const meta = document.querySelector('meta[name="viewport"]');
   if (!meta) return;
   const base = meta.getAttribute('content');
-  const isField = el => el && el.matches && el.matches('input, textarea, select');
+  // Guard: if the static meta ever regains a maximum-scale, don't stack a second.
+  const locked = /maximum-scale/.test(base) ? base : base + ', maximum-scale=1';
+  // Only the software keyboard triggers focus-zoom, so lock only for text/number
+  // fields. select and input[type=date] open native pickers (no keyboard), and
+  // the app's only textarea is an off-screen clipboard helper that is removed
+  // while focused — locking for either would waste or strand the lock.
+  const isField = el => el && el.matches && el.matches('input[type="text"], input[type="number"]');
   document.addEventListener('focusin', e => {
-    if (isField(e.target)) meta.setAttribute('content', base + ', maximum-scale=1');
+    if (isField(e.target)) meta.setAttribute('content', locked);
   });
   document.addEventListener('focusout', e => {
     if (isField(e.target)) meta.setAttribute('content', base);
