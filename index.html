@@ -958,6 +958,32 @@ function setState(patch) {
   render();
 }
 
+// ── Live-patch helpers ──────────────────────────────────────
+// Update `state` WITHOUT re-rendering, then patch only the nodes we own.
+// render() replaces app.innerHTML wholesale, which destroys the element the
+// user is currently typing into (and dismisses the mobile keyboard), so any
+// control that updates on keystroke must go through these instead of setState.
+function setStateSilent(patch) { Object.assign(state, patch); }
+
+function syncRepUI() {
+  const display = document.getElementById('repDisplay');
+  const btn     = document.getElementById('btnLogSet');
+  if (display) {
+    display.textContent = state.repInput || '—';
+    display.classList.toggle('empty', !state.repInput);
+  }
+  if (btn) btn.disabled = !(state.repInput && Number(state.repInput) > 0);
+}
+
+function syncModifiedLabel() {
+  const el = document.getElementById('modifiedLabel');
+  if (!el) return;
+  const ref  = getExerciseHistory(state.activeExercise?.name || '')[0]?.sets?.[0]?.weight;
+  const show = ref !== undefined && state.weight !== ref;
+  el.textContent   = show ? `↕ Modified from last session (${ref}kg)` : '';
+  el.style.display = show ? '' : 'none';
+}
+
 function goBack() {
   _goingBack = true;
   switch (state.view) {
@@ -1105,7 +1131,7 @@ function selectExercise(idx) {
   // Restore any partial sets already saved for this exercise in the current session
   const savedEntry = state.activeSession?.exercises.find(e => e.exercise === ex.name);
   const sets       = savedEntry ? savedEntry.sets : [];
-  const weight     = sets.length > 0 ? sets[0].weight : lastWeight;
+  const weight     = sets.length > 0 ? sets[sets.length - 1].weight : lastWeight;
   const repInput = sets.length > 0 ? String(sets[sets.length - 1].reps) : '';
   setState({ view: 'exercise', activeExercise: ex, sets, weight, repInput });
 }
@@ -1123,19 +1149,36 @@ function saveExerciseToSession(sets) {
 }
 
 function numpadKey(k) {
-  if (k === '⌫') {
-    state.repInput = state.repInput.slice(0, -1);
-  } else {
+  if (k === '⌫') setStateSilent({ repInput: state.repInput.slice(0, -1) });
+  else {
     if (state.repInput.length >= 2) return;
-    state.repInput += k;
+    setStateSilent({ repInput: state.repInput + k });
   }
-  const display = document.getElementById('repDisplay');
-  const btn     = document.getElementById('btnLogSet');
-  if (display) {
-    display.textContent = state.repInput || '—';
-    display.classList.toggle('empty', !state.repInput);
+  syncRepUI();
+}
+
+function onWeightInput(el) {
+  // An input[type=number] reports value === '' for BOTH an empty field and a
+  // mid-typed value the parser rejects ("82.", "8e"). Zeroing state on the
+  // latter would make the next logged set record 0kg while the field visibly
+  // reads "82.", so bail out and wait for the next keystroke instead.
+  if (el.value === '') {
+    if (el.validity && el.validity.badInput) return;
+    setStateSilent({ weight: 0 });
+  } else {
+    const n = parseFloat(el.value);
+    if (!Number.isFinite(n) || n < 0) return;
+    setStateSilent({ weight: n });
   }
-  if (btn) btn.disabled = !(state.repInput && Number(state.repInput) > 0);
+  syncModifiedLabel();
+}
+
+function onWeightBlur(el) {
+  const n = parseFloat(el.value);
+  const v = Number.isFinite(n) && n >= 0 ? n : 0;
+  setStateSilent({ weight: v });
+  el.value = String(v);   // normalise "82." → "82" and "" → "0", but only on blur
+  syncModifiedLabel();
 }
 
 function addSet() {
@@ -1515,9 +1558,12 @@ function renderExercise() {
       <div style="font-size:0.875rem;color:var(--text-mid);font-weight:600">${lastSession.sets.map(s => s.reps).join('-')} @ ${lastSession.sets[0]?.weight ?? '?'}kg</div>
     </div>` : '';
 
-  // Weight modified warning
-  const modifiedHTML = (lastSession && lastSession.sets.length > 0 && state.weight !== lastSession.sets[0].weight)
-    ? `<div class="modified-label">↕ Modified from last session (${lastSession.sets[0].weight}kg)</div>` : '';
+  // Weight modified warning — always emitted (hidden when not applicable) so
+  // syncModifiedLabel() can patch it without a re-render.
+  const modRef  = lastSession?.sets?.[0]?.weight;
+  const modShow = modRef !== undefined && state.weight !== modRef;
+  const modifiedHTML = `<div id="modifiedLabel" class="modified-label"${modShow ? '' : ' style="display:none"'}>${
+    modShow ? `↕ Modified from last session (${modRef}kg)` : ''}</div>`;
 
   // Sets list
   const setsHTML = state.sets.length === 0
@@ -1603,8 +1649,9 @@ function renderExercise() {
 
           <div class="mb-3">
             <div class="label mb-2">Weight (kg)</div>
-            <input type="number" inputmode="decimal" value="${state.weight}" class="input-weight" aria-label="Weight in kilograms"
-                   oninput="setState({weight:Math.max(0,parseFloat(this.value)||0)})" />
+            <input type="number" inputmode="decimal" step="0.5" min="0" id="weightInput"
+                   value="${state.weight}" class="input-weight" aria-label="Weight in kilograms"
+                   oninput="onWeightInput(this)" onchange="onWeightInput(this)" onblur="onWeightBlur(this)" />
             ${modifiedHTML}
           </div>
 
@@ -1940,6 +1987,9 @@ document.addEventListener('keydown', e => {
 // ============================================================
 function render() {
   const app = document.getElementById('app');
+  const ae  = document.activeElement;
+  const keepId = ae && ae.id && app.contains(ae) && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName) ? ae.id : null;
+
   switch (state.view) {
     case 'select':   app.innerHTML = renderSelect();   break;
     case 'workout':  app.innerHTML = renderWorkout();  break;
@@ -1953,9 +2003,9 @@ function render() {
     const screen = app.querySelector('.screen');
     if (screen) screen.classList.add('back');
   }
-  if (state.view === 'exercise' && state.sets.length < MAX_SETS) {
-    const input = document.getElementById('repInput');
-    if (input) input.focus();
+  if (keepId) {
+    const el = document.getElementById(keepId);
+    if (el) el.focus();
   }
 }
 
