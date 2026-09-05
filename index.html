@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Workout Tracker</title>
+  <meta name="theme-color" content="#070b14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Workouts" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -77,7 +83,8 @@
     /* ── Screen fade ── */
     .screen {
       min-height: 100vh;
-      padding: 12px 12px 32px;
+      /* top | right | bottom | left — insets must match their own side. */
+      padding: 12px max(12px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
       animation: fadeIn 0.18s ease;
     }
     @keyframes fadeIn    { from { opacity: 0; transform: translateY(6px); }   to { opacity: 1; transform: none; } }
@@ -195,6 +202,17 @@
       justify-content: center;
       gap: 8px;
       letter-spacing: 0.02em;
+      position: sticky;
+      /* --kb is the on-screen keyboard's height, published by the
+         visualViewport listener below. iOS resizes only the visual viewport
+         when the keyboard opens, while sticky/fixed bottom offsets resolve
+         against the layout viewport — so without this the button sits
+         underneath the keyboard, which is the overlap the old custom numpad
+         existed to avoid. */
+      bottom: calc(env(safe-area-inset-bottom, 0px) + var(--kb, 0px));
+      z-index: 5;
+      box-shadow: 0 -8px 12px -4px var(--bg);
+      transition: bottom 0.15s ease-out;
     }
     .btn-log:active:not(:disabled) { transform: scale(0.98); }
     .btn-log:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -302,9 +320,9 @@
       border: 1px solid var(--amber);
       border-radius: 6px;
       color: var(--white);
-      font-size: 0.75rem;
+      font-size: 1rem;
       font-weight: 600;
-      padding: 2px 6px;
+      padding: 6px 8px;
       outline: none;
       color-scheme: dark;
     }
@@ -329,6 +347,7 @@
       border-radius: 8px;
       text-align: center;
       font-family: inherit;
+      font-size: 1rem;
       outline: none;
       width: 100%;
       transition: border-color 0.15s, box-shadow 0.15s;
@@ -347,36 +366,6 @@
       flex: 1;
       color: var(--cyan);
     }
-    .rep-display {
-      font-size: 2.5rem;
-      font-weight: 800;
-      text-align: center;
-      padding: 14px;
-      color: var(--cyan);
-      letter-spacing: -0.02em;
-      background: var(--bg-inner);
-      border: 1px solid var(--border-mid);
-      border-radius: 8px;
-    }
-    .rep-display.empty { color: var(--text-dim); }
-    .numpad {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .numpad-key {
-      background: var(--bg-inner);
-      border: 1px solid var(--border-mid);
-      color: var(--white);
-      border-radius: 10px;
-      padding: 18px 8px;
-      font-size: 1.25rem;
-      font-weight: 700;
-    }
-    .numpad-key:active { transform: scale(0.93); }
-    .numpad-key.backspace { color: var(--red); }
-    .numpad-key.zero { grid-column: span 2; }
     /* ── Progress bar ── */
     .progress-bar-wrap {
       background: var(--bg-card);
@@ -417,6 +406,27 @@
     .exercise-item:active { transform: scale(0.99); }
     .exercise-item.done    { border-color: var(--border); background: rgba(245,158,11,0.03); }
     .exercise-item.partial { border-color: var(--cyan-dim); background: rgba(245,158,11,0.03); }
+    .exercise-item.skipped { opacity: 0.5; }
+
+    /* ── Session-local reorder / skip controls ── */
+    .exercise-row-controls {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .exercise-row-controls .icon-btn { flex: 0 0 auto; padding: 10px; }
+    .btn-skip-toggle {
+      flex: 1;
+      background: var(--bg-inner);
+      border: 1px solid var(--border-mid);
+      color: var(--text-dim);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .btn-skip-toggle.active { color: var(--yellow); border-color: var(--yellow-dim); background: var(--yellow-bg); }
 
     /* ── Set rows (with slide-in animation) ── */
     .set-row-wrap {
@@ -435,6 +445,24 @@
       padding: 10px 12px;
       border-radius: 8px;
     }
+    .set-row-tap {
+      width: 100%;
+      text-align: left;
+      color: inherit;
+      font-family: inherit;
+    }
+    .set-edit-hint { color: var(--muted); display: inline-flex; }
+    .set-row-editing {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      border-color: var(--cyan-dim);
+    }
+    .set-edit-fields { display: flex; align-items: center; gap: 8px; }
+    .set-edit-input { flex: 1; padding: 12px 8px; font-size: 1rem; }
+    .set-edit-x { color: var(--text-dim); font-weight: 700; flex-shrink: 0; }
+    .set-edit-actions { display: flex; gap: 8px; }
+    .set-edit-actions .icon-btn { flex: 1; justify-content: center; padding: 12px; }
 
     /* ── PR badges (with pop animation) ── */
     .pr-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
@@ -469,6 +497,17 @@
     .progression.increase { background: var(--green-bg);  border: 1px solid var(--green-dim);  color: var(--green); }
     .progression.good     { background: var(--blue-bg);   border: 1px solid var(--blue-dim);   color: var(--blue); }
     .progression.maintain { background: var(--yellow-bg); border: 1px solid var(--yellow-dim); color: var(--yellow); }
+
+    /* ── Rest timer ── */
+    .rest-timer-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--cyan);
+      text-align: center;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .rest-timer-value.rest-timer-done { color: var(--green); font-size: 1.125rem; }
 
 
 
@@ -766,6 +805,19 @@
       color: var(--white);
       text-align: left;
     }
+    .wk-row-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: none;
+      padding: 0;
+      text-align: left;
+      color: inherit;
+      font-family: inherit;
+    }
     .wk-list-item-info { flex: 1; min-width: 0; }
     .wk-list-item-name { font-size: 0.9rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .wk-row-actions { display: flex; gap: 4px; flex-shrink: 0; }
@@ -823,7 +875,6 @@
       .btn-delete-day:hover { color: var(--red); }
       .btn-edit-day:hover { color: var(--amber); }
       .btn-export:hover { background: var(--cyan-glow); }
-      .numpad-key:hover  { border-color: var(--border-hi); color: var(--cyan); }
       .exercise-item:hover  { border-color: var(--border-hi); }
       .cal-nav:hover { color: var(--white); }
       .btn-save-back:hover { border-color: var(--green-dim); color: var(--green); }
@@ -885,15 +936,122 @@ const WK_PALETTE_SIZE = 8;
 // ============================================================
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyuEmiw_M-mMHS0IWN-9y4VbWJhzGZYysQizYEOSMISxnlz8aukSqRrzVQPijodigne/exec';
 
+// NOTE: mode:'no-cors' gives an opaque response — response.ok is always false
+// and status is always 0, so success/failure can only be judged by whether
+// the fetch PROMISE resolves at all, never by inspecting the response. This
+// function is intentionally allowed to throw (a network failure rejects the
+// fetch promise): the only caller is drainSyncQueue(), which needs that
+// rejection to know a batch must stay queued rather than being dropped.
+const SYNC_TIMEOUT_MS = 15000;
+
 async function syncToSheets(entries) {
   if (!SHEETS_URL) return;
+  // A fetch with no timeout can hang indefinitely on mobile — a captive
+  // portal or a server that accepts the connection but never answers. Because
+  // drainSyncQueue awaits this behind an in-flight guard, a hung request would
+  // strand that guard set forever and silently disable syncing for the rest of
+  // the session. Abort instead, so it fails like any other error: the batch
+  // stays queued and the next drain can retry.
+  const ctrl  = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), SYNC_TIMEOUT_MS);
   try {
     await fetch(SHEETS_URL, {
       method: 'POST', mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entries),
+      signal: ctrl.signal,
     });
-  } catch(e) { console.warn('Sheets sync failed:', e); }
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ============================================================
+// OFFLINE-SAFE SYNC QUEUE
+// ============================================================
+// A session logged with no signal must never be lost. completeSession()
+// always enqueues its batch to localStorage FIRST — independent of whether
+// the network is up — then a drain is attempted immediately. A batch is only
+// removed from the queue once its POST has actually resolved; a thrown fetch
+// leaves it (and everything queued after it) in place for the next drain
+// (on the next 'online' event or the next page load).
+const SYNC_QUEUE_KEY = 'syncQueue';
+const MAX_SYNC_QUEUE = 50; // cap so a long outage can't grow this unbounded
+
+function isValidSyncQueue(data) {
+  return Array.isArray(data) && data.every(b =>
+    b && typeof b === 'object' &&
+    typeof b.id === 'string' && b.id.length > 0 &&
+    typeof b.queuedAt === 'string' &&
+    Array.isArray(b.entries));
+}
+
+function loadSyncQueue() {
+  const data = loadLS(SYNC_QUEUE_KEY, []);
+  if (!isValidSyncQueue(data)) {
+    console.warn('Invalid syncQueue in localStorage, resetting to empty queue.');
+    saveLS(SYNC_QUEUE_KEY, []);
+    return [];
+  }
+  return data;
+}
+
+function saveSyncQueue(queue) {
+  // Keep only the most recent MAX_SYNC_QUEUE batches.
+  const capped = queue.length > MAX_SYNC_QUEUE ? queue.slice(queue.length - MAX_SYNC_QUEUE) : queue;
+  saveLS(SYNC_QUEUE_KEY, capped);
+  return capped;
+}
+
+function enqueueSyncBatch(entries) {
+  const batch = { id: newId('sync'), entries, queuedAt: new Date().toISOString() };
+  return saveSyncQueue([...loadSyncQueue(), batch]);
+}
+
+// Guards against two overlapping drains sending the same batch twice — the
+// flag is set synchronously (before the first `await`), so a second call
+// made before the first one yields control returns immediately instead of
+// racing it.
+let _syncDraining = false;
+
+// _syncDraining only guards this JS context. Two instances sharing the same
+// localStorage — the installed PWA and a browser tab, say — would each read
+// the same batch and POST it, duplicating rows in the sheet. This advisory
+// lock is held in localStorage so both see it, and carries an expiry so a tab
+// closed mid-drain cannot wedge syncing permanently.
+const SYNC_LOCK_KEY = 'syncLock';
+const SYNC_LOCK_MS  = 30000;
+
+function acquireSyncLock() {
+  const now  = Date.now();
+  const held = Number(loadLS(SYNC_LOCK_KEY, 0));
+  if (Number.isFinite(held) && held > now) return false;   // someone else, still fresh
+  saveLS(SYNC_LOCK_KEY, now + SYNC_LOCK_MS);
+  return true;
+}
+const releaseSyncLock = () => removeLS(SYNC_LOCK_KEY);
+
+async function drainSyncQueue() {
+  if (_syncDraining) return;
+  if (!acquireSyncLock()) return;
+  _syncDraining = true;
+  try {
+    const queue = loadSyncQueue();
+    for (const batch of queue) {
+      try {
+        await syncToSheets(batch.entries);
+      } catch (e) {
+        console.warn('Sheets sync failed, batch stays queued:', e);
+        break; // stop this pass — leave this batch and any after it queued
+      }
+      // Remove only this batch, re-reading first in case something else
+      // (e.g. a completeSession() enqueue) touched the queue meanwhile.
+      saveSyncQueue(loadSyncQueue().filter(b => b.id !== batch.id));
+    }
+  } finally {
+    _syncDraining = false;
+    releaseSyncLock();
+  }
 }
 
 // ============================================================
@@ -945,10 +1103,15 @@ function isValidHistory(data) {
 }
 
 function isValidSession(data) {
+  // order/skipped are optional session-local additions (Feature: reorder/skip
+  // exercises for the current session) — absent entirely on older in-flight
+  // sessions, which must keep loading, so only type-check them when present.
   return data && typeof data === 'object' &&
          typeof data.sessionType === 'string' &&
          Array.isArray(data.exercises) &&
-         data.exercises.every(ex => ex && typeof ex.exercise === 'string' && Array.isArray(ex.sets));
+         data.exercises.every(ex => ex && typeof ex.exercise === 'string' && Array.isArray(ex.sets)) &&
+         (data.order === undefined || Array.isArray(data.order)) &&
+         (data.skipped === undefined || Array.isArray(data.skipped));
 }
 
 // Lenient by design: only id/name/exercises and each exercise's name/weight/
@@ -1025,6 +1188,12 @@ let state = {
   progressMode:   'weight',
   historyFilter:  '',        // exercise name filter for history screen
   editingDate:    null,      // dateStr currently being edited inline
+  editingSetIdx:  null,      // index into state.sets currently in inline edit mode (exercise screen)
+  // Epoch ms the current rest countdown ends at, or null when idle. Deliberately
+  // NOT persisted to localStorage (see REST TIMER section): a stale timestamp
+  // surviving a reload must never show a bogus countdown, and simply never
+  // saving it sidesteps that rather than needing a staleness check.
+  restEndsAt:     null,
   lastDeletedHistory: null,
 };
 
@@ -1104,12 +1273,7 @@ function setState(patch) {
 function setStateSilent(patch) { Object.assign(state, patch); }
 
 function syncRepUI() {
-  const display = document.getElementById('repDisplay');
-  const btn     = document.getElementById('btnLogSet');
-  if (display) {
-    display.textContent = state.repInput || '—';
-    display.classList.toggle('empty', !state.repInput);
-  }
+  const btn = document.getElementById('btnLogSet');
   if (btn) btn.disabled = !(state.repInput && Number(state.repInput) > 0);
 }
 
@@ -1135,10 +1299,11 @@ function goBack() {
       setState({ view: 'select', sessionType: null, ...(shouldRestore ? { activeSession: savedSession } : {}) });
       break;
     }
-    case 'exercise': setState({ view: 'workout', activeExercise: null, sets: [], repInput: '' }); break;
+    case 'exercise': setState({ view: 'workout', activeExercise: null, sets: [], repInput: '', editingSetIdx: null, restEndsAt: null }); break;
     case 'history':  setState({ view: 'select' }); break;
     case 'settings': setState({ view: 'select' }); break;
-    case 'workouts': setState({ view: 'select' }); break;
+    case 'workouts':    setState({ view: 'select' }); break;
+    case 'workoutNew':  setState({ view: 'workouts' }); break;
     case 'workoutEdit': {
       // Structural action — harvest whatever the user last typed before it's discarded.
       harvestEditorDOM();
@@ -1207,7 +1372,12 @@ function getExerciseHistory(name) {
 // and orphanedExercises() surfaces the rest. Nothing is discarded:
 // completeSession still writes every logged entry to history.
 function sessionEntriesInWorkout() {
-  const names = new Set((currentWorkout()?.exercises || []).map(e => e.name));
+  // Skipped exercises are excluded from the denominator by
+  // activeWorkoutExercises(), so they must be excluded from the numerator too
+  // — otherwise skipping an exercise that was already finished counts a
+  // completion against a total that no longer includes it, and the session
+  // reads "1/0".
+  const names = new Set(activeWorkoutExercises().map(e => e.name));
   return (state.activeSession?.exercises || []).filter(e => names.has(e.exercise));
 }
 
@@ -1231,6 +1401,57 @@ function orphanedExercises() {
   return (state.activeSession?.exercises || [])
     .filter(e => !names.has(e.exercise) && e.sets.length > 0)
     .map(e => ({ name: e.exercise, sets: e.sets.length }));
+}
+
+// ── Session-local reorder / skip ────────────────────────────────────────
+// The workout definition's exercise order is never touched here — these
+// helpers only resolve a DISPLAY order for the active session, backed by
+// state.activeSession.order (names) and .skipped (names), persisted with the
+// session (not with `workouts`). Resolved defensively, same spirit as
+// orphanedExercises() above: a stored order entry that no longer names a
+// real exercise in the workout is dropped (never rendered as a phantom row),
+// and a workout exercise missing from the stored order (added to the
+// workout after the session started, or the field predates this feature)
+// is appended in the workout's own order.
+function sessionExerciseOrder() {
+  const defNames = (currentWorkout()?.exercises || []).map(e => e.name);
+  const order = state.activeSession?.order;
+  if (!Array.isArray(order) || order.length === 0) return defNames;
+  const defSet = new Set(defNames);
+  const known   = order.filter(n => defSet.has(n));
+  const missing = defNames.filter(n => !known.includes(n));
+  return [...known, ...missing];
+}
+
+// The current workout's exercise defs, in this session's display order.
+function orderedExercises() {
+  const byName = new Map((currentWorkout()?.exercises || []).map(e => [e.name, e]));
+  return sessionExerciseOrder().map(n => byName.get(n)).filter(Boolean);
+}
+
+function isSkipped(name) {
+  return (state.activeSession?.skipped || []).includes(name);
+}
+
+// Does the active session hold anything worth resuming or abandoning?
+// Reordering or skipping persists the session before any set is logged, so
+// gating the resume banner and the abandon button on logged sets alone would
+// strand such a session: saved to localStorage, but with no UI path to reach,
+// finish or discard it.
+function sessionHasProgress(session = state.activeSession) {
+  if (!session) return false;
+  return (session.exercises?.length || 0) > 0
+      || (session.skipped?.length   || 0) > 0
+      || (session.order?.length     || 0) > 0;
+}
+
+// Exercises counted toward "done/total" — a skipped exercise is excluded
+// from the denominator so skipping the last remaining one lets the session
+// complete cleanly. Nothing is removed from the workout or from the session's
+// logged entries; a skipped exercise with sets already logged still shows,
+// still saves on completion, it just doesn't hold the count back.
+function activeWorkoutExercises() {
+  return (currentWorkout()?.exercises || []).filter(e => !isSkipped(e.name));
 }
 
 function getQuickStats() {
@@ -1366,13 +1587,20 @@ function completeSession() {
   saveLS('workoutHistory', history);
   removeLS('currentSession');
   // The Google Sheets endpoint is a black box that expects the original
-  // shape — strip the new workoutId field at the boundary.
-  syncToSheets(entries.map(({ workoutId, ...rest }) => rest));
+  // shape — strip the new workoutId field at the boundary. Local history is
+  // already saved above, so it never depends on the sync below: always
+  // enqueue first (durable across a dropped connection or a killed tab),
+  // then attempt an immediate drain.
+  enqueueSyncBatch(entries.map(({ workoutId, ...rest }) => rest));
+  drainSyncQueue();
   setState({ view: 'select', sessionType: null, activeSession: null, history });
 }
 
 function selectExercise(idx) {
-  const ex = currentWorkout()?.exercises[idx];
+  // idx indexes the session's DISPLAY order (orderedExercises), which may
+  // differ from the workout definition's own order once the exercise has
+  // been reordered for this session.
+  const ex = orderedExercises()[idx];
   if (!ex) return;
   const history    = getExerciseHistory(ex.name);
   const lastWeight = history[0]?.sets[0]?.weight ?? ex.weight;
@@ -1381,7 +1609,7 @@ function selectExercise(idx) {
   const sets       = savedEntry ? savedEntry.sets : [];
   const weight     = sets.length > 0 ? sets[sets.length - 1].weight : lastWeight;
   const repInput = sets.length > 0 ? String(sets[sets.length - 1].reps) : '';
-  setState({ view: 'exercise', activeExercise: ex, sets, weight, repInput });
+  setState({ view: 'exercise', activeExercise: ex, sets, weight, repInput, editingSetIdx: null, restEndsAt: null });
 }
 
 function saveExerciseToSession(sets) {
@@ -1396,12 +1624,26 @@ function saveExerciseToSession(sets) {
   return session;
 }
 
-function numpadKey(k) {
-  if (k === '⌫') setStateSilent({ repInput: state.repInput.slice(0, -1) });
-  else {
-    if (state.repInput.length >= 2) return;
-    setStateSilent({ repInput: state.repInput + k });
+function onRepsInput(el) {
+  // Same badInput guard as onWeightInput: value === '' covers both an empty
+  // field and a mid-typed value the parser rejects, so bail out on the latter
+  // rather than zeroing state while the field still shows a rejected value.
+  if (el.value === '') {
+    if (el.validity && el.validity.badInput) return;
+    setStateSilent({ repInput: '' });
+  } else {
+    const n = parseInt(el.value, 10);
+    if (!Number.isFinite(n) || n < 0) return;
+    setStateSilent({ repInput: String(n) });
   }
+  syncRepUI();
+}
+
+function onRepsBlur(el) {
+  const n = parseInt(el.value, 10);
+  const v = Number.isFinite(n) && n > 0 ? String(n) : '';
+  setStateSilent({ repInput: v });
+  el.value = v;
   syncRepUI();
 }
 
@@ -1430,6 +1672,7 @@ function onWeightBlur(el) {
 }
 
 function addSet() {
+  harvestOpenSetEdit();
   const reps = parseInt(state.repInput);
   if (!reps || reps <= 0) return;
   const newSet   = { reps, weight: state.weight, prs: detectPRs(state.activeExercise.name, { reps, weight: state.weight }, state.sets) };
@@ -1437,24 +1680,217 @@ function addSet() {
   const repInput = sets.length < targetSetsFor(state.activeExercise) ? String(reps) : '';
   // Auto-save after every set
   const session  = saveExerciseToSession(sets);
-  setState({ sets, repInput, activeSession: session });
+  // Auto-start (or restart) the rest countdown for the exercise's own rest
+  // window — see the "REST TIMER" section below.
+  const restEndsAt = Date.now() + parseRestSeconds(state.activeExercise?.rest) * 1000;
+  setState({ sets, repInput, activeSession: session, restEndsAt });
+}
+
+// ============================================================
+// REST TIMER
+// ============================================================
+// On-screen countdown only — no vibration (unsupported in iOS Safari, so it
+// would silently do nothing) and no sound. Auto-starts the moment a set is
+// logged; skip/+30s are the only controls, and it never blocks logging
+// further sets. The countdown lives in state.restEndsAt (an epoch-ms target,
+// not a decrementing counter), so it survives the full-DOM-replacement
+// render()s that every other setState() triggers — a single setInterval
+// (see startRestInterval/clearRestInterval) patches the countdown node
+// directly each second instead of calling setState, so it never fights the
+// user's inputs or steals focus.
+const DEFAULT_REST_SECONDS = 90;
+
+// Exercise .rest is free text like "3-4 min", "1.5-2 min", "2 min" (ranges
+// are always low-high) — use the LOWER bound so the countdown never asks the
+// user to wait longer than the minimum. Falls back to a sensible default
+// rather than ever producing NaN on screen.
+function parseRestSeconds(restStr) {
+  if (typeof restStr !== 'string') return DEFAULT_REST_SECONDS;
+  const s = restStr.toLowerCase();
+  const match = s.match(/(\d+(?:\.\d+)?)/); // first number = lower bound of a range
+  if (!match) return DEFAULT_REST_SECONDS;
+  const n = parseFloat(match[1]);
+  if (!Number.isFinite(n) || n <= 0) return DEFAULT_REST_SECONDS;
+  const isSecondsUnit = /sec/.test(s) && !/min/.test(s);
+  const seconds = Math.round(isSecondsUnit ? n : n * 60);
+  return seconds > 0 ? seconds : DEFAULT_REST_SECONDS;
+}
+
+let _restIntervalId = null;
+
+function clearRestInterval() {
+  if (_restIntervalId !== null) {
+    clearInterval(_restIntervalId);
+    _restIntervalId = null;
+  }
+}
+
+// Patches the countdown node in place (same approach as syncRepUI) — looked
+// up by id each tick rather than captured once, since render() may have
+// replaced it since the interval last fired.
+function tickRestTimer() {
+  const el = document.getElementById('restTimerValue');
+  if (!el || !state.restEndsAt) { clearRestInterval(); return; }
+  const remaining = Math.ceil((state.restEndsAt - Date.now()) / 1000);
+  if (remaining <= 0) {
+    el.textContent = 'Rest complete';
+    el.classList.add('rest-timer-done');
+    const plusBtn = document.getElementById('restPlusBtn');
+    if (plusBtn) plusBtn.disabled = true;
+    clearRestInterval(); // timer ended — stop ticking
+    return;
+  }
+  const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
+  const ss = String(remaining % 60).padStart(2, '0');
+  el.textContent = `${mm}:${ss}`;
+}
+
+// Exactly one interval is ever live: called after every render, it always
+// clears any previous interval first, so logging several sets in a row (each
+// one a fresh setState → render) never stacks a second ticker.
+function startRestInterval() {
+  clearRestInterval();
+  _restIntervalId = setInterval(tickRestTimer, 1000);
+}
+
+function skipRest() {
+  harvestOpenSetEdit();
+  setState({ restEndsAt: null });
+}
+
+function addRestTime(seconds) {
+  harvestOpenSetEdit();
+  if (!state.restEndsAt) return;
+  setState({ restEndsAt: state.restEndsAt + seconds * 1000 });
+}
+
+function renderRestTimer() {
+  if (!state.restEndsAt) return '';
+  const remaining = Math.ceil((state.restEndsAt - Date.now()) / 1000);
+  const done = remaining <= 0;
+  const mm = String(Math.floor(Math.max(0, remaining) / 60)).padStart(2, '0');
+  const ss = String(Math.max(0, remaining) % 60).padStart(2, '0');
+  return `
+    <div class="card card--glow mb-3 rest-timer-card">
+      <div class="label mb-1">Rest</div>
+      <div id="restTimerValue" class="rest-timer-value${done ? ' rest-timer-done' : ''}">${done ? 'Rest complete' : `${mm}:${ss}`}</div>
+      <div class="flex-row mt-2">
+        <button type="button" class="btn-secondary" onclick="skipRest()">Skip</button>
+        <button type="button" class="btn-secondary" id="restPlusBtn" onclick="addRestTime(30)" ${done ? 'disabled' : ''}>+30s</button>
+      </div>
+    </div>`;
+}
+
+// Shared by removeLastSet/deleteSet/confirmEditSet: persists whatever sets
+// remain for the active exercise, or — if none remain — drops the exercise
+// from the session entirely (same behaviour removeLastSet always had, now
+// reused instead of duplicated per call site).
+function persistSets(sets) {
+  if (sets.length > 0) return saveExerciseToSession(sets);
+  const exercises = state.activeSession.exercises.filter(e => e.exercise !== state.activeExercise.name);
+  const session = { ...state.activeSession, exercises };
+  saveLS('currentSession', session);
+  return session;
+}
+
+// Recomputes every set's `prs` from scratch, in order, so that editing or
+// deleting an earlier set can never leave a later set's PR badge referring to
+// a comparison that no longer holds. Mirrors exactly how addSet() computes a
+// PR — detectPRs(name, thisSet, setsLoggedBeforeIt) — just replayed over the
+// whole (possibly just-edited) array instead of appending one at a time.
+function recomputeSetsPRs(exerciseName, sets) {
+  const result = [];
+  for (const s of sets) {
+    const prs = detectPRs(exerciseName, s, result);
+    result.push({ weight: s.weight, reps: s.reps, prs });
+  }
+  return result;
 }
 
 function removeLastSet() {
+  harvestOpenSetEdit();
   const sets    = state.sets.slice(0, -1);
-  const session = sets.length > 0 ? saveExerciseToSession(sets) : (() => {
-    // Remove exercise from session if no sets left
-    const exercises = state.activeSession.exercises.filter(e => e.exercise !== state.activeExercise.name);
-    const s = { ...state.activeSession, exercises };
-    saveLS('currentSession', s);
-    return s;
-  })();
+  const session = persistSets(sets);
   setState({ sets, activeSession: session });
 }
 
+// ── Per-set inline edit (any logged set, not just the last one) ──────────
+function deleteSet(idx) {
+  const remaining = state.sets.filter((_, i) => i !== idx).map(s => ({ weight: s.weight, reps: s.reps }));
+  const recomputed = recomputeSetsPRs(state.activeExercise.name, remaining);
+  const session = persistSets(recomputed);
+  setState({ sets: recomputed, activeSession: session, editingSetIdx: null });
+}
+
+// The edit row's weight/reps inputs are UNCONTROLLED (same reasoning as the
+// workout editor's harvestEditorDOM) — nothing re-renders while the row is
+// open, so this reads the live DOM values only at confirm time, the single
+// structural action that follows.
+// Read the open edit row's live DOM values back into `sets`, without
+// rendering. Shared by confirmEditSet and by harvestOpenSetEdit; returns the
+// updated set list, or null when there is nothing open to read.
+function readOpenSetEdit(idx) {
+  const set = state.sets[idx];
+  if (!set) return null;
+  const wEl = document.getElementById('editSetWeight');
+  const rEl = document.getElementById('editSetReps');
+  if (!wEl && !rEl) return null;
+  const wN     = wEl ? parseFloat(wEl.value) : NaN;
+  const weight = Number.isFinite(wN) && wN >= 0 ? wN : set.weight;
+  const rN     = rEl ? parseInt(rEl.value, 10) : NaN;
+  const reps   = Number.isFinite(rN) && rN > 0 ? rN : set.reps;
+  const updated = state.sets.map((s, i) => i === idx ? { weight, reps } : { weight: s.weight, reps: s.reps });
+  return recomputeSetsPRs(state.activeExercise.name, updated);
+}
+
+function confirmEditSet(idx) {
+  const recomputed = readOpenSetEdit(idx);
+  if (!recomputed) { setState({ editingSetIdx: null }); return; }
+  const session = persistSets(recomputed);
+  setState({ sets: recomputed, activeSession: session, editingSetIdx: null });
+}
+
+// The edit row's inputs are uncontrolled, so anything else that triggers a
+// full render would rebuild the row from the unedited values in state and
+// silently throw away what the user had typed. Every such action harvests
+// first — the same contract harvestEditorDOM() enforces in the workout editor.
+function harvestOpenSetEdit() {
+  if (state.editingSetIdx === null || state.editingSetIdx === undefined) return;
+  const idx = state.editingSetIdx;
+  const recomputed = readOpenSetEdit(idx);
+  if (recomputed) {
+    const session = persistSets(recomputed);
+    setStateSilent({ sets: recomputed, activeSession: session });
+  }
+  setStateSilent({ editingSetIdx: null });
+}
+
+// ── Session-local reorder / skip (workout definition is never touched) ───
+function moveSessionExercise(idx, dir) {
+  const list = orderedExercises();
+  const j = idx + dir;
+  if (j < 0 || j >= list.length) return;
+  const names = list.map(e => e.name);
+  [names[idx], names[j]] = [names[j], names[idx]];
+  const session = { ...state.activeSession, order: names };
+  saveLS('currentSession', session);
+  setState({ activeSession: session });
+}
+
+function toggleSkipExercise(idx) {
+  const ex = orderedExercises()[idx];
+  if (!ex) return;
+  const skipped = new Set(state.activeSession?.skipped || []);
+  if (skipped.has(ex.name)) skipped.delete(ex.name); else skipped.add(ex.name);
+  const session = { ...state.activeSession, skipped: [...skipped] };
+  saveLS('currentSession', session);
+  setState({ activeSession: session });
+}
+
 function completeExercise() {
+  harvestOpenSetEdit();
   const session = saveExerciseToSession(state.sets);
-  setState({ view: 'workout', activeSession: session, activeExercise: null, sets: [], weight: 0, repInput: '' });
+  setState({ view: 'workout', activeSession: session, activeExercise: null, sets: [], weight: 0, repInput: '', editingSetIdx: null, restEndsAt: null });
 }
 
 function deleteHistoryDay(dateStr) {
@@ -1787,8 +2223,23 @@ function buildCalendarHTML() {
 
   const canGoForward = state.calOffset > 0;
 
-  const legend = state.workouts.map(w =>
-    `<span style="font-size:0.6rem;color:var(--wk${w.color})">■ ${esc(w.name)}</span>`).join('');
+  // Legend covers only the workouts actually trained in the month on screen.
+  // Listing every workout turned into its own wall of names once there were
+  // more than a handful — the same noise the home screen was just relieved of.
+  const legendIds = new Set();
+  const legendItems = [];
+  Object.values(workedDays).forEach(e => {
+    const w = workoutById(e.workoutId) || state.workouts.find(x => x.label === e.session);
+    const key = w ? w.id : `~${e.session}`;
+    if (legendIds.has(key)) return;
+    legendIds.add(key);
+    legendItems.push({ name: w ? w.name : String(e.session ?? '?'), color: colorForHistoryEntry(e) });
+  });
+  const LEGEND_MAX = 6;
+  const legend = legendItems.slice(0, LEGEND_MAX).map(l =>
+    `<span style="font-size:0.6rem;color:var(--wk${l.color})">■ ${esc(l.name)}</span>`).join('')
+    + (legendItems.length > LEGEND_MAX
+        ? `<span style="font-size:0.6rem;color:var(--text-dim)">+${legendItems.length - LEGEND_MAX} more</span>` : '');
 
   return `
     <div class="card card--glow mb-4">
@@ -1861,7 +2312,7 @@ function renderSelect() {
     </div>`;
 
   const resumeWorkout = session ? workoutById(session.sessionType) : null;
-  const resumeHTML = (session?.exercises.length > 0) ? `
+  const resumeHTML = sessionHasProgress(session) ? `
     <div class="resume-banner mb-4">
       <div style="font-weight:700;font-size:0.875rem;color:var(--blue);margin-bottom:2px">${esc(resumeWorkout?.name ?? 'Workout')} in progress</div>
       <div class="label mb-3">${session.exercises.length}/${resumeWorkout?.exercises.length ?? 0} exercises complete</div>
@@ -1871,26 +2322,16 @@ function renderSelect() {
       </div>
     </div>` : '';
 
-  const sessionBtns = state.workouts.length === 0 ? `
+  const startBtnHTML = state.workouts.length === 0 ? `
     <div class="empty-state mb-6">
       <div class="empty-state-icon">📋</div>
       <div class="empty-state-title">No workouts yet</div>
       <div class="empty-state-sub">Create a workout to start tracking sessions.</div>
-      <button type="button" class="btn-primary empty-state-action" onclick="setState({view:'workouts'})">${icons.plus} Manage Workouts</button>
-    </div>` : `<div class="space-y-2 mb-6">${state.workouts.map(w => {
-      const totalSets = w.exercises.reduce((sum, ex) => sum + targetSetsFor(ex), 0);
-      return `
-    <button type="button" class="btn-session" onclick="startSession('${w.id}')">
-      <div style="display:flex;align-items:center;gap:10px;min-width:0">
-        <span class="wk-swatch" style="${wkStyle(w.color)}"></span>
-        <div style="min-width:0">
-          <div style="font-size:1.125rem;font-weight:800;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(w.name)}</div>
-          <div class="label">${w.exercises.length} exercises · ${totalSets} sets</div>
-        </div>
-      </div>
-      ${icons.chevron}
-    </button>`;
-    }).join('')}</div>`;
+      <button type="button" class="btn-primary empty-state-action" onclick="setState({view:'workoutNew'})">${icons.plus} New Workout</button>
+    </div>` : `
+    <div class="mb-6">
+      <button type="button" class="btn-primary" onclick="setState({view:'workouts'})">${icons.chevron} START WORKOUT</button>
+    </div>`;
 
   return `
     <div class="screen">
@@ -1902,10 +2343,10 @@ function renderSelect() {
         </div>
         ${statsHTML}
         ${resumeHTML}
-        ${sessionBtns}
+        ${startBtnHTML}
         ${buildCalendarHTML()}
         <div class="space-y-2">
-          <button type="button" class="btn-nav" onclick="setState({view:'workouts'})">Manage Workouts</button>
+          <button type="button" class="btn-nav" onclick="setState({view:'workoutNew'})">${icons.plus} New Workout</button>
           <button type="button" class="btn-nav" onclick="setState({view:'history'})">View History</button>
           <button type="button" class="btn-nav" onclick="setState({view:'settings'})" style="color:var(--text-dim)">⚙ Settings</button>
         </div>
@@ -1918,7 +2359,8 @@ function renderSelect() {
 // ============================================================
 function renderWorkout() {
   const workout   = currentWorkout();
-  const exercises = workout?.exercises ?? [];
+  const exercises = orderedExercises();          // session-local display order
+  const total     = activeWorkoutExercises().length; // excludes skipped
   const done      = completedExercises();
   const partial   = partialExercises();
 
@@ -1928,6 +2370,7 @@ function renderWorkout() {
     const isDone     = done.includes(ex.name);
     const partialEx  = partial.find(p => p.name === ex.name);
     const isPartial  = !!partialEx && !isDone;
+    const skipped    = isSkipped(ex.name);
 
     let recentHTML = '';
     if (recent && !isDone) {
@@ -1956,24 +2399,33 @@ function renderWorkout() {
 
     // Status badge
     let statusBadge = '';
-    if (isDone) {
+    if (skipped) {
+      statusBadge = `<span style="font-size:0.65rem;font-weight:700;color:var(--text-dim);background:var(--bg-deep);border:1px solid var(--border-mid);border-radius:9999px;padding:2px 7px;letter-spacing:0.04em">SKIPPED</span>`;
+    } else if (isDone) {
       statusBadge = `<span class="check-circle">${icons.checkFill}</span>`;
     } else if (isPartial) {
       statusBadge = `<span style="font-size:0.65rem;font-weight:700;color:var(--cyan);background:var(--cyan-glow);border:1px solid var(--cyan-dim);border-radius:9999px;padding:2px 7px">${partialEx.sets}/${partialEx.target}</span>`;
     }
 
     return `
-      <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''}" onclick="selectExercise(${idx})">
-        <div style="flex:1">
-          <div class="flex-row mb-1" style="align-items:center;gap:8px">
-            <div style="font-size:0.875rem;font-weight:700;${isDone ? 'text-decoration:line-through;color:var(--muted)' : 'color:var(--white)'}">${esc(ex.name)}</div>
-            ${statusBadge}
+      <div class="exercise-row-wrap" data-idx="${idx}">
+        <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''} ${skipped ? 'skipped' : ''}" onclick="selectExercise(${idx})">
+          <div style="flex:1">
+            <div class="flex-row mb-1" style="align-items:center;gap:8px">
+              <div style="font-size:0.875rem;font-weight:700;${isDone ? 'text-decoration:line-through;color:var(--muted)' : 'color:var(--white)'}">${esc(ex.name)}</div>
+              ${statusBadge}
+            </div>
+            <div class="label">${ex.weight > 0 ? ex.weight + 'kg' : 'BW'} · ${esc(ex.targetReps)} reps</div>
+            ${recentHTML}
           </div>
-          <div class="label">${ex.weight > 0 ? ex.weight + 'kg' : 'BW'} · ${esc(ex.targetReps)} reps</div>
-          ${recentHTML}
+          ${icons.chevron}
+        </button>
+        <div class="exercise-row-controls">
+          <button type="button" class="icon-btn btn-move-up" aria-label="Move up" ${idx === 0 ? 'disabled style="opacity:0.3"' : ''} onclick="moveSessionExercise(${idx}, -1)">${icons.up}</button>
+          <button type="button" class="icon-btn btn-move-down" aria-label="Move down" ${idx === exercises.length - 1 ? 'disabled style="opacity:0.3"' : ''} onclick="moveSessionExercise(${idx}, 1)">${icons.down}</button>
+          <button type="button" class="btn-skip-toggle ${skipped ? 'active' : ''}" aria-label="${skipped ? 'Include this exercise' : 'Skip this exercise'}" onclick="toggleSkipExercise(${idx})">${skipped ? 'INCLUDE' : 'SKIP'}</button>
         </div>
-        ${icons.chevron}
-      </button>`;
+      </div>`;
   }).join('');
 
   // Sets logged against exercises since removed from this workout. Shown so
@@ -1990,11 +2442,17 @@ function renderWorkout() {
     </div>`;
 
   const started    = done.length + partial.length + orphans.length;
-  const bottomHTML = started > 0 ? `
+  // Abandon must stay reachable for a session that has only been reordered or
+  // had exercises skipped, otherwise it can never be cleared from the UI.
+  // Complete needs at least one logged set — completeSession() no-ops without
+  // one, so offering the button then would give a dead control. Abandon is
+  // gated more loosely, or a reorder/skip-only session could never be cleared.
+  const bottomHTML = (started > 0 || sessionHasProgress()) ? `
     <div class="mt-4 space-y-2">
+      ${started > 0 ? `
       <button type="button" class="btn-primary" onclick="completeSession()">
-        ${icons.check} COMPLETE SESSION (${done.length}/${exercises.length})
-      </button>
+        ${icons.check} COMPLETE SESSION (${done.length}/${total})
+      </button>` : ''}
       <button type="button" class="btn-secondary" onclick="abandonSession()">Abandon Session</button>
     </div>` : '';
 
@@ -2002,7 +2460,7 @@ function renderWorkout() {
     <div class="screen">
       <div class="container">
         <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
-        ${progressBarHTML(done.length, exercises.length, workout?.name ?? '')}
+        ${progressBarHTML(done.length, total, workout?.name ?? '')}
         <div class="space-y-2">${items}</div>
         ${orphansHTML}
         ${bottomHTML}
@@ -2037,17 +2495,46 @@ function renderExercise() {
   const modifiedHTML = `<div id="modifiedLabel" class="modified-label"${modShow ? '' : ' style="display:none"'}>${
     modShow ? `↕ Modified from last session (${modRef}kg)` : ''}</div>`;
 
-  // Sets list
+  // Sets list — any row can be tapped into an inline edit state (tracked in
+  // state.editingSetIdx). The edit row's inputs are UNCONTROLLED (see
+  // confirmEditSet): nothing re-renders while the user is mid-edit, so they
+  // never fight a keystroke-triggered render the way a setState-on-input
+  // field would.
   const setsHTML = state.sets.length === 0
     ? `<p style="text-align:center;padding:14px 0;font-size:0.75rem;color:var(--muted)">No sets logged yet</p>`
-    : state.sets.map((set, idx) => `
+    : state.sets.map((set, idx) => {
+        if (state.editingSetIdx === idx) {
+          return `
+            <div class="set-row-wrap">
+              <div class="set-row set-row-editing">
+                <span class="label">Set ${idx + 1}</span>
+                <div class="set-edit-fields">
+                  <input type="number" inputmode="decimal" step="0.5" min="0" id="editSetWeight"
+                         class="input-field set-edit-input" value="${set.weight}" aria-label="Edit weight for set ${idx + 1}" />
+                  <span class="set-edit-x">×</span>
+                  <input type="number" inputmode="numeric" step="1" min="1" id="editSetReps"
+                         class="input-field set-edit-input" value="${set.reps}" aria-label="Edit reps for set ${idx + 1}" />
+                </div>
+                <div class="set-edit-actions">
+                  <button type="button" class="icon-btn" aria-label="Confirm changes to set ${idx + 1}" onclick="confirmEditSet(${idx})">${icons.check}</button>
+                  <button type="button" class="icon-btn danger" aria-label="Delete set ${idx + 1}" onclick="deleteSet(${idx})">${icons.x14}</button>
+                  <button type="button" class="icon-btn" aria-label="Cancel editing set ${idx + 1}" onclick="setState({editingSetIdx:null})">${icons.x}</button>
+                </div>
+              </div>
+            </div>`;
+        }
+        return `
         <div class="set-row-wrap">
-          <div class="set-row">
+          <button type="button" class="set-row set-row-tap" onclick="setState({editingSetIdx:${idx}})" aria-label="Edit set ${idx + 1}">
             <span class="label">Set ${idx + 1}</span>
-            <span style="font-weight:700;font-size:0.9rem">${set.weight}kg × ${set.reps}</span>
-          </div>
+            <span style="display:flex;align-items:center;gap:6px">
+              <span style="font-weight:700;font-size:0.9rem">${set.weight}kg × ${set.reps}</span>
+              <span class="set-edit-hint">${icons.pencil}</span>
+            </span>
+          </button>
           ${set.prs?.length > 0 ? `<div class="pr-badges">${set.prs.map(p => `<div class="pr-badge">${p.icon} ${p.message}</div>`).join('')}</div>` : ''}
-        </div>`).join('');
+        </div>`;
+      }).join('');
 
   const removeHTML = state.sets.length > 0 ? `
     <button type="button" class="btn-danger mb-3" onclick="removeLastSet()">${icons.x} Remove last set</button>` : '';
@@ -2055,40 +2542,37 @@ function renderExercise() {
   const progHTML = progression ? `
     <div class="progression ${progression.status}">${progression.message}</div>` : '';
 
+  const placeholder = (lastSession && lastSession.sets.length > 0 && state.sets.length === 0) ? lastSession.sets[0].reps.toString() : '0';
+
+  // Reps input — shown only while more sets are needed; once the target is
+  // met the COMPLETE EXERCISE button below takes over instead.
+  const repsHTML = state.sets.length < target ? `
+    <div class="mb-3">
+      <div class="label mb-2">Reps — Set ${state.sets.length + 1}</div>
+      <input type="number" inputmode="numeric" step="1" min="1" id="repsInput" value="${state.repInput}"
+             placeholder="${esc(placeholder)}" class="input-weight" aria-label="Reps for this set"
+             oninput="onRepsInput(this)" onblur="onRepsBlur(this)" />
+    </div>` : '';
+
+  // NOTE: the log button is a DIRECT child of .container (no wrapping div) —
+  // position:sticky only has room to stick within its own containing block,
+  // so wrapping it in a short div (just tall enough for the button itself)
+  // would give it nowhere to travel and it would never visibly "stick".
+  // .container spans the full exercise screen, giving it real room to work.
   let actionHTML = '';
   if (state.sets.length < target) {
-    const placeholder = (lastSession && lastSession.sets.length > 0 && state.sets.length === 0) ? lastSession.sets[0].reps.toString() : '0';
     const saveBackBtn = state.sets.length > 0 ? `
       <button type="button" class="btn-save-back mt-2" onclick="completeExercise()">
         ${icons.check} Save ${state.sets.length} set${state.sets.length > 1 ? 's' : ''} & back
       </button>` : '';
     actionHTML = `
-      <div class="mb-3">
-        <div class="label mb-2">Reps — Set ${state.sets.length + 1}</div>
-        <div id="repDisplay" class="rep-display mb-3 ${!state.repInput ? 'empty' : ''}" aria-label="Reps for current set">
-          ${state.repInput || placeholder}
-        </div>
-        <div class="numpad mb-3">
-          <button type="button" class="numpad-key" onclick="numpadKey('1')">1</button>
-          <button type="button" class="numpad-key" onclick="numpadKey('2')">2</button>
-          <button type="button" class="numpad-key" onclick="numpadKey('3')">3</button>
-          <button type="button" class="numpad-key" onclick="numpadKey('4')">4</button>
-          <button type="button" class="numpad-key" onclick="numpadKey('5')">5</button>
-          <button type="button" class="numpad-key" onclick="numpadKey('6')">6</button>
-          <button type="button" class="numpad-key" onclick="numpadKey('7')">7</button>
-          <button type="button" class="numpad-key" onclick="numpadKey('8')">8</button>
-          <button type="button" class="numpad-key" onclick="numpadKey('9')">9</button>
-          <button type="button" class="numpad-key backspace" onclick="numpadKey('⌫')">⌫</button>
-          <button type="button" class="numpad-key zero" onclick="numpadKey('0')">0</button>
-        </div>
-        <button type="button" id="btnLogSet" class="btn-log" onclick="addSet()" ${!state.repInput || Number(state.repInput) <= 0 ? 'disabled' : ''}>
-          ${icons.plus} LOG SET ${state.sets.length + 1}
-        </button>
-        ${saveBackBtn}
-      </div>`;
+      <button type="button" id="btnLogSet" class="btn-log mb-2" onclick="addSet()" ${!state.repInput || Number(state.repInput) <= 0 ? 'disabled' : ''}>
+        ${icons.plus} LOG SET ${state.sets.length + 1}
+      </button>
+      ${saveBackBtn}`;
   } else {
     actionHTML = `
-      <button type="button" class="btn-complete-ex" onclick="completeExercise()">
+      <button type="button" class="btn-complete-ex mb-3" onclick="completeExercise()">
         ${icons.check24} COMPLETE EXERCISE
       </button>`;
   }
@@ -2119,30 +2603,35 @@ function renderExercise() {
               <h2 class="title-lg mb-3">${esc(ex.name)}</h2>
               ${lastHTML}
 
-          <div class="mb-3">
-            <div class="label mb-2">Weight (kg)</div>
-            <input type="number" inputmode="decimal" step="0.5" min="0" id="weightInput"
-                   value="${state.weight}" class="input-weight" aria-label="Weight in kilograms"
-                   oninput="onWeightInput(this)" onchange="onWeightInput(this)" onblur="onWeightBlur(this)" />
-            ${modifiedHTML}
-          </div>
+              <div class="mb-3">
+                <div class="label mb-2">Weight (kg)</div>
+                <input type="number" inputmode="decimal" step="0.5" min="0" id="weightInput"
+                       value="${state.weight}" class="input-weight" aria-label="Weight in kilograms"
+                       oninput="onWeightInput(this)" onchange="onWeightInput(this)" onblur="onWeightBlur(this)" />
+                ${modifiedHTML}
+              </div>
 
-          <div class="grid-2 mb-2">
-            <div class="card--deep"><span class="label">Target </span><span style="font-weight:600">${esc(ex.targetReps)} reps</span></div>
-            <div class="card--deep"><span class="label">Rest </span><span style="font-weight:600">${esc(ex.rest)}</span></div>
-          </div>
-          ${notesHTML}
+              ${repsHTML}
             </div>
           </div>
         </div>
+
+        ${renderRestTimer()}
 
         <div class="card card--glow mb-3">
           <div class="title-sm mb-3">Sets ${state.sets.length}/${target}</div>
           ${state.sets.length > 0 ? `<div class="space-y-2 mb-3">${setsHTML}</div>` : setsHTML}
           ${removeHTML}
           ${progHTML}
-          ${actionHTML}
         </div>
+
+        ${actionHTML}
+
+        <div class="grid-2 mb-2 mt-3">
+          <div class="card--deep"><span class="label">Target </span><span style="font-weight:600">${esc(ex.targetReps)} reps</span></div>
+          <div class="card--deep"><span class="label">Rest </span><span style="font-weight:600">${esc(ex.rest)}</span></div>
+        </div>
+        ${notesHTML}
 
         ${historyHTML}
       </div>
@@ -2238,6 +2727,12 @@ function renderSettings() {
           <div class="title-sm mb-2">Google Sheets Sync</div>
           <div style="font-size:0.75rem;color:var(--text-mid);line-height:1.6">
             ${SHEETS_URL ? '✅ Connected — sessions sync automatically.' : '⚠️ Not configured.'}
+            ${(() => {
+              const pending = loadSyncQueue().length;
+              return pending > 0
+                ? `<br>⏳ ${pending} session${pending > 1 ? 's' : ''} waiting to sync (will retry automatically).`
+                : '';
+            })()}
           </div>
         </div>
 
@@ -2422,11 +2917,13 @@ function renderWorkouts() {
       const totalSets = w.exercises.reduce((sum, ex) => sum + targetSetsFor(ex), 0);
       return `
       <div class="wk-list-item">
-        <span class="wk-swatch" style="${wkStyle(w.color)}"></span>
-        <div class="wk-list-item-info">
-          <div class="wk-list-item-name">${esc(w.name)}</div>
-          <div class="label">${w.exercises.length} exercises · ${totalSets} sets</div>
-        </div>
+        <button type="button" class="wk-row-main" onclick="startSession('${w.id}')" aria-label="Start ${esc(w.name)}">
+          <span class="wk-swatch" style="${wkStyle(w.color)}"></span>
+          <div class="wk-list-item-info">
+            <div class="wk-list-item-name">${esc(w.name)}</div>
+            <div class="label">${w.exercises.length} exercises · ${totalSets} sets</div>
+          </div>
+        </button>
         <div class="wk-row-actions">
           <button type="button" class="icon-btn" title="Edit" aria-label="Edit ${esc(w.name)}" onclick="openWorkoutEditor('${w.id}')">${icons.pencil}</button>
           <button type="button" class="icon-btn" title="Duplicate" aria-label="Duplicate ${esc(w.name)}" onclick="duplicateWorkout('${w.id}')">${icons.copy}</button>
@@ -2435,18 +2932,38 @@ function renderWorkouts() {
       </div>`;
     }).join('')}</div>`;
 
-  const templateBtns = TEMPLATE_KEYS.map(k => `
-    <button type="button" class="btn-secondary" style="flex:1" onclick="createWorkout('${k}')">Session ${k}</button>`).join('');
+  return `
+    <div class="screen">
+      <div class="container">
+        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
+        <h2 class="title-xl mb-4">Workouts</h2>
+        ${items}
+        <button type="button" class="btn-primary mt-4" onclick="setState({view:'workoutNew'})">${icons.plus} New Workout</button>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// NEW WORKOUT — TEMPLATE CHOOSER
+// ============================================================
+function renderWorkoutNew() {
+  const templateItems = TEMPLATE_KEYS.map(k => `
+    <button type="button" class="wk-list-item" style="width:100%;text-align:left" onclick="createWorkout('${k}')">
+      <div class="wk-list-item-info">
+        <div class="wk-list-item-name">Session ${k}</div>
+        <div class="label">${WORKOUTS[k].length} exercises</div>
+      </div>
+      ${icons.chevron}
+    </button>`).join('');
 
   return `
     <div class="screen">
       <div class="container">
         <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
-        <h2 class="title-xl mb-4">Manage Workouts</h2>
-        ${items}
-        <div class="section-label mt-4"><span>New from template</span></div>
-        <div class="flex-row mb-3">${templateBtns}</div>
-        <button type="button" class="btn-primary" onclick="createWorkout()">${icons.plus} New Workout</button>
+        <h2 class="title-xl mb-4">New Workout</h2>
+        <button type="button" class="btn-primary mb-4" onclick="createWorkout()">${icons.plus} Start from scratch</button>
+        <div class="section-label"><span>Start from a template</span></div>
+        <div class="space-y-2">${templateItems}</div>
       </div>
     </div>`;
 }
@@ -2540,6 +3057,24 @@ function renderWorkoutEdit() {
 }
 
 // ============================================================
+// Publish the on-screen keyboard's height as --kb so bottom-anchored controls
+// (the LOG SET button) stay above it. iOS shrinks only the visual viewport
+// when the keyboard opens; the layout viewport that sticky offsets resolve
+// against is unchanged, so a sticky bottom button ends up behind the keyboard.
+// The difference between the two viewports is the keyboard height.
+(function initKeyboardInset() {
+  const vv = window.visualViewport;
+  if (!vv) return;                       // no support: falls back to --kb: 0px
+  const apply = () => {
+    const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    // Ignore small deltas: browser chrome collapsing is not a keyboard.
+    document.documentElement.style.setProperty('--kb', (inset > 120 ? inset : 0) + 'px');
+  };
+  vv.addEventListener('resize', apply);
+  vv.addEventListener('scroll', apply);
+  apply();
+})();
+
 (function initSwipe() {
   let startX = 0;
   let startY = 0;
@@ -2584,6 +3119,7 @@ function render() {
     case 'history':     app.innerHTML = renderHistory();     break;
     case 'settings':    app.innerHTML = renderSettings();    break;
     case 'workouts':    app.innerHTML = renderWorkouts();    break;
+    case 'workoutNew':  app.innerHTML = renderWorkoutNew();  break;
     case 'workoutEdit': app.innerHTML = renderWorkoutEdit(); break;
   }
   // Apply slide-back animation class
@@ -2595,6 +3131,16 @@ function render() {
     const el = document.getElementById(keepId);
     if (el) el.focus();
   }
+
+  // Rest timer: exactly one interval lives only while the exercise screen is
+  // showing an active countdown. Any other view (or a cleared restEndsAt)
+  // clears it — leaving the exercise, changing views, skipping, or the
+  // countdown itself reaching zero must never leak an interval.
+  if (state.view === 'exercise' && state.restEndsAt) {
+    startRestInterval();
+  } else {
+    clearRestInterval();
+  }
 }
 
 // ============================================================
@@ -2602,6 +3148,17 @@ function render() {
 // ============================================================
 initState();
 render();
+drainSyncQueue();
+window.addEventListener('online', () => drainSyncQueue());
+
+// ============================================================
+// SERVICE WORKER REGISTRATION
+// ============================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW registration failed:', e));
+  });
+}
 </script>
 </body>
 </html>
