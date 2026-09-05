@@ -1168,8 +1168,13 @@ function detectPRs(exerciseName, newSet, currentSets) {
   if (newSet.weight > maxWeight && !shownTypes.has('weight'))
     prs.push({ type: 'weight', icon: '⭐', message: 'Weight PR!' });
 
-  const maxRepsAtWeight = Math.max(0, ...allSets.filter(s => s.weight === newSet.weight).map(s => s.reps));
-  if (newSet.reps > maxRepsAtWeight && !shownTypes.has('reps'))
+  // Scoped to this exact weight, so it only means anything if this weight has
+  // been lifted before. Without that check the baseline is 0 for any weight
+  // never used, and a single rep at a weight far below the historical max
+  // wins a "Rep PR!" that then gets written into history with the set.
+  const repsAtWeight    = allSets.filter(s => s.weight === newSet.weight).map(s => s.reps);
+  const maxRepsAtWeight = Math.max(0, ...repsAtWeight);
+  if (repsAtWeight.length > 0 && newSet.reps > maxRepsAtWeight && !shownTypes.has('reps'))
     prs.push({ type: 'reps', icon: '🔥', message: 'Rep PR!' });
 
   const maxVolume = Math.max(0, ...allSets.map(s => s.weight * s.reps));
@@ -1194,18 +1199,38 @@ function getExerciseHistory(name) {
   return state.history.filter(e => e.exercise === name).slice(0, 5);
 }
 
+// A logged session entry whose exercise has since been removed from (or
+// renamed in) the workout still holds real sets the user performed, but it no
+// longer has a row on the workout screen. Counting it would make the progress
+// summary disagree with the visible list — "1/0" when the workout is emptied
+// mid-session — so the counts below cover only exercises still in the workout,
+// and orphanedExercises() surfaces the rest. Nothing is discarded:
+// completeSession still writes every logged entry to history.
+function sessionEntriesInWorkout() {
+  const names = new Set((currentWorkout()?.exercises || []).map(e => e.name));
+  return (state.activeSession?.exercises || []).filter(e => names.has(e.exercise));
+}
+
 function completedExercises() {
   // Only count exercises where the target number of sets is logged
-  return (state.activeSession?.exercises || [])
+  return sessionEntriesInWorkout()
     .filter(e => e.sets.length >= targetSetsFor(e.exercise))
     .map(e => e.exercise);
 }
 
 function partialExercises() {
   // Exercises saved with fewer than the target number of sets
-  return (state.activeSession?.exercises || [])
+  return sessionEntriesInWorkout()
     .filter(e => e.sets.length < targetSetsFor(e.exercise))
     .map(e => ({ name: e.exercise, sets: e.sets.length, target: targetSetsFor(e.exercise) }));
+}
+
+// Logged entries no longer present in the workout definition.
+function orphanedExercises() {
+  const names = new Set((currentWorkout()?.exercises || []).map(e => e.name));
+  return (state.activeSession?.exercises || [])
+    .filter(e => !names.has(e.exercise) && e.sets.length > 0)
+    .map(e => ({ name: e.exercise, sets: e.sets.length }));
 }
 
 function getQuickStats() {
@@ -1239,9 +1264,14 @@ function newId(prefix) {
 }
 
 function clampSets(n) {
-  n = Math.round(Number(n));
-  if (!Number.isFinite(n)) return DEFAULT_TARGET_SETS;
-  return Math.min(10, Math.max(1, n));
+  // An empty editor field means "unset", not zero: Number('') is 0, which is
+  // finite, so without this it would clamp to the floor of 1 instead of the
+  // default of 3 that every other unset path uses.
+  if (n === null || n === undefined) return DEFAULT_TARGET_SETS;
+  if (typeof n === 'string' && n.trim() === '') return DEFAULT_TARGET_SETS;
+  const v = Math.round(Number(n));
+  if (!Number.isFinite(v)) return DEFAULT_TARGET_SETS;
+  return Math.min(10, Math.max(1, v));
 }
 
 function workoutById(id) {
@@ -1946,7 +1976,20 @@ function renderWorkout() {
       </button>`;
   }).join('');
 
-  const started    = done.length + partial.length;
+  // Sets logged against exercises since removed from this workout. Shown so
+  // the user can see they will still be saved, rather than silently vanishing.
+  const orphans     = orphanedExercises();
+  const orphansHTML = orphans.length === 0 ? '' : `
+    <div class="section-label mt-4"><span>Also logged</span></div>
+    <div class="space-y-2">
+      ${orphans.map(o => `
+        <div class="card--inner">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-mid)">${esc(o.name)}</div>
+          <div class="label mt-1">${o.sets} set${o.sets > 1 ? 's' : ''} · no longer in this workout</div>
+        </div>`).join('')}
+    </div>`;
+
+  const started    = done.length + partial.length + orphans.length;
   const bottomHTML = started > 0 ? `
     <div class="mt-4 space-y-2">
       <button type="button" class="btn-primary" onclick="completeSession()">
@@ -1961,6 +2004,7 @@ function renderWorkout() {
         <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
         ${progressBarHTML(done.length, exercises.length, workout?.name ?? '')}
         <div class="space-y-2">${items}</div>
+        ${orphansHTML}
         ${bottomHTML}
       </div>
     </div>`;
