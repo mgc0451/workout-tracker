@@ -42,6 +42,16 @@
       --violet-mid:   #7c3aed;
       --violet-glow:  rgba(167,139,250,0.14);
       --violet-glow2: rgba(167,139,250,0.07);
+
+      /* Workout colour palette (index-based, stored per workout) */
+      --wk0:#a78bfa; --wk0s:rgba(167,139,250,0.26);
+      --wk1:#22d3ee; --wk1s:rgba(34,211,238,0.24);
+      --wk2:#60a5fa; --wk2s:rgba(96,165,250,0.22);
+      --wk3:#22c55e; --wk3s:rgba(34,197,94,0.22);
+      --wk4:#fbbf24; --wk4s:rgba(251,191,36,0.24);
+      --wk5:#fb923c; --wk5s:rgba(251,146,60,0.24);
+      --wk6:#f87171; --wk6s:rgba(248,113,113,0.22);
+      --wk7:#f472b6; --wk7s:rgba(244,114,182,0.22);
     }
 
     html, body {
@@ -127,7 +137,6 @@
       align-items: center;
       gap: 4px;
     }
-    .btn-back:hover { color: var(--cyan); }
 
     .btn-primary {
       width: 100%;
@@ -144,7 +153,6 @@
       box-shadow: 0 4px 12px rgba(22,163,74,0.3);
       letter-spacing: 0.02em;
     }
-    .btn-primary:hover  { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 4px 16px rgba(22,163,74,0.45); }
     .btn-primary:active { transform: scale(0.98); }
 
     .btn-secondary {
@@ -157,7 +165,6 @@
       font-size: 0.75rem;
       letter-spacing: 0.04em;
     }
-    .btn-secondary:hover { border-color: var(--border-hi); color: var(--white); }
 
     .btn-danger {
       width: 100%;
@@ -173,7 +180,6 @@
       gap: 6px;
       letter-spacing: 0.04em;
     }
-    .btn-danger:hover { background: rgba(127,29,29,0.3); }
 
     .btn-log {
       width: 100%;
@@ -190,7 +196,6 @@
       gap: 8px;
       letter-spacing: 0.02em;
     }
-    .btn-log:hover:not(:disabled) { border-color: var(--cyan-dim); background: linear-gradient(135deg, rgba(245,158,11,0.08), var(--bg-card)); box-shadow: 0 0 12px var(--cyan-glow); }
     .btn-log:active:not(:disabled) { transform: scale(0.98); }
     .btn-log:disabled { opacity: 0.35; cursor: not-allowed; }
 
@@ -210,7 +215,6 @@
       box-shadow: 0 0 16px var(--cyan-glow);
       letter-spacing: 0.02em;
     }
-    .btn-complete-ex:hover  { background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(245,158,11,0.1)); box-shadow: 0 0 24px rgba(245,158,11,0.2); }
     .btn-complete-ex:active { transform: scale(0.98); }
 
     .btn-session {
@@ -235,14 +239,6 @@
       opacity: 0;
       transition: opacity 0.2s;
     }
-    .btn-session:hover { border-color: var(--violet-dim); }
-    .btn-session:hover::before { opacity: 1; }
-    .btn-session.next-session {
-      border-color: var(--violet-mid);
-      box-shadow: 0 0 14px var(--violet-glow), inset 0 1px 0 rgba(167,139,250,0.1);
-    }
-    .btn-session.next-session::before { opacity: 1; background: linear-gradient(135deg, var(--violet-glow), transparent); }
-
     .btn-nav {
       width: 100%;
       background: transparent;
@@ -253,7 +249,6 @@
       font-size: 0.75rem;
       letter-spacing: 0.04em;
     }
-    .btn-nav:hover { border-color: var(--border-hi); color: var(--text-mid); }
 
     .btn-resume {
       flex: 1;
@@ -265,7 +260,6 @@
       font-weight: 700;
       letter-spacing: 0.04em;
     }
-    .btn-resume:hover { background: linear-gradient(135deg, #3b82f6, #2563eb); }
 
     .btn-abandon {
       flex: 1;
@@ -276,7 +270,6 @@
       border-radius: 8px;
       font-size: 0.75rem;
     }
-    .btn-abandon:hover { border-color: var(--red-dim); color: var(--red); }
 
     .btn-clear-all {
       background: none;
@@ -287,7 +280,6 @@
       border-radius: 6px;
       letter-spacing: 0.04em;
     }
-    .btn-clear-all:hover { color: var(--red); border-color: var(--red); }
 
     .btn-delete-day {
       background: none;
@@ -296,7 +288,6 @@
       line-height: 1;
       border-radius: 4px;
     }
-    .btn-delete-day:hover { color: var(--red); }
 
     .btn-edit-day {
       background: none;
@@ -305,7 +296,6 @@
       line-height: 1;
       border-radius: 4px;
     }
-    .btn-edit-day:hover { color: var(--amber); }
 
     .date-edit-input {
       background: var(--bg-inner);
@@ -330,7 +320,6 @@
       font-size: 0.75rem;
       letter-spacing: 0.04em;
     }
-    .btn-export:hover { background: var(--cyan-glow); }
 
     /* ── Inputs ── */
     input[type="number"], input[type="text"] {
@@ -385,7 +374,6 @@
       font-size: 1.25rem;
       font-weight: 700;
     }
-    .numpad-key:hover  { border-color: var(--border-hi); color: var(--cyan); }
     .numpad-key:active { transform: scale(0.93); }
     .numpad-key.backspace { color: var(--red); }
     .numpad-key.zero { grid-column: span 2; }
@@ -426,7 +414,6 @@
       color: var(--white);
       transition: border-color 0.15s, background 0.15s;
     }
-    .exercise-item:hover  { border-color: var(--border-hi); }
     .exercise-item:active { transform: scale(0.99); }
     .exercise-item.done    { border-color: var(--border); background: rgba(245,158,11,0.03); }
     .exercise-item.partial { border-color: var(--cyan-dim); background: rgba(245,158,11,0.03); }
@@ -497,9 +484,7 @@
       border-radius: 9999px;
       flex-shrink: 0;
     }
-    .ex-accent-bar.session-A { background: linear-gradient(to bottom, var(--violet), var(--violet-dim)); }
-    .ex-accent-bar.session-B { background: linear-gradient(to bottom, var(--cyan), var(--cyan-dim)); }
-    .ex-accent-bar.session-C { background: linear-gradient(to bottom, var(--blue), var(--blue-dim)); }
+    .ex-accent-bar.wk-accent { background: linear-gradient(to bottom, var(--wk), var(--wks)); }
 
     /* ── Filled checkmark ── */
     .check-circle {
@@ -536,20 +521,6 @@
       border-radius: 12px;
       padding: 14px;
     }
-
-    /* ── Next session badge ── */
-    .next-badge {
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: var(--violet);
-      background: var(--violet-glow);
-      border: 1px solid var(--violet-dim);
-      border-radius: 9999px;
-      padding: 2px 8px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
 
 
     /* ── Utility ── */
@@ -635,22 +606,10 @@
       border-radius: 50%;
       background: var(--cyan);
     }
-    .cal-day.worked-A {
-      background: linear-gradient(135deg, rgba(167,139,250,0.35), rgba(124,58,237,0.2));
-      border: 1px solid rgba(167,139,250,0.3);
-      color: var(--violet);
-      font-weight: 800;
-    }
-    .cal-day.worked-B {
-      background: linear-gradient(135deg, rgba(245,158,11,0.3), rgba(180,83,9,0.18));
-      border: 1px solid rgba(245,158,11,0.3);
-      color: var(--cyan);
-      font-weight: 800;
-    }
-    .cal-day.worked-C {
-      background: linear-gradient(135deg, rgba(96,165,250,0.25), rgba(30,58,138,0.2));
-      border: 1px solid rgba(96,165,250,0.25);
-      color: var(--blue);
+    .cal-day.worked {
+      background: linear-gradient(135deg, var(--wks), transparent);
+      border: 1px solid var(--wks);
+      color: var(--wk);
       font-weight: 800;
     }
     .cal-nav {
@@ -662,7 +621,6 @@
       border-radius: 4px;
       line-height: 1;
     }
-    .cal-nav:hover { color: var(--white); }
 
     /* ── Tab bar ── */
     .tab-bar {
@@ -780,7 +738,6 @@
       gap: 6px;
       letter-spacing: 0.02em;
     }
-    .btn-save-back:hover { border-color: var(--green-dim); color: var(--green); }
 
     /* ── Section label ── */
     .section-label {
@@ -791,6 +748,88 @@
     }
     .section-label span { font-size: 0.65rem; font-weight: 700; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
     .section-label::before, .section-label::after { content: ''; flex: 1; border-top: 1px solid var(--border); }
+
+    /* ── Workout manager / editor ── */
+    .wk-swatch {
+      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+      background: var(--wk); box-shadow: 0 0 0 2px var(--wks);
+    }
+    .wk-list-item {
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--white);
+      text-align: left;
+    }
+    .wk-list-item-info { flex: 1; min-width: 0; }
+    .wk-list-item-name { font-size: 0.9rem; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .wk-row-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .icon-btn {
+      background: var(--bg-inner);
+      border: 1px solid var(--border-mid);
+      color: var(--text-mid);
+      padding: 8px;
+      border-radius: 8px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .icon-btn.danger { color: var(--red); border-color: var(--red-dim); }
+    .color-picker { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0 4px; }
+    .color-swatch-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--wk);
+      border: 2px solid transparent;
+      box-shadow: 0 0 0 2px var(--bg-card);
+      padding: 0;
+    }
+    .color-swatch-btn.selected { border-color: var(--white); box-shadow: 0 0 0 2px var(--bg-card), 0 0 8px var(--wks); }
+    .ex-edit-card { position: relative; }
+    .ex-edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .field-label { font-size: 0.65rem; color: var(--text-dim); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 4px; display: block; }
+    .ex-edit-move-row { display: flex; gap: 6px; margin-top: 10px; }
+    .ex-edit-move-row .icon-btn { flex: 1; }
+    input[type="text"].input-name, input[type="text"].input-label {
+      font-size: 1rem;
+      padding: 12px;
+      text-align: left;
+    }
+    input[type="number"].input-field, input[type="text"].input-field {
+      font-size: 1rem;
+      padding: 10px;
+    }
+    .empty-state-action { margin-top: 14px; }
+
+    /* ── Hover states — pointer devices only, so a tap doesn't leave a "stuck" hover on touch ── */
+    @media (hover: hover) {
+      .btn-back:hover { color: var(--cyan); }
+      .btn-primary:hover  { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 4px 16px rgba(22,163,74,0.45); }
+      .btn-secondary:hover { border-color: var(--border-hi); color: var(--white); }
+      .btn-danger:hover { background: rgba(127,29,29,0.3); }
+      .btn-log:hover:not(:disabled) { border-color: var(--cyan-dim); background: linear-gradient(135deg, rgba(245,158,11,0.08), var(--bg-card)); box-shadow: 0 0 12px var(--cyan-glow); }
+      .btn-complete-ex:hover  { background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(245,158,11,0.1)); box-shadow: 0 0 24px rgba(245,158,11,0.2); }
+      .btn-session:hover { border-color: var(--violet-dim); }
+      .btn-session:hover::before { opacity: 1; }
+      .btn-nav:hover { border-color: var(--border-hi); color: var(--text-mid); }
+      .btn-resume:hover { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+      .btn-abandon:hover { border-color: var(--red-dim); color: var(--red); }
+      .btn-clear-all:hover { color: var(--red); border-color: var(--red); }
+      .btn-delete-day:hover { color: var(--red); }
+      .btn-edit-day:hover { color: var(--amber); }
+      .btn-export:hover { background: var(--cyan-glow); }
+      .numpad-key:hover  { border-color: var(--border-hi); color: var(--cyan); }
+      .exercise-item:hover  { border-color: var(--border-hi); }
+      .cal-nav:hover { color: var(--white); }
+      .btn-save-back:hover { border-color: var(--green-dim); color: var(--green); }
+      .icon-btn:hover { border-color: var(--border-hi); color: var(--white); }
+      .icon-btn.danger:hover { border-color: var(--red); color: var(--red); }
+    }
   </style>
 </head>
 <body>
@@ -798,6 +837,14 @@
 
 <script>
 'use strict';
+
+// ============================================================
+// ESCAPING — every render path is innerHTML; any user-entered text
+// (workout/exercise names, labels, notes, rest, targetReps) must go
+// through this before being interpolated.
+// ============================================================
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 
 // ============================================================
 // DATA
@@ -829,8 +876,9 @@ const WORKOUTS = {
   ],
 };
 
-const SESSION_ORDER = ['B', 'C', 'A'];
-const MAX_SETS = 3;
+const TEMPLATE_KEYS = ['A', 'B', 'C'];
+const DEFAULT_TARGET_SETS = 3;
+const WK_PALETTE_SIZE = 8;
 
 // ============================================================
 // GOOGLE SHEETS SYNC
@@ -898,6 +946,60 @@ function isValidSession(data) {
          data.exercises.every(ex => ex && typeof ex.exercise === 'string' && Array.isArray(ex.sets));
 }
 
+// Lenient by design: only id/name/exercises and each exercise's name/weight/
+// targetReps are load-bearing. Everything else (label/color/notes/rest/
+// targetSets/exercise id) gets repaired by normalizeWorkouts() rather than
+// triggering a destructive reset. An empty array is a VALID state — it means
+// the user deleted every workout.
+function isValidWorkouts(data) {
+  return Array.isArray(data) && data.every(w =>
+    w && typeof w === 'object' &&
+    typeof w.id === 'string' && w.id.length > 0 &&
+    typeof w.name === 'string' &&
+    Array.isArray(w.exercises) &&
+    w.exercises.every(ex =>
+      ex && typeof ex === 'object' &&
+      typeof ex.name === 'string' &&
+      typeof ex.weight === 'number' &&
+      typeof ex.targetReps === 'string'));
+}
+
+function normalizeWorkouts(data) {
+  return data.map((w, wi) => ({
+    id: w.id,
+    name: w.name,
+    label: (typeof w.label === 'string' && w.label.trim()) ? w.label.trim().slice(0, 3) : w.name.slice(0, 3).toUpperCase(),
+    color: (Number.isInteger(w.color) && w.color >= 0 && w.color < WK_PALETTE_SIZE) ? w.color : (wi % WK_PALETTE_SIZE),
+    exercises: w.exercises.map(ex => ({
+      id: (typeof ex.id === 'string' && ex.id) ? ex.id : newId('e'),
+      name: ex.name,
+      weight: ex.weight,
+      targetReps: ex.targetReps,
+      rest: typeof ex.rest === 'string' ? ex.rest : '',
+      notes: typeof ex.notes === 'string' ? ex.notes : '',
+      targetSets: clampSets(Number.isFinite(ex.targetSets) ? ex.targetSets : DEFAULT_TARGET_SETS),
+    })),
+  }));
+}
+
+function buildSeedWorkouts() {
+  return TEMPLATE_KEYS.map((key, i) => ({
+    id: key,
+    name: `Session ${key}`,
+    label: key,
+    color: i,
+    exercises: WORKOUTS[key].map(ex => ({
+      id: newId('e'),
+      name: ex.name,
+      weight: ex.weight,
+      targetReps: ex.targetReps,
+      rest: ex.rest || '',
+      notes: ex.notes || '',
+      targetSets: DEFAULT_TARGET_SETS,
+    })),
+  }));
+}
+
 // ============================================================
 // STATE
 // ============================================================
@@ -910,6 +1012,8 @@ let state = {
   weight:         0,
   repInput:       '',
   history:        [],
+  workouts:       [],        // user-defined workouts (seeded from templates A/B/C)
+  editWorkoutId:  null,      // id of the workout currently open in the editor
   calOffset:      0,
   homeTab:        'workout', // 'workout' | 'progress'
   progressEx:     null,
@@ -939,19 +1043,48 @@ function initState() {
     state.history = persistedHistory;
   }
 
+  // ── Workouts (user-definable; seeded from templates A/B/C on first load).
+  // Must be resolved BEFORE currentSession below, since a persisted session's
+  // sessionType needs to resolve against a real workout.
+  const hasWorkoutsKey = localStorage.getItem('workouts') !== null;
+  if (!hasWorkoutsKey) {
+    state.workouts = buildSeedWorkouts();
+    saveLS('workouts', state.workouts);
+  } else {
+    const persistedWorkouts = loadLS('workouts', null);
+    if (!isValidWorkouts(persistedWorkouts)) {
+      console.warn('Invalid workouts in localStorage, reseeding from templates.');
+      state.workouts = buildSeedWorkouts();
+      saveLS('workouts', state.workouts);
+    } else {
+      state.workouts = normalizeWorkouts(persistedWorkouts);
+      saveLS('workouts', state.workouts);
+    }
+  }
+
   const persistedSession = loadLS('currentSession', null);
   if (persistedSession === null) {
     state.activeSession = null;
-  } else if (isValidSession(persistedSession)) {
-    state.activeSession = persistedSession;
-  } else {
+  } else if (!isValidSession(persistedSession)) {
     console.warn('Invalid currentSession in localStorage, removing it.');
     removeLS('currentSession');
     state.activeSession = null;
+  } else if (!workoutById(persistedSession.sessionType)) {
+    console.warn('currentSession references a workout that no longer exists, discarding it.');
+    removeLS('currentSession');
+    state.activeSession = null;
+  } else {
+    state.activeSession = persistedSession;
   }
 }
 
 let _goingBack = false;
+
+// Snapshot of { exerciseId: originalName } taken when the workout editor is
+// opened, used only to detect renames at Save time (so a history rewrite can
+// be offered). Not a copy of workout data — state.workouts stays the single
+// source the editor renders from.
+let editSnapshot = {};
 
 function setState(patch) {
   Object.assign(state, patch);
@@ -1000,6 +1133,14 @@ function goBack() {
     case 'exercise': setState({ view: 'workout', activeExercise: null, sets: [], repInput: '' }); break;
     case 'history':  setState({ view: 'select' }); break;
     case 'settings': setState({ view: 'select' }); break;
+    case 'workouts': setState({ view: 'select' }); break;
+    case 'workoutEdit': {
+      // Structural action — harvest whatever the user last typed before it's discarded.
+      harvestEditorDOM();
+      saveLS('workouts', state.workouts);
+      setState({ view: 'workouts', editWorkoutId: null });
+      break;
+    }
   }
   _goingBack = false;
 }
@@ -1029,8 +1170,11 @@ function detectPRs(exerciseName, newSet, currentSets) {
 }
 
 function getProgressionStatus(exercise, sets) {
-  if (sets.length < MAX_SETS) return null;
-  const [min, max] = exercise.targetReps.split('-').map(Number);
+  if (sets.length < targetSetsFor(exercise)) return null;
+  const [min, max] = (exercise.targetReps || '').split('-').map(Number);
+  // Free-text targets ("AMRAP", a bare "10", etc.) don't parse as a min-max
+  // range — skip the banner rather than pinning it to "Push for more reps" forever.
+  if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
   if (sets.every(s => s.reps >= max)) return { status: 'increase', message: '✓ MAXED — increase weight next session' };
   if (sets.every(s => s.reps >= min)) return { status: 'good',     message: '✓ Good — keep pushing' };
   return                                      { status: 'maintain', message: '↑ Push for more reps' };
@@ -1041,25 +1185,17 @@ function getExerciseHistory(name) {
 }
 
 function completedExercises() {
-  // Only count exercises where all 3 sets are logged
+  // Only count exercises where the target number of sets is logged
   return (state.activeSession?.exercises || [])
-    .filter(e => e.sets.length >= MAX_SETS)
+    .filter(e => e.sets.length >= targetSetsFor(e.exercise))
     .map(e => e.exercise);
 }
 
 function partialExercises() {
-  // Exercises saved with fewer than MAX_SETS sets
+  // Exercises saved with fewer than the target number of sets
   return (state.activeSession?.exercises || [])
-    .filter(e => e.sets.length < MAX_SETS)
-    .map(e => ({ name: e.exercise, sets: e.sets.length }));
-}
-
-function getNextSession() {
-  if (!state.history.length) return 'B';
-  const lastSessions = [...new Set(state.history.map(e => e.session))];
-  const last = lastSessions[0];
-  const idx  = SESSION_ORDER.indexOf(last);
-  return SESSION_ORDER[(idx + 1) % SESSION_ORDER.length];
+    .filter(e => e.sets.length < targetSetsFor(e.exercise))
+    .map(e => ({ name: e.exercise, sets: e.sets.length, target: targetSetsFor(e.exercise) }));
 }
 
 function getQuickStats() {
@@ -1087,19 +1223,83 @@ function getBestSet(exerciseName) {
   return all.reduce((best, s) => (s.weight * s.reps > best.weight * best.reps ? s : best));
 }
 
+// ── Workout helpers ─────────────────────────────────────────
+function newId(prefix) {
+  return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function clampSets(n) {
+  n = Math.round(Number(n));
+  if (!Number.isFinite(n)) return DEFAULT_TARGET_SETS;
+  return Math.min(10, Math.max(1, n));
+}
+
+function workoutById(id) {
+  return state.workouts.find(w => w.id === id) || null;
+}
+
+function currentWorkout() {
+  return workoutById(state.sessionType);
+}
+
+// Resolve any of {workout id, label, name} to a real workout id, or null.
+function resolveWorkoutId(v) {
+  if (!v) return null;
+  const byId = state.workouts.find(w => w.id === v);
+  if (byId) return byId.id;
+  const byLabel = state.workouts.find(w => w.label === v);
+  if (byLabel) return byLabel.id;
+  const byName = state.workouts.find(w => w.name === v);
+  if (byName) return byName.id;
+  return null;
+}
+
+function exDefByName(name, w) {
+  return (w?.exercises || []).find(e => e.name === name) || null;
+}
+
+// Accepts either an exercise def (object with .targetSets) or an exercise
+// name string to look up within the current workout. Falls back to
+// DEFAULT_TARGET_SETS when the def was deleted mid-session.
+function targetSetsFor(nameOrDef) {
+  const def = typeof nameOrDef === 'string' ? exDefByName(nameOrDef, currentWorkout()) : nameOrDef;
+  return clampSets(def?.targetSets ?? DEFAULT_TARGET_SETS);
+}
+
+function hashLabelToIndex(label) {
+  let h = 0;
+  const s = String(label || '');
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h % WK_PALETTE_SIZE;
+}
+
+// Never returns undefined — an undefined index would emit var(--wkundefined)
+// in an inline style and render an invisible calendar day.
+function colorForHistoryEntry(e) {
+  const w = workoutById(e.workoutId) || state.workouts.find(w => w.label === e.session);
+  if (w && Number.isInteger(w.color)) return w.color;
+  return hashLabelToIndex(e.session);
+}
+
+function wkStyle(i) {
+  const idx = Number.isInteger(i) ? ((i % WK_PALETTE_SIZE) + WK_PALETTE_SIZE) % WK_PALETTE_SIZE : 0;
+  return `--wk:var(--wk${idx});--wks:var(--wk${idx}s)`;
+}
+
 // ============================================================
 // ACTIONS
 // ============================================================
-function startSession(type) {
-  if (state.activeSession?.sessionType === type) {
+function startSession(id) {
+  if (!workoutById(id)) return;
+  if (state.activeSession?.sessionType === id) {
     saveLS('currentSession', state.activeSession);
-    setState({ view: 'workout', sessionType: type });
+    setState({ view: 'workout', sessionType: id });
     return;
   }
-  const session = { sessionType: type, exercises: [], startedAt: new Date().toISOString() };
+  const session = { sessionType: id, exercises: [], startedAt: new Date().toISOString() };
   // Don't commit to localStorage yet — only saved when the first set is added,
   // so browsing a different session never wipes in-progress progress.
-  setState({ view: 'workout', sessionType: type, activeSession: session });
+  setState({ view: 'workout', sessionType: id, activeSession: session });
 }
 
 function resumeSession() {
@@ -1115,17 +1315,25 @@ function abandonSession() {
 function completeSession() {
   const validExercises = (state.activeSession?.exercises || []).filter(e => e.sets.length > 0);
   if (!validExercises.length) return;
+  const workout = currentWorkout();
   const ts      = new Date().toISOString();
-  const entries = validExercises.map(ex => ({ ...ex, date: ts, session: state.activeSession.sessionType }));
+  const entries = validExercises.map(ex => ({
+    ...ex, date: ts,
+    session: workout?.label ?? state.activeSession.sessionType,
+    workoutId: state.activeSession.sessionType,
+  }));
   const history = [...entries, ...state.history];
   saveLS('workoutHistory', history);
   removeLS('currentSession');
-  syncToSheets(entries);
+  // The Google Sheets endpoint is a black box that expects the original
+  // shape — strip the new workoutId field at the boundary.
+  syncToSheets(entries.map(({ workoutId, ...rest }) => rest));
   setState({ view: 'select', sessionType: null, activeSession: null, history });
 }
 
 function selectExercise(idx) {
-  const ex         = WORKOUTS[state.sessionType][idx];
+  const ex = currentWorkout()?.exercises[idx];
+  if (!ex) return;
   const history    = getExerciseHistory(ex.name);
   const lastWeight = history[0]?.sets[0]?.weight ?? ex.weight;
   // Restore any partial sets already saved for this exercise in the current session
@@ -1186,7 +1394,7 @@ function addSet() {
   if (!reps || reps <= 0) return;
   const newSet   = { reps, weight: state.weight, prs: detectPRs(state.activeExercise.name, { reps, weight: state.weight }, state.sets) };
   const sets     = [...state.sets, newSet];
-  const repInput = sets.length < MAX_SETS ? String(reps) : '';
+  const repInput = sets.length < targetSetsFor(state.activeExercise) ? String(reps) : '';
   // Auto-save after every set
   const session  = saveExerciseToSession(sets);
   setState({ sets, repInput, activeSession: session });
@@ -1243,7 +1451,8 @@ function saveEditDate(oldDateStr, newISODate) {
 function clearAllHistory() {
   if (!confirm('Clear ALL workout history? This cannot be undone.')) return;
   saveLS('workoutHistory', []);
-  setState({ history: [], lastDeletedHistory: null });
+  removeLS('currentSession');
+  setState({ history: [], lastDeletedHistory: null, activeSession: null, sessionType: null });
 }
 
 function exportHistory() {
@@ -1262,6 +1471,199 @@ function exportHistory() {
 }
 
 // ============================================================
+// WORKOUT EDITOR
+// ============================================================
+// Editor inputs are UNCONTROLLED (value written once per render, no setState
+// on keystroke) so typing never triggers a re-render that would blow away the
+// input the user is mid-edit in and dismiss the mobile keyboard. Every
+// structural action therefore harvests the live DOM values into the actual
+// state.workouts entry FIRST, before it mutates anything or re-renders.
+function harvestEditorDOM() {
+  const w = workoutById(state.editWorkoutId);
+  if (!w) return;
+  const nameEl  = document.getElementById('wkNameInput');
+  const labelEl = document.getElementById('wkLabelInput');
+  if (nameEl)  w.name  = nameEl.value;
+  if (labelEl) w.label = labelEl.value;
+
+  document.querySelectorAll('[data-ex-idx]').forEach(rowEl => {
+    const idx = Number(rowEl.getAttribute('data-ex-idx'));
+    const ex  = w.exercises[idx];
+    if (!ex) return;
+    rowEl.querySelectorAll('[data-f]').forEach(fieldEl => {
+      const f = fieldEl.getAttribute('data-f');
+      if (f === 'weight') {
+        const n = parseFloat(fieldEl.value);
+        ex.weight = Number.isFinite(n) && n >= 0 ? n : 0;
+      } else if (f === 'targetSets') {
+        ex.targetSets = clampSets(fieldEl.value);
+      } else {
+        ex[f] = fieldEl.value;
+      }
+    });
+  });
+}
+
+function openWorkoutEditor(id) {
+  const w = workoutById(id);
+  if (!w) return;
+  editSnapshot = {};
+  w.exercises.forEach(ex => { editSnapshot[ex.id] = ex.name; });
+  setState({ view: 'workoutEdit', editWorkoutId: id });
+}
+
+function createWorkout(templateKey) {
+  const nextColor = state.workouts.length % WK_PALETTE_SIZE;
+  let w;
+  if (templateKey && WORKOUTS[templateKey]) {
+    w = {
+      id: newId('w'),
+      name: `Session ${templateKey} copy`,
+      label: templateKey,
+      color: nextColor,
+      exercises: WORKOUTS[templateKey].map(ex => ({
+        id: newId('e'),
+        name: ex.name,
+        weight: ex.weight,
+        targetReps: ex.targetReps,
+        rest: ex.rest || '',
+        notes: ex.notes || '',
+        targetSets: DEFAULT_TARGET_SETS,
+      })),
+    };
+  } else {
+    w = { id: newId('w'), name: 'New Workout', label: 'NEW', color: nextColor, exercises: [] };
+  }
+  const workouts = [...state.workouts, w];
+  saveLS('workouts', workouts);
+  editSnapshot = {};
+  w.exercises.forEach(ex => { editSnapshot[ex.id] = ex.name; });
+  setState({ workouts, view: 'workoutEdit', editWorkoutId: w.id });
+}
+
+function duplicateWorkout(id) {
+  const src = workoutById(id);
+  if (!src) return;
+  const copy = {
+    id: newId('w'),
+    name: `${src.name} copy`,
+    label: src.label,
+    color: src.color,
+    exercises: src.exercises.map(ex => ({ ...ex, id: newId('e') })),
+  };
+  const srcIdx   = state.workouts.findIndex(w => w.id === id);
+  const workouts = [...state.workouts];
+  workouts.splice(srcIdx + 1, 0, copy);
+  saveLS('workouts', workouts);
+  setState({ workouts });
+}
+
+function deleteWorkout(id) {
+  const w = workoutById(id);
+  if (!w) return;
+  if (!confirm(`Delete "${w.name}"? This cannot be undone.`)) return;
+  const isActive = state.activeSession?.sessionType === id;
+  if (isActive && !confirm('A session for this workout is in progress. Deleting it will also abandon that session. Continue?')) return;
+  const workouts = state.workouts.filter(x => x.id !== id);
+  saveLS('workouts', workouts);
+  const patch = { workouts, view: 'workouts' };
+  if (isActive) {
+    removeLS('currentSession');
+    patch.activeSession = null;
+    patch.sessionType    = null;
+  }
+  setState(patch);
+}
+
+function moveExercise(i, dir) {
+  harvestEditorDOM();
+  const w = workoutById(state.editWorkoutId);
+  if (!w) return;
+  const j = i + dir;
+  if (j < 0 || j >= w.exercises.length) return;
+  [w.exercises[i], w.exercises[j]] = [w.exercises[j], w.exercises[i]];
+  saveLS('workouts', state.workouts);
+  setState({});
+}
+
+function addExerciseRow() {
+  harvestEditorDOM();
+  const w = workoutById(state.editWorkoutId);
+  if (!w) return;
+  w.exercises.push({ id: newId('e'), name: '', weight: 0, targetReps: '', rest: '', notes: '', targetSets: DEFAULT_TARGET_SETS });
+  saveLS('workouts', state.workouts);
+  setState({});
+}
+
+function removeExerciseRow(i) {
+  harvestEditorDOM();
+  const w = workoutById(state.editWorkoutId);
+  if (!w || !w.exercises[i]) return;
+  w.exercises.splice(i, 1);
+  saveLS('workouts', state.workouts);
+  setState({});
+}
+
+function setWorkoutColor(n) {
+  harvestEditorDOM();
+  const w = workoutById(state.editWorkoutId);
+  if (!w) return;
+  w.color = ((n % WK_PALETTE_SIZE) + WK_PALETTE_SIZE) % WK_PALETTE_SIZE;
+  saveLS('workouts', state.workouts);
+  setState({});
+}
+
+function saveWorkoutEdit() {
+  harvestEditorDOM();
+  const w = workoutById(state.editWorkoutId);
+  if (!w) { setState({ view: 'workouts', editWorkoutId: null }); return; }
+
+  w.name  = (w.name || '').trim() || 'Untitled workout';
+  w.label = (w.label || '').trim().slice(0, 3) || w.name.slice(0, 3).toUpperCase();
+
+  // Drop rows left completely blank (e.g. "+ Add exercise" then never filled in).
+  w.exercises = w.exercises.filter(ex => (ex.name || '').trim());
+
+  // 1) Duplicate exercise names WITHIN this workout would make
+  //    saveExerciseToSession/completedExercises (both keyed by name) collide —
+  //    auto-suffix repeats rather than silently losing one exercise's sets.
+  const seenNames = new Map();
+  w.exercises.forEach(ex => {
+    ex.name = ex.name.trim();
+    const key   = ex.name.toLowerCase();
+    const count = (seenNames.get(key) || 0) + 1;
+    seenNames.set(key, count);
+    if (count > 1) ex.name = `${ex.name} (${count})`;
+    ex.weight     = Number.isFinite(ex.weight) ? Math.max(0, ex.weight) : 0;
+    ex.targetSets = clampSets(ex.targetSets);
+  });
+
+  // 2) Renaming an exercise orphans its history (getExerciseHistory/detectPRs/
+  //    getProgressData all key on the name string) — offer to rewrite it.
+  let history = state.history;
+  let historyChanged = false;
+  w.exercises.forEach(ex => {
+    const oldName = editSnapshot[ex.id];
+    if (oldName && oldName !== ex.name && history.some(h => h.exercise === oldName)) {
+      const rewrite = confirm(
+        `Rename "${oldName}" to "${ex.name}" in past history too?\n\n` +
+        `OK keeps its progress graph and PRs under the new name.\n` +
+        `Cancel leaves old history entries under "${oldName}".`
+      );
+      if (rewrite) {
+        history = history.map(h => h.exercise === oldName ? { ...h, exercise: ex.name } : h);
+        historyChanged = true;
+      }
+    }
+  });
+
+  if (historyChanged) saveLS('workoutHistory', history);
+  saveLS('workouts', state.workouts);
+  editSnapshot = {};
+  setState({ view: 'workouts', editWorkoutId: null, ...(historyChanged ? { history } : {}) });
+}
+
+// ============================================================
 // SVG ICONS
 // ============================================================
 const icons = {
@@ -1276,17 +1678,20 @@ const icons = {
   weight:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/></svg>`,
   back:    `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`,
   pencil: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  copy:    `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
+  up:      `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`,
+  down:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>`,
 };
 
 // ============================================================
 // PROGRESS BAR
 // ============================================================
-function progressBarHTML(completed, total, sessionType) {
+function progressBarHTML(completed, total, title) {
   const pct = total > 0 ? (completed / total) * 100 : 0;
   return `
     <div class="progress-bar-wrap mb-4">
       <div class="progress-bar-labels mb-1">
-        <span class="label" style="color:var(--cyan)">SESSION ${sessionType}</span>
+        <span class="label" style="color:var(--cyan)">${esc(title).toUpperCase()}</span>
         <span class="label">${completed}/${total}</span>
       </div>
       <div class="progress-bar-track">
@@ -1304,13 +1709,13 @@ function buildCalendarHTML() {
   const year   = target.getFullYear();
   const month  = target.getMonth();
 
-  // Build a set of worked dates → session type
+  // Build a set of worked dates → history entry (for colour lookup)
   const workedDays = {};
   state.history.forEach(e => {
     const d   = new Date(e.date);
     if (d.getFullYear() === year && d.getMonth() === month) {
       const key = d.getDate();
-      if (!workedDays[key]) workedDays[key] = e.session;
+      if (!workedDays[key]) workedDays[key] = e;
     }
   });
 
@@ -1329,13 +1734,17 @@ function buildCalendarHTML() {
   // Day cells
   const days = Array.from({ length: daysInMonth }, (_, i) => {
     const day     = i + 1;
-    const session = workedDays[day];
+    const entry   = workedDays[day];
     const isToday = day === todayDate;
-    const cls     = ['cal-day', session ? `worked-${session}` : '', isToday && !session ? 'today' : ''].filter(Boolean).join(' ');
-    return `<div class="${cls}">${day}</div>`;
+    const cls     = ['cal-day', entry ? 'worked' : '', isToday && !entry ? 'today' : ''].filter(Boolean).join(' ');
+    const style   = entry ? ` style="${wkStyle(colorForHistoryEntry(entry))}"` : '';
+    return `<div class="${cls}"${style}>${day}</div>`;
   }).join('');
 
   const canGoForward = state.calOffset > 0;
+
+  const legend = state.workouts.map(w =>
+    `<span style="font-size:0.6rem;color:var(--wk${w.color})">■ ${esc(w.name)}</span>`).join('');
 
   return `
     <div class="card card--glow mb-4">
@@ -1349,11 +1758,7 @@ function buildCalendarHTML() {
         ${empties}
         ${days}
       </div>
-      <div style="display:flex;gap:12px;margin-top:8px;justify-content:center">
-        <span style="font-size:0.6rem;color:var(--violet)">■ Session A</span>
-        <span style="font-size:0.6rem;color:var(--cyan)">■ Session B</span>
-        <span style="font-size:0.6rem;color:var(--blue)">■ Session C</span>
-      </div>
+      ${legend ? `<div style="display:flex;gap:12px;margin-top:8px;justify-content:center;flex-wrap:wrap">${legend}</div>` : ''}
     </div>`;
 }
 
@@ -1387,7 +1792,6 @@ function renderSelect() {
   // ── Workout tab ──
   const stats   = getQuickStats();
   const session = state.activeSession;
-  const next    = getNextSession();
 
   const statsHTML = stats ? `
     <div class="card card--glow mb-4">
@@ -1412,30 +1816,37 @@ function renderSelect() {
       <div class="empty-state-sub">Pick a session below to get started.<br>Your stats will appear here after your first workout.</div>
     </div>`;
 
+  const resumeWorkout = session ? workoutById(session.sessionType) : null;
   const resumeHTML = (session?.exercises.length > 0) ? `
     <div class="resume-banner mb-4">
-      <div style="font-weight:700;font-size:0.875rem;color:var(--blue);margin-bottom:2px">Session ${session.sessionType} in progress</div>
-      <div class="label mb-3">${session.exercises.length}/${WORKOUTS[session.sessionType].length} exercises complete</div>
+      <div style="font-weight:700;font-size:0.875rem;color:var(--blue);margin-bottom:2px">${esc(resumeWorkout?.name ?? 'Workout')} in progress</div>
+      <div class="label mb-3">${session.exercises.length}/${resumeWorkout?.exercises.length ?? 0} exercises complete</div>
       <div class="flex-row">
         <button type="button" class="btn-resume" onclick="resumeSession()">RESUME</button>
         <button type="button" class="btn-abandon" onclick="abandonSession()">ABANDON</button>
       </div>
     </div>` : '';
 
-  const sessionBtns = ['A', 'B', 'C'].map(s => {
-    const isNext = s === next && !session;
-    return `
-    <button type="button" class="btn-session ${isNext ? 'next-session' : ''}" onclick="startSession('${s}')">
-      <div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
-          <span style="font-size:1.125rem;font-weight:800;color:var(--white)">Session ${s}</span>
-          ${isNext ? '<span class="next-badge">NEXT</span>' : ''}
+  const sessionBtns = state.workouts.length === 0 ? `
+    <div class="empty-state mb-6">
+      <div class="empty-state-icon">📋</div>
+      <div class="empty-state-title">No workouts yet</div>
+      <div class="empty-state-sub">Create a workout to start tracking sessions.</div>
+      <button type="button" class="btn-primary empty-state-action" onclick="setState({view:'workouts'})">${icons.plus} Manage Workouts</button>
+    </div>` : `<div class="space-y-2 mb-6">${state.workouts.map(w => {
+      const totalSets = w.exercises.reduce((sum, ex) => sum + targetSetsFor(ex), 0);
+      return `
+    <button type="button" class="btn-session" onclick="startSession('${w.id}')">
+      <div style="display:flex;align-items:center;gap:10px;min-width:0">
+        <span class="wk-swatch" style="${wkStyle(w.color)}"></span>
+        <div style="min-width:0">
+          <div style="font-size:1.125rem;font-weight:800;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(w.name)}</div>
+          <div class="label">${w.exercises.length} exercises · ${totalSets} sets</div>
         </div>
-        <div class="label">${WORKOUTS[s].length} exercises · ${WORKOUTS[s].length * MAX_SETS} sets</div>
       </div>
       ${icons.chevron}
     </button>`;
-  }).join('');
+    }).join('')}</div>`;
 
   return `
     <div class="screen">
@@ -1447,9 +1858,10 @@ function renderSelect() {
         </div>
         ${statsHTML}
         ${resumeHTML}
-        <div class="space-y-2 mb-6">${sessionBtns}</div>
+        ${sessionBtns}
         ${buildCalendarHTML()}
         <div class="space-y-2">
+          <button type="button" class="btn-nav" onclick="setState({view:'workouts'})">Manage Workouts</button>
           <button type="button" class="btn-nav" onclick="setState({view:'history'})">View History</button>
           <button type="button" class="btn-nav" onclick="setState({view:'settings'})" style="color:var(--text-dim)">⚙ Settings</button>
         </div>
@@ -1461,8 +1873,8 @@ function renderSelect() {
 // WORKOUT SCREEN
 // ============================================================
 function renderWorkout() {
-  const type      = state.sessionType;
-  const exercises = WORKOUTS[type];
+  const workout   = currentWorkout();
+  const exercises = workout?.exercises ?? [];
   const done      = completedExercises();
   const partial   = partialExercises();
 
@@ -1503,17 +1915,17 @@ function renderWorkout() {
     if (isDone) {
       statusBadge = `<span class="check-circle">${icons.checkFill}</span>`;
     } else if (isPartial) {
-      statusBadge = `<span style="font-size:0.65rem;font-weight:700;color:var(--cyan);background:var(--cyan-glow);border:1px solid var(--cyan-dim);border-radius:9999px;padding:2px 7px">${partialEx.sets}/${MAX_SETS}</span>`;
+      statusBadge = `<span style="font-size:0.65rem;font-weight:700;color:var(--cyan);background:var(--cyan-glow);border:1px solid var(--cyan-dim);border-radius:9999px;padding:2px 7px">${partialEx.sets}/${partialEx.target}</span>`;
     }
 
     return `
       <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''}" onclick="selectExercise(${idx})">
         <div style="flex:1">
           <div class="flex-row mb-1" style="align-items:center;gap:8px">
-            <div style="font-size:0.875rem;font-weight:700;${isDone ? 'text-decoration:line-through;color:var(--muted)' : 'color:var(--white)'}">${ex.name}</div>
+            <div style="font-size:0.875rem;font-weight:700;${isDone ? 'text-decoration:line-through;color:var(--muted)' : 'color:var(--white)'}">${esc(ex.name)}</div>
             ${statusBadge}
           </div>
-          <div class="label">${ex.weight > 0 ? ex.weight + 'kg' : 'BW'} · ${ex.targetReps} reps</div>
+          <div class="label">${ex.weight > 0 ? ex.weight + 'kg' : 'BW'} · ${esc(ex.targetReps)} reps</div>
           ${recentHTML}
         </div>
         ${icons.chevron}
@@ -1533,7 +1945,7 @@ function renderWorkout() {
     <div class="screen">
       <div class="container">
         <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
-        ${progressBarHTML(done.length, exercises.length, type)}
+        ${progressBarHTML(done.length, exercises.length, workout?.name ?? '')}
         <div class="space-y-2">${items}</div>
         ${bottomHTML}
       </div>
@@ -1545,11 +1957,13 @@ function renderWorkout() {
 // ============================================================
 function renderExercise() {
   const ex          = state.activeExercise;
+  const workout     = currentWorkout();
   const history     = getExerciseHistory(ex.name);
   const lastSession = history[0] || null;
   const done        = completedExercises();
-  const total       = WORKOUTS[state.sessionType].length;
-  const progression = state.sets.length === MAX_SETS ? getProgressionStatus(ex, state.sets) : null;
+  const total       = workout?.exercises.length ?? 0;
+  const target      = targetSetsFor(ex);
+  const progression = state.sets.length >= target ? getProgressionStatus(ex, state.sets) : null;
 
   // Last session
   const lastHTML = lastSession ? `
@@ -1584,7 +1998,7 @@ function renderExercise() {
     <div class="progression ${progression.status}">${progression.message}</div>` : '';
 
   let actionHTML = '';
-  if (state.sets.length < MAX_SETS) {
+  if (state.sets.length < target) {
     const placeholder = (lastSession && lastSession.sets.length > 0 && state.sets.length === 0) ? lastSession.sets[0].reps.toString() : '0';
     const saveBackBtn = state.sets.length > 0 ? `
       <button type="button" class="btn-save-back mt-2" onclick="completeExercise()">
@@ -1621,7 +2035,7 @@ function renderExercise() {
       </button>`;
   }
 
-  const notesHTML = ex.notes ? `<div class="note-box mb-3">💡 ${ex.notes}</div>` : '';
+  const notesHTML = ex.notes ? `<div class="note-box mb-3">💡 ${esc(ex.notes)}</div>` : '';
 
   const historyHTML = history.length > 1 ? `
     <div class="section-label"><span>Previous sessions</span></div>
@@ -1637,14 +2051,14 @@ function renderExercise() {
     <div class="screen">
       <div class="container">
         <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
-        ${progressBarHTML(done.length, total, state.sessionType)}
+        ${progressBarHTML(done.length, total, workout?.name ?? '')}
 
         <div class="card card--glow mb-3">
           <div class="ex-header">
-            <div class="ex-accent-bar session-${state.sessionType}"></div>
+            <div class="ex-accent-bar wk-accent" style="${wkStyle(workout?.color ?? 0)}"></div>
             <div style="flex:1">
-              <div class="label mb-1">Session ${state.sessionType}</div>
-              <h2 class="title-lg mb-3">${ex.name}</h2>
+              <div class="label mb-1">${esc(workout?.name ?? '')}</div>
+              <h2 class="title-lg mb-3">${esc(ex.name)}</h2>
               ${lastHTML}
 
           <div class="mb-3">
@@ -1656,8 +2070,8 @@ function renderExercise() {
           </div>
 
           <div class="grid-2 mb-2">
-            <div class="card--deep"><span class="label">Target </span><span style="font-weight:600">${ex.targetReps} reps</span></div>
-            <div class="card--deep"><span class="label">Rest </span><span style="font-weight:600">${ex.rest}</span></div>
+            <div class="card--deep"><span class="label">Target </span><span style="font-weight:600">${esc(ex.targetReps)} reps</span></div>
+            <div class="card--deep"><span class="label">Rest </span><span style="font-weight:600">${esc(ex.rest)}</span></div>
           </div>
           ${notesHTML}
             </div>
@@ -1665,7 +2079,7 @@ function renderExercise() {
         </div>
 
         <div class="card card--glow mb-3">
-          <div class="title-sm mb-3">Sets ${state.sets.length}/${MAX_SETS}</div>
+          <div class="title-sm mb-3">Sets ${state.sets.length}/${target}</div>
           ${state.sets.length > 0 ? `<div class="space-y-2 mb-3">${setsHTML}</div>` : setsHTML}
           ${removeHTML}
           ${progHTML}
@@ -1689,7 +2103,7 @@ function renderHistory() {
     <div class="mb-4">
       <select aria-label="Filter history by exercise" onchange="setState({historyFilter:this.value})">
         <option value="" ${!filter ? 'selected' : ''}>All exercises</option>
-        ${allExercises.map(ex => `<option value="${ex}" ${filter === ex ? 'selected' : ''}>${ex}</option>`).join('')}
+        ${allExercises.map(ex => `<option value="${esc(ex)}" ${filter === ex ? 'selected' : ''}>${esc(ex)}</option>`).join('')}
       </select>
     </div>`;
 
@@ -1713,7 +2127,10 @@ function renderHistory() {
                onchange="saveEditDate('${date}', this.value)"
                onblur="setState({editingDate:null})"
                autofocus />`
-          : `${icons.cal} ${date}<span class="chip" style="margin-left:4px">${entries[0].session}</span>`;
+          : (() => {
+              const sw = workoutById(entries[0].workoutId) || state.workouts.find(w => w.label === entries[0].session);
+              return `${icons.cal} ${date}<span class="chip" style="margin-left:4px">${esc(sw?.name ?? entries[0].session)}</span>`;
+            })();
         return `
         <div class="card card--glow">
           <div class="flex mb-3" style="justify-content:space-between;align-items:center">
@@ -1728,7 +2145,7 @@ function renderHistory() {
           <div class="space-y-2">
             ${entries.map(entry => `
               <div class="card--inner">
-                <div style="font-weight:700;font-size:0.8rem;margin-bottom:2px;color:var(--white)">${entry.exercise}</div>
+                <div style="font-weight:700;font-size:0.8rem;margin-bottom:2px;color:var(--white)">${esc(entry.exercise)}</div>
                 <div style="font-size:0.75rem;color:var(--text-mid)">${entry.sets.map(s => `${s.reps}@${s.weight}kg`).join(' \xb7 ')}</div>
               </div>`).join('')}
           </div>
@@ -1781,19 +2198,25 @@ function renderSettings() {
 // PROGRESS SCREEN
 // ============================================================
 function renderProgressContent() {
-  const allEx = ['A','B','C'].flatMap(s => WORKOUTS[s].map(e => ({ name: e.name, session: s })));
-  const withData = allEx.filter(e => state.history.some(h => h.exercise === e.name));
+  // Union of names in current workouts and names present in history — so
+  // deleting or renaming a workout doesn't erase graphs for exercises that
+  // still have logged history under their old name.
+  const allNames = new Set([
+    ...state.workouts.flatMap(w => w.exercises.map(e => e.name)),
+    ...state.history.map(h => h.exercise),
+  ]);
+  const withData = [...allNames].filter(name => state.history.some(h => h.exercise === name));
 
-  const selectedEx = (state.progressEx && withData.some(e => e.name === state.progressEx))
+  const selectedEx = (state.progressEx && withData.includes(state.progressEx))
     ? state.progressEx
-    : (withData[0]?.name ?? null);
+    : (withData[0] ?? null);
   const mode       = state.progressMode;
 
   const dropdown = withData.length > 0 ? `
     <div class="mb-4">
       <label class="label" for="progressExerciseSelect">Exercise</label>
       <select id="progressExerciseSelect" class="graph-toggle-btn" aria-label="Select exercise" onchange="setState({progressEx:this.value})">
-        ${withData.map(e => `<option value="${e.name}" ${e.name === selectedEx ? 'selected' : ''}>${e.name}</option>`).join('')}
+        ${withData.map(name => `<option value="${esc(name)}" ${name === selectedEx ? 'selected' : ''}>${esc(name)}</option>`).join('')}
       </select>
     </div>` : '';
 
@@ -1940,6 +2363,136 @@ function buildGraphSVG(points, mode) {
 }
 
 // ============================================================
+// WORKOUT MANAGER (list)
+// ============================================================
+function renderWorkouts() {
+  const items = state.workouts.length === 0 ? `
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <div class="empty-state-title">No workouts</div>
+      <div class="empty-state-sub">Create one from scratch or start from a template below.</div>
+    </div>` : `<div class="space-y-2">${state.workouts.map(w => {
+      const totalSets = w.exercises.reduce((sum, ex) => sum + targetSetsFor(ex), 0);
+      return `
+      <div class="wk-list-item">
+        <span class="wk-swatch" style="${wkStyle(w.color)}"></span>
+        <div class="wk-list-item-info">
+          <div class="wk-list-item-name">${esc(w.name)}</div>
+          <div class="label">${w.exercises.length} exercises · ${totalSets} sets</div>
+        </div>
+        <div class="wk-row-actions">
+          <button type="button" class="icon-btn" title="Edit" aria-label="Edit ${esc(w.name)}" onclick="openWorkoutEditor('${w.id}')">${icons.pencil}</button>
+          <button type="button" class="icon-btn" title="Duplicate" aria-label="Duplicate ${esc(w.name)}" onclick="duplicateWorkout('${w.id}')">${icons.copy}</button>
+          <button type="button" class="icon-btn danger" title="Delete" aria-label="Delete ${esc(w.name)}" onclick="deleteWorkout('${w.id}')">${icons.x14}</button>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+
+  const templateBtns = TEMPLATE_KEYS.map(k => `
+    <button type="button" class="btn-secondary" style="flex:1" onclick="createWorkout('${k}')">Session ${k}</button>`).join('');
+
+  return `
+    <div class="screen">
+      <div class="container">
+        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
+        <h2 class="title-xl mb-4">Manage Workouts</h2>
+        ${items}
+        <div class="section-label mt-4"><span>New from template</span></div>
+        <div class="flex-row mb-3">${templateBtns}</div>
+        <button type="button" class="btn-primary" onclick="createWorkout()">${icons.plus} New Workout</button>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// WORKOUT EDITOR
+// ============================================================
+// All fields below are UNCONTROLLED — their value is written once here at
+// render time and never touched again until the next full render. No input
+// here calls setState on keystroke; see harvestEditorDOM() in ACTIONS.
+function renderWorkoutEdit() {
+  const w = workoutById(state.editWorkoutId);
+  if (!w) {
+    return `
+      <div class="screen">
+        <div class="container">
+          <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
+          <p style="color:var(--muted);font-size:0.875rem">Workout not found.</p>
+        </div>
+      </div>`;
+  }
+
+  const colorSwatches = Array.from({ length: WK_PALETTE_SIZE }, (_, i) => `
+    <button type="button" class="color-swatch-btn ${i === w.color ? 'selected' : ''}"
+      style="${wkStyle(i)}" aria-label="Colour ${i + 1}" aria-pressed="${i === w.color}"
+      onclick="setWorkoutColor(${i})"></button>`).join('');
+
+  const exerciseCards = w.exercises.map((ex, i) => `
+    <div class="card card--glow mb-3 ex-edit-card" data-ex-idx="${i}">
+      <div class="mb-2">
+        <label class="field-label" for="exName${i}">Exercise name</label>
+        <input type="text" id="exName${i}" class="input-field input-name" data-f="name" value="${esc(ex.name)}" placeholder="Exercise name" />
+      </div>
+      <div class="ex-edit-grid mb-2">
+        <div>
+          <label class="field-label" for="exWeight${i}">Weight (kg)</label>
+          <input type="number" id="exWeight${i}" class="input-field" data-f="weight" inputmode="decimal" step="0.5" min="0" value="${ex.weight}" />
+        </div>
+        <div>
+          <label class="field-label" for="exReps${i}">Target reps</label>
+          <input type="text" id="exReps${i}" class="input-field" data-f="targetReps" value="${esc(ex.targetReps)}" placeholder="e.g. 8-10" />
+        </div>
+        <div>
+          <label class="field-label" for="exRest${i}">Rest</label>
+          <input type="text" id="exRest${i}" class="input-field" data-f="rest" value="${esc(ex.rest)}" placeholder="e.g. 2-3 min" />
+        </div>
+        <div>
+          <label class="field-label" for="exSets${i}">Target sets</label>
+          <input type="number" id="exSets${i}" class="input-field" data-f="targetSets" min="1" max="10" step="1" value="${targetSetsFor(ex)}" />
+        </div>
+      </div>
+      <div class="mb-1">
+        <label class="field-label" for="exNotes${i}">Notes</label>
+        <input type="text" id="exNotes${i}" class="input-field" data-f="notes" value="${esc(ex.notes)}" placeholder="Optional" />
+      </div>
+      <div class="ex-edit-move-row">
+        <button type="button" class="icon-btn" ${i === 0 ? 'disabled style="opacity:0.3"' : ''} aria-label="Move up" onclick="moveExercise(${i}, -1)">${icons.up}</button>
+        <button type="button" class="icon-btn" ${i === w.exercises.length - 1 ? 'disabled style="opacity:0.3"' : ''} aria-label="Move down" onclick="moveExercise(${i}, 1)">${icons.down}</button>
+        <button type="button" class="icon-btn danger" aria-label="Remove exercise" onclick="removeExerciseRow(${i})">${icons.x14} Remove</button>
+      </div>
+    </div>`).join('');
+
+  return `
+    <div class="screen">
+      <div class="container">
+        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
+        <h2 class="title-xl mb-4">Edit Workout</h2>
+
+        <div class="card card--glow mb-4">
+          <div class="mb-3">
+            <label class="field-label" for="wkNameInput">Workout name</label>
+            <input type="text" id="wkNameInput" class="input-name" value="${esc(w.name)}" placeholder="Workout name" />
+          </div>
+          <div class="mb-2">
+            <label class="field-label" for="wkLabelInput">Short label (history chip, max 3 chars)</label>
+            <input type="text" id="wkLabelInput" class="input-label" maxlength="3" value="${esc(w.label)}" placeholder="e.g. A" />
+          </div>
+          <div class="field-label">Colour</div>
+          <div class="color-picker">${colorSwatches}</div>
+        </div>
+
+        <div class="section-label"><span>Exercises</span></div>
+        ${exerciseCards || `<p style="text-align:center;padding:14px 0;font-size:0.75rem;color:var(--muted)">No exercises yet</p>`}
+
+        <div class="space-y-2 mt-3">
+          <button type="button" class="btn-secondary" onclick="addExerciseRow()">${icons.plus} Add exercise</button>
+          <button type="button" class="btn-primary" onclick="saveWorkoutEdit()">${icons.check} Save</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ============================================================
 (function initSwipe() {
   let startX = 0;
   let startY = 0;
@@ -1965,22 +2518,9 @@ function buildGraphSVG(points, mode) {
   }, { passive: true });
 })();
 
-document.addEventListener('keydown', e => {
-  if (state.view === 'exercise' && state.sets.length < MAX_SETS) {
-    const tag = document.activeElement?.tagName;
-    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') { /* let native input handle it */ }
-    else {
-      if (e.key >= '0' && e.key <= '9') { numpadKey(e.key); return; }
-      if (e.key === 'Backspace') { e.preventDefault(); numpadKey('⌫'); return; }
-      if (e.key === 'Enter') { addSet(); return; }
-    }
-  }
-  if (e.key === 'Escape' && state.view !== 'select') {
-    const tag = document.activeElement?.tagName;
-    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
-    goBack();
-  }
-});
+// Note: no physical-keyboard handler here. The app is mobile-only; swipe-back
+// (initSwipe above) covers back-navigation, and routing digit/Enter/Escape
+// keys into the numpad was the mechanism that misrouted weight-field input.
 
 // ============================================================
 // RENDER DISPATCHER
@@ -1991,12 +2531,14 @@ function render() {
   const keepId = ae && ae.id && app.contains(ae) && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName) ? ae.id : null;
 
   switch (state.view) {
-    case 'select':   app.innerHTML = renderSelect();   break;
-    case 'workout':  app.innerHTML = renderWorkout();  break;
-    case 'exercise': app.innerHTML = renderExercise(); break;
-    case 'history':  app.innerHTML = renderHistory();  break;
-    case 'settings': app.innerHTML = renderSettings(); break;
-    case 'progress': app.innerHTML = renderProgress(); break;
+    case 'select':      app.innerHTML = renderSelect();      break;
+    case 'workout':     app.innerHTML = renderWorkout();     break;
+    case 'exercise':    app.innerHTML = renderExercise();    break;
+    case 'history':     app.innerHTML = renderHistory();     break;
+    case 'settings':    app.innerHTML = renderSettings();    break;
+    case 'progress':    app.innerHTML = renderProgress();    break;
+    case 'workouts':    app.innerHTML = renderWorkouts();    break;
+    case 'workoutEdit': app.innerHTML = renderWorkoutEdit(); break;
   }
   // Apply slide-back animation class
   if (_goingBack) {
