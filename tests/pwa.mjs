@@ -29,6 +29,28 @@ console.log('\n── Manifest + meta ──');
   ok('display standalone', m.display === 'standalone');
   ok('has a maskable icon', m.icons.some(i => /maskable/.test(i.purpose || '')));
   ok('no page errors', errs.length === 0, errs.join('; '));
+
+  // Focus-zoom lock: text/number fields pin maximum-scale while focused so iOS
+  // won't zoom in when the keyboard opens, then release it on blur so pinch-zoom
+  // returns. Non-keyboard controls (select, date pickers) must NOT be locked.
+  // This guards the JS mechanism; the actual iOS zoom-prevention needs a real
+  // device — Chromium emulation can't model WebKit's focus-zoom.
+  const zoomLock = await page.evaluate(() => {
+    const meta = document.querySelector('meta[name=viewport]');
+    const read = () => meta.getAttribute('content');
+    const num = document.createElement('input'); num.type = 'number';
+    document.body.appendChild(num);
+    num.focus();       const numFocused = read();
+    num.blur();        const numBlurred = read();
+    num.remove();
+    const sel = document.createElement('select'); document.body.appendChild(sel);
+    sel.focus();       const selFocused = read();
+    sel.blur(); sel.remove();
+    return { numFocused, numBlurred, selFocused };
+  });
+  ok('focus-zoom lock pins maximum-scale on number-field focus', /maximum-scale=1/.test(zoomLock.numFocused), zoomLock.numFocused);
+  ok('focus-zoom lock releases on blur (pinch-zoom returns)', !/maximum-scale/.test(zoomLock.numBlurred), zoomLock.numBlurred);
+  ok('focus-zoom lock ignores non-keyboard controls (select)', !/maximum-scale/.test(zoomLock.selFocused), zoomLock.selFocused);
   await ctx.close();
 }
 
