@@ -203,9 +203,16 @@
       gap: 8px;
       letter-spacing: 0.02em;
       position: sticky;
-      bottom: env(safe-area-inset-bottom, 0px);
+      /* --kb is the on-screen keyboard's height, published by the
+         visualViewport listener below. iOS resizes only the visual viewport
+         when the keyboard opens, while sticky/fixed bottom offsets resolve
+         against the layout viewport — so without this the button sits
+         underneath the keyboard, which is the overlap the old custom numpad
+         existed to avoid. */
+      bottom: calc(env(safe-area-inset-bottom, 0px) + var(--kb, 0px));
       z-index: 5;
       box-shadow: 0 -8px 12px -4px var(--bg);
+      transition: bottom 0.15s ease-out;
     }
     .btn-log:active:not(:disabled) { transform: scale(0.98); }
     .btn-log:disabled { opacity: 0.35; cursor: not-allowed; }
@@ -935,13 +942,28 @@ const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyuEmiw_M-mMHS0IWN-9
 // function is intentionally allowed to throw (a network failure rejects the
 // fetch promise): the only caller is drainSyncQueue(), which needs that
 // rejection to know a batch must stay queued rather than being dropped.
+const SYNC_TIMEOUT_MS = 15000;
+
 async function syncToSheets(entries) {
   if (!SHEETS_URL) return;
-  await fetch(SHEETS_URL, {
-    method: 'POST', mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(entries),
-  });
+  // A fetch with no timeout can hang indefinitely on mobile — a captive
+  // portal or a server that accepts the connection but never answers. Because
+  // drainSyncQueue awaits this behind an in-flight guard, a hung request would
+  // strand that guard set forever and silently disable syncing for the rest of
+  // the session. Abort instead, so it fails like any other error: the batch
+  // stays queued and the next drain can retry.
+  const ctrl  = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), SYNC_TIMEOUT_MS);
+  try {
+    await fetch(SHEETS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entries),
+      signal: ctrl.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 // ============================================================
@@ -992,8 +1014,26 @@ function enqueueSyncBatch(entries) {
 // racing it.
 let _syncDraining = false;
 
+// _syncDraining only guards this JS context. Two instances sharing the same
+// localStorage — the installed PWA and a browser tab, say — would each read
+// the same batch and POST it, duplicating rows in the sheet. This advisory
+// lock is held in localStorage so both see it, and carries an expiry so a tab
+// closed mid-drain cannot wedge syncing permanently.
+const SYNC_LOCK_KEY = 'syncLock';
+const SYNC_LOCK_MS  = 30000;
+
+function acquireSyncLock() {
+  const now  = Date.now();
+  const held = Number(loadLS(SYNC_LOCK_KEY, 0));
+  if (Number.isFinite(held) && held > now) return false;   // someone else, still fresh
+  saveLS(SYNC_LOCK_KEY, now + SYNC_LOCK_MS);
+  return true;
+}
+const releaseSyncLock = () => removeLS(SYNC_LOCK_KEY);
+
 async function drainSyncQueue() {
   if (_syncDraining) return;
+  if (!acquireSyncLock()) return;
   _syncDraining = true;
   try {
     const queue = loadSyncQueue();
@@ -1010,6 +1050,7 @@ async function drainSyncQueue() {
     }
   } finally {
     _syncDraining = false;
+    releaseSyncLock();
   }
 }
 
@@ -1331,7 +1372,12 @@ function getExerciseHistory(name) {
 // and orphanedExercises() surfaces the rest. Nothing is discarded:
 // completeSession still writes every logged entry to history.
 function sessionEntriesInWorkout() {
-  const names = new Set((currentWorkout()?.exercises || []).map(e => e.name));
+  // Skipped exercises are excluded from the denominator by
+  // activeWorkoutExercises(), so they must be excluded from the numerator too
+  // — otherwise skipping an exercise that was already finished counts a
+  // completion against a total that no longer includes it, and the session
+  // reads "1/0".
+  const names = new Set(activeWorkoutExercises().map(e => e.name));
   return (state.activeSession?.exercises || []).filter(e => names.has(e.exercise));
 }
 
@@ -1385,6 +1431,18 @@ function orderedExercises() {
 
 function isSkipped(name) {
   return (state.activeSession?.skipped || []).includes(name);
+}
+
+// Does the active session hold anything worth resuming or abandoning?
+// Reordering or skipping persists the session before any set is logged, so
+// gating the resume banner and the abandon button on logged sets alone would
+// strand such a session: saved to localStorage, but with no UI path to reach,
+// finish or discard it.
+function sessionHasProgress(session = state.activeSession) {
+  if (!session) return false;
+  return (session.exercises?.length || 0) > 0
+      || (session.skipped?.length   || 0) > 0
+      || (session.order?.length     || 0) > 0;
 }
 
 // Exercises counted toward "done/total" — a skipped exercise is excluded
@@ -1614,6 +1672,7 @@ function onWeightBlur(el) {
 }
 
 function addSet() {
+  harvestOpenSetEdit();
   const reps = parseInt(state.repInput);
   if (!reps || reps <= 0) return;
   const newSet   = { reps, weight: state.weight, prs: detectPRs(state.activeExercise.name, { reps, weight: state.weight }, state.sets) };
@@ -1695,10 +1754,12 @@ function startRestInterval() {
 }
 
 function skipRest() {
+  harvestOpenSetEdit();
   setState({ restEndsAt: null });
 }
 
 function addRestTime(seconds) {
+  harvestOpenSetEdit();
   if (!state.restEndsAt) return;
   setState({ restEndsAt: state.restEndsAt + seconds * 1000 });
 }
@@ -1747,6 +1808,7 @@ function recomputeSetsPRs(exerciseName, sets) {
 }
 
 function removeLastSet() {
+  harvestOpenSetEdit();
   const sets    = state.sets.slice(0, -1);
   const session = persistSets(sets);
   setState({ sets, activeSession: session });
@@ -1764,19 +1826,43 @@ function deleteSet(idx) {
 // workout editor's harvestEditorDOM) — nothing re-renders while the row is
 // open, so this reads the live DOM values only at confirm time, the single
 // structural action that follows.
-function confirmEditSet(idx) {
+// Read the open edit row's live DOM values back into `sets`, without
+// rendering. Shared by confirmEditSet and by harvestOpenSetEdit; returns the
+// updated set list, or null when there is nothing open to read.
+function readOpenSetEdit(idx) {
   const set = state.sets[idx];
-  if (!set) { setState({ editingSetIdx: null }); return; }
+  if (!set) return null;
   const wEl = document.getElementById('editSetWeight');
   const rEl = document.getElementById('editSetReps');
-  const wN  = wEl ? parseFloat(wEl.value) : NaN;
+  if (!wEl && !rEl) return null;
+  const wN     = wEl ? parseFloat(wEl.value) : NaN;
   const weight = Number.isFinite(wN) && wN >= 0 ? wN : set.weight;
-  const rN  = rEl ? parseInt(rEl.value, 10) : NaN;
-  const reps = Number.isFinite(rN) && rN > 0 ? rN : set.reps;
-  const updated    = state.sets.map((s, i) => i === idx ? { weight, reps } : { weight: s.weight, reps: s.reps });
-  const recomputed = recomputeSetsPRs(state.activeExercise.name, updated);
-  const session     = persistSets(recomputed);
+  const rN     = rEl ? parseInt(rEl.value, 10) : NaN;
+  const reps   = Number.isFinite(rN) && rN > 0 ? rN : set.reps;
+  const updated = state.sets.map((s, i) => i === idx ? { weight, reps } : { weight: s.weight, reps: s.reps });
+  return recomputeSetsPRs(state.activeExercise.name, updated);
+}
+
+function confirmEditSet(idx) {
+  const recomputed = readOpenSetEdit(idx);
+  if (!recomputed) { setState({ editingSetIdx: null }); return; }
+  const session = persistSets(recomputed);
   setState({ sets: recomputed, activeSession: session, editingSetIdx: null });
+}
+
+// The edit row's inputs are uncontrolled, so anything else that triggers a
+// full render would rebuild the row from the unedited values in state and
+// silently throw away what the user had typed. Every such action harvests
+// first — the same contract harvestEditorDOM() enforces in the workout editor.
+function harvestOpenSetEdit() {
+  if (state.editingSetIdx === null || state.editingSetIdx === undefined) return;
+  const idx = state.editingSetIdx;
+  const recomputed = readOpenSetEdit(idx);
+  if (recomputed) {
+    const session = persistSets(recomputed);
+    setStateSilent({ sets: recomputed, activeSession: session });
+  }
+  setStateSilent({ editingSetIdx: null });
 }
 
 // ── Session-local reorder / skip (workout definition is never touched) ───
@@ -1802,6 +1888,7 @@ function toggleSkipExercise(idx) {
 }
 
 function completeExercise() {
+  harvestOpenSetEdit();
   const session = saveExerciseToSession(state.sets);
   setState({ view: 'workout', activeSession: session, activeExercise: null, sets: [], weight: 0, repInput: '', editingSetIdx: null, restEndsAt: null });
 }
@@ -2225,7 +2312,7 @@ function renderSelect() {
     </div>`;
 
   const resumeWorkout = session ? workoutById(session.sessionType) : null;
-  const resumeHTML = (session?.exercises.length > 0) ? `
+  const resumeHTML = sessionHasProgress(session) ? `
     <div class="resume-banner mb-4">
       <div style="font-weight:700;font-size:0.875rem;color:var(--blue);margin-bottom:2px">${esc(resumeWorkout?.name ?? 'Workout')} in progress</div>
       <div class="label mb-3">${session.exercises.length}/${resumeWorkout?.exercises.length ?? 0} exercises complete</div>
@@ -2355,11 +2442,17 @@ function renderWorkout() {
     </div>`;
 
   const started    = done.length + partial.length + orphans.length;
-  const bottomHTML = started > 0 ? `
+  // Abandon must stay reachable for a session that has only been reordered or
+  // had exercises skipped, otherwise it can never be cleared from the UI.
+  // Complete needs at least one logged set — completeSession() no-ops without
+  // one, so offering the button then would give a dead control. Abandon is
+  // gated more loosely, or a reorder/skip-only session could never be cleared.
+  const bottomHTML = (started > 0 || sessionHasProgress()) ? `
     <div class="mt-4 space-y-2">
+      ${started > 0 ? `
       <button type="button" class="btn-primary" onclick="completeSession()">
         ${icons.check} COMPLETE SESSION (${done.length}/${total})
-      </button>
+      </button>` : ''}
       <button type="button" class="btn-secondary" onclick="abandonSession()">Abandon Session</button>
     </div>` : '';
 
@@ -2964,6 +3057,24 @@ function renderWorkoutEdit() {
 }
 
 // ============================================================
+// Publish the on-screen keyboard's height as --kb so bottom-anchored controls
+// (the LOG SET button) stay above it. iOS shrinks only the visual viewport
+// when the keyboard opens; the layout viewport that sticky offsets resolve
+// against is unchanged, so a sticky bottom button ends up behind the keyboard.
+// The difference between the two viewports is the keyboard height.
+(function initKeyboardInset() {
+  const vv = window.visualViewport;
+  if (!vv) return;                       // no support: falls back to --kb: 0px
+  const apply = () => {
+    const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    // Ignore small deltas: browser chrome collapsing is not a keyboard.
+    document.documentElement.style.setProperty('--kb', (inset > 120 ? inset : 0) + 'px');
+  };
+  vv.addEventListener('resize', apply);
+  vv.addEventListener('scroll', apply);
+  apply();
+})();
+
 (function initSwipe() {
   let startX = 0;
   let startY = 0;
