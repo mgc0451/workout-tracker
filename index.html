@@ -491,6 +491,17 @@
     .progression.good     { background: var(--blue-bg);   border: 1px solid var(--blue-dim);   color: var(--blue); }
     .progression.maintain { background: var(--yellow-bg); border: 1px solid var(--yellow-dim); color: var(--yellow); }
 
+    /* ── Rest timer ── */
+    .rest-timer-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--cyan);
+      text-align: center;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .rest-timer-value.rest-timer-done { color: var(--green); font-size: 1.125rem; }
+
 
 
     /* ── Exercise accent bar ── */
@@ -918,15 +929,88 @@ const WK_PALETTE_SIZE = 8;
 // ============================================================
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyuEmiw_M-mMHS0IWN-9y4VbWJhzGZYysQizYEOSMISxnlz8aukSqRrzVQPijodigne/exec';
 
+// NOTE: mode:'no-cors' gives an opaque response — response.ok is always false
+// and status is always 0, so success/failure can only be judged by whether
+// the fetch PROMISE resolves at all, never by inspecting the response. This
+// function is intentionally allowed to throw (a network failure rejects the
+// fetch promise): the only caller is drainSyncQueue(), which needs that
+// rejection to know a batch must stay queued rather than being dropped.
 async function syncToSheets(entries) {
   if (!SHEETS_URL) return;
+  await fetch(SHEETS_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entries),
+  });
+}
+
+// ============================================================
+// OFFLINE-SAFE SYNC QUEUE
+// ============================================================
+// A session logged with no signal must never be lost. completeSession()
+// always enqueues its batch to localStorage FIRST — independent of whether
+// the network is up — then a drain is attempted immediately. A batch is only
+// removed from the queue once its POST has actually resolved; a thrown fetch
+// leaves it (and everything queued after it) in place for the next drain
+// (on the next 'online' event or the next page load).
+const SYNC_QUEUE_KEY = 'syncQueue';
+const MAX_SYNC_QUEUE = 50; // cap so a long outage can't grow this unbounded
+
+function isValidSyncQueue(data) {
+  return Array.isArray(data) && data.every(b =>
+    b && typeof b === 'object' &&
+    typeof b.id === 'string' && b.id.length > 0 &&
+    typeof b.queuedAt === 'string' &&
+    Array.isArray(b.entries));
+}
+
+function loadSyncQueue() {
+  const data = loadLS(SYNC_QUEUE_KEY, []);
+  if (!isValidSyncQueue(data)) {
+    console.warn('Invalid syncQueue in localStorage, resetting to empty queue.');
+    saveLS(SYNC_QUEUE_KEY, []);
+    return [];
+  }
+  return data;
+}
+
+function saveSyncQueue(queue) {
+  // Keep only the most recent MAX_SYNC_QUEUE batches.
+  const capped = queue.length > MAX_SYNC_QUEUE ? queue.slice(queue.length - MAX_SYNC_QUEUE) : queue;
+  saveLS(SYNC_QUEUE_KEY, capped);
+  return capped;
+}
+
+function enqueueSyncBatch(entries) {
+  const batch = { id: newId('sync'), entries, queuedAt: new Date().toISOString() };
+  return saveSyncQueue([...loadSyncQueue(), batch]);
+}
+
+// Guards against two overlapping drains sending the same batch twice — the
+// flag is set synchronously (before the first `await`), so a second call
+// made before the first one yields control returns immediately instead of
+// racing it.
+let _syncDraining = false;
+
+async function drainSyncQueue() {
+  if (_syncDraining) return;
+  _syncDraining = true;
   try {
-    await fetch(SHEETS_URL, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(entries),
-    });
-  } catch(e) { console.warn('Sheets sync failed:', e); }
+    const queue = loadSyncQueue();
+    for (const batch of queue) {
+      try {
+        await syncToSheets(batch.entries);
+      } catch (e) {
+        console.warn('Sheets sync failed, batch stays queued:', e);
+        break; // stop this pass — leave this batch and any after it queued
+      }
+      // Remove only this batch, re-reading first in case something else
+      // (e.g. a completeSession() enqueue) touched the queue meanwhile.
+      saveSyncQueue(loadSyncQueue().filter(b => b.id !== batch.id));
+    }
+  } finally {
+    _syncDraining = false;
+  }
 }
 
 // ============================================================
@@ -1064,6 +1148,11 @@ let state = {
   historyFilter:  '',        // exercise name filter for history screen
   editingDate:    null,      // dateStr currently being edited inline
   editingSetIdx:  null,      // index into state.sets currently in inline edit mode (exercise screen)
+  // Epoch ms the current rest countdown ends at, or null when idle. Deliberately
+  // NOT persisted to localStorage (see REST TIMER section): a stale timestamp
+  // surviving a reload must never show a bogus countdown, and simply never
+  // saving it sidesteps that rather than needing a staleness check.
+  restEndsAt:     null,
   lastDeletedHistory: null,
 };
 
@@ -1169,7 +1258,7 @@ function goBack() {
       setState({ view: 'select', sessionType: null, ...(shouldRestore ? { activeSession: savedSession } : {}) });
       break;
     }
-    case 'exercise': setState({ view: 'workout', activeExercise: null, sets: [], repInput: '', editingSetIdx: null }); break;
+    case 'exercise': setState({ view: 'workout', activeExercise: null, sets: [], repInput: '', editingSetIdx: null, restEndsAt: null }); break;
     case 'history':  setState({ view: 'select' }); break;
     case 'settings': setState({ view: 'select' }); break;
     case 'workouts':    setState({ view: 'select' }); break;
@@ -1440,8 +1529,12 @@ function completeSession() {
   saveLS('workoutHistory', history);
   removeLS('currentSession');
   // The Google Sheets endpoint is a black box that expects the original
-  // shape — strip the new workoutId field at the boundary.
-  syncToSheets(entries.map(({ workoutId, ...rest }) => rest));
+  // shape — strip the new workoutId field at the boundary. Local history is
+  // already saved above, so it never depends on the sync below: always
+  // enqueue first (durable across a dropped connection or a killed tab),
+  // then attempt an immediate drain.
+  enqueueSyncBatch(entries.map(({ workoutId, ...rest }) => rest));
+  drainSyncQueue();
   setState({ view: 'select', sessionType: null, activeSession: null, history });
 }
 
@@ -1458,7 +1551,7 @@ function selectExercise(idx) {
   const sets       = savedEntry ? savedEntry.sets : [];
   const weight     = sets.length > 0 ? sets[sets.length - 1].weight : lastWeight;
   const repInput = sets.length > 0 ? String(sets[sets.length - 1].reps) : '';
-  setState({ view: 'exercise', activeExercise: ex, sets, weight, repInput, editingSetIdx: null });
+  setState({ view: 'exercise', activeExercise: ex, sets, weight, repInput, editingSetIdx: null, restEndsAt: null });
 }
 
 function saveExerciseToSession(sets) {
@@ -1528,7 +1621,103 @@ function addSet() {
   const repInput = sets.length < targetSetsFor(state.activeExercise) ? String(reps) : '';
   // Auto-save after every set
   const session  = saveExerciseToSession(sets);
-  setState({ sets, repInput, activeSession: session });
+  // Auto-start (or restart) the rest countdown for the exercise's own rest
+  // window — see the "REST TIMER" section below.
+  const restEndsAt = Date.now() + parseRestSeconds(state.activeExercise?.rest) * 1000;
+  setState({ sets, repInput, activeSession: session, restEndsAt });
+}
+
+// ============================================================
+// REST TIMER
+// ============================================================
+// On-screen countdown only — no vibration (unsupported in iOS Safari, so it
+// would silently do nothing) and no sound. Auto-starts the moment a set is
+// logged; skip/+30s are the only controls, and it never blocks logging
+// further sets. The countdown lives in state.restEndsAt (an epoch-ms target,
+// not a decrementing counter), so it survives the full-DOM-replacement
+// render()s that every other setState() triggers — a single setInterval
+// (see startRestInterval/clearRestInterval) patches the countdown node
+// directly each second instead of calling setState, so it never fights the
+// user's inputs or steals focus.
+const DEFAULT_REST_SECONDS = 90;
+
+// Exercise .rest is free text like "3-4 min", "1.5-2 min", "2 min" (ranges
+// are always low-high) — use the LOWER bound so the countdown never asks the
+// user to wait longer than the minimum. Falls back to a sensible default
+// rather than ever producing NaN on screen.
+function parseRestSeconds(restStr) {
+  if (typeof restStr !== 'string') return DEFAULT_REST_SECONDS;
+  const s = restStr.toLowerCase();
+  const match = s.match(/(\d+(?:\.\d+)?)/); // first number = lower bound of a range
+  if (!match) return DEFAULT_REST_SECONDS;
+  const n = parseFloat(match[1]);
+  if (!Number.isFinite(n) || n <= 0) return DEFAULT_REST_SECONDS;
+  const isSecondsUnit = /sec/.test(s) && !/min/.test(s);
+  const seconds = Math.round(isSecondsUnit ? n : n * 60);
+  return seconds > 0 ? seconds : DEFAULT_REST_SECONDS;
+}
+
+let _restIntervalId = null;
+
+function clearRestInterval() {
+  if (_restIntervalId !== null) {
+    clearInterval(_restIntervalId);
+    _restIntervalId = null;
+  }
+}
+
+// Patches the countdown node in place (same approach as syncRepUI) — looked
+// up by id each tick rather than captured once, since render() may have
+// replaced it since the interval last fired.
+function tickRestTimer() {
+  const el = document.getElementById('restTimerValue');
+  if (!el || !state.restEndsAt) { clearRestInterval(); return; }
+  const remaining = Math.ceil((state.restEndsAt - Date.now()) / 1000);
+  if (remaining <= 0) {
+    el.textContent = 'Rest complete';
+    el.classList.add('rest-timer-done');
+    const plusBtn = document.getElementById('restPlusBtn');
+    if (plusBtn) plusBtn.disabled = true;
+    clearRestInterval(); // timer ended — stop ticking
+    return;
+  }
+  const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
+  const ss = String(remaining % 60).padStart(2, '0');
+  el.textContent = `${mm}:${ss}`;
+}
+
+// Exactly one interval is ever live: called after every render, it always
+// clears any previous interval first, so logging several sets in a row (each
+// one a fresh setState → render) never stacks a second ticker.
+function startRestInterval() {
+  clearRestInterval();
+  _restIntervalId = setInterval(tickRestTimer, 1000);
+}
+
+function skipRest() {
+  setState({ restEndsAt: null });
+}
+
+function addRestTime(seconds) {
+  if (!state.restEndsAt) return;
+  setState({ restEndsAt: state.restEndsAt + seconds * 1000 });
+}
+
+function renderRestTimer() {
+  if (!state.restEndsAt) return '';
+  const remaining = Math.ceil((state.restEndsAt - Date.now()) / 1000);
+  const done = remaining <= 0;
+  const mm = String(Math.floor(Math.max(0, remaining) / 60)).padStart(2, '0');
+  const ss = String(Math.max(0, remaining) % 60).padStart(2, '0');
+  return `
+    <div class="card card--glow mb-3 rest-timer-card">
+      <div class="label mb-1">Rest</div>
+      <div id="restTimerValue" class="rest-timer-value${done ? ' rest-timer-done' : ''}">${done ? 'Rest complete' : `${mm}:${ss}`}</div>
+      <div class="flex-row mt-2">
+        <button type="button" class="btn-secondary" onclick="skipRest()">Skip</button>
+        <button type="button" class="btn-secondary" id="restPlusBtn" onclick="addRestTime(30)" ${done ? 'disabled' : ''}>+30s</button>
+      </div>
+    </div>`;
 }
 
 // Shared by removeLastSet/deleteSet/confirmEditSet: persists whatever sets
@@ -1614,7 +1803,7 @@ function toggleSkipExercise(idx) {
 
 function completeExercise() {
   const session = saveExerciseToSession(state.sets);
-  setState({ view: 'workout', activeSession: session, activeExercise: null, sets: [], weight: 0, repInput: '', editingSetIdx: null });
+  setState({ view: 'workout', activeSession: session, activeExercise: null, sets: [], weight: 0, repInput: '', editingSetIdx: null, restEndsAt: null });
 }
 
 function deleteHistoryDay(dateStr) {
@@ -2334,6 +2523,8 @@ function renderExercise() {
           </div>
         </div>
 
+        ${renderRestTimer()}
+
         <div class="card card--glow mb-3">
           <div class="title-sm mb-3">Sets ${state.sets.length}/${target}</div>
           ${state.sets.length > 0 ? `<div class="space-y-2 mb-3">${setsHTML}</div>` : setsHTML}
@@ -2443,6 +2634,12 @@ function renderSettings() {
           <div class="title-sm mb-2">Google Sheets Sync</div>
           <div style="font-size:0.75rem;color:var(--text-mid);line-height:1.6">
             ${SHEETS_URL ? '✅ Connected — sessions sync automatically.' : '⚠️ Not configured.'}
+            ${(() => {
+              const pending = loadSyncQueue().length;
+              return pending > 0
+                ? `<br>⏳ ${pending} session${pending > 1 ? 's' : ''} waiting to sync (will retry automatically).`
+                : '';
+            })()}
           </div>
         </div>
 
@@ -2823,6 +3020,16 @@ function render() {
     const el = document.getElementById(keepId);
     if (el) el.focus();
   }
+
+  // Rest timer: exactly one interval lives only while the exercise screen is
+  // showing an active countdown. Any other view (or a cleared restEndsAt)
+  // clears it — leaving the exercise, changing views, skipping, or the
+  // countdown itself reaching zero must never leak an interval.
+  if (state.view === 'exercise' && state.restEndsAt) {
+    startRestInterval();
+  } else {
+    clearRestInterval();
+  }
 }
 
 // ============================================================
@@ -2830,6 +3037,8 @@ function render() {
 // ============================================================
 initState();
 render();
+drainSyncQueue();
+window.addEventListener('online', () => drainSyncQueue());
 
 // ============================================================
 // SERVICE WORKER REGISTRATION
