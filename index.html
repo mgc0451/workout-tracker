@@ -83,8 +83,12 @@
     /* ── Screen fade ── */
     .screen {
       min-height: 100vh;
-      /* top | right | bottom | left — insets must match their own side. */
-      padding: 12px max(12px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+      /* top | right | bottom | left — insets must match their own side.
+         On iOS Home Screen (standalone, black-translucent status bar,
+         viewport-fit=cover) the web view runs edge-to-edge under the status
+         bar / Dynamic Island, so the top row would sit beneath it without
+         env(safe-area-inset-top). */
+      padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
       animation: fadeIn 0.18s ease;
     }
     @keyframes fadeIn    { from { opacity: 0; transform: translateY(6px); }   to { opacity: 1; transform: none; } }
@@ -3073,6 +3077,25 @@ function renderWorkoutEdit() {
   vv.addEventListener('resize', apply);
   vv.addEventListener('scroll', apply);
   apply();
+})();
+
+// Stop iOS from zooming the page in when a field is focused and the keyboard
+// opens. The inputs are already 16px (the documented threshold), but standalone
+// Home Screen webviews still nudge a zoom on focus; pinning maximum-scale only
+// while a control is focused blocks that, then releasing it on blur keeps
+// two-finger pinch-zoom available the rest of the time (an accessibility
+// affordance the pwa suite guards — the static meta tag never carries the lock).
+(function initFocusZoomLock() {
+  const meta = document.querySelector('meta[name="viewport"]');
+  if (!meta) return;
+  const base = meta.getAttribute('content');
+  const isField = el => el && el.matches && el.matches('input, textarea, select');
+  document.addEventListener('focusin', e => {
+    if (isField(e.target)) meta.setAttribute('content', base + ', maximum-scale=1');
+  });
+  document.addEventListener('focusout', e => {
+    if (isField(e.target)) meta.setAttribute('content', base);
+  });
 })();
 
 (function initSwipe() {
