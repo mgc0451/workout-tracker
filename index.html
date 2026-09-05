@@ -26,9 +26,9 @@
       --cyan-glow:  rgba(34,211,238,0.12);
       --cyan-glow2: rgba(34,211,238,0.06);
       --white:      #e8f2ff;
-      --muted:      #506888;
+      --muted:      #8296b3;
       --text-mid:   #8aadd4;
-      --text-dim:   #607898;
+      --text-dim:   #748aa8;
       --green:      #22c55e;
       --green-dim:  #14532d;
       --green-bg:   #071a0f;
@@ -48,6 +48,23 @@
       --violet-mid:   #7c3aed;
       --violet-glow:  rgba(167,139,250,0.14);
       --violet-glow2: rgba(167,139,250,0.07);
+
+      /* Deliberate type scale and shared component primitives. */
+      --type-display: 2rem;
+      --type-title: 1.5rem;
+      --type-value: 1.625rem;
+      --type-body: 0.875rem;
+      --type-label: 0.6875rem;
+      --type-caption: 0.75rem;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-pill: 9999px;
+      --shadow-card: 0 10px 28px rgba(0,0,0,0.2), inset 0 1px rgba(255,255,255,0.035);
+      --shadow-raised: 0 6px 18px rgba(0,0,0,0.28);
+      --shadow-focus: 0 0 0 3px var(--cyan-glow);
+      --pressed-scale: 0.975;
+      --touch-min: 44px;
 
       /* Workout colour palette (index-based, stored per workout) */
       --wk0:#a78bfa; --wk0s:rgba(167,139,250,0.26);
@@ -862,18 +879,86 @@
     }
     .empty-state-action { margin-top: 14px; }
 
+    /* ── Design system refinements ── */
+    body { font-size: var(--type-body); line-height: 1.5; }
+    .title-xl { font-size: var(--type-title); line-height: 1.1; }
+    .title-lg { font-size: var(--type-display); line-height: 1; font-weight: 850; letter-spacing: -0.045em; }
+    .title-sm, .label, .field-label, .graph-stat-lbl, .section-label span {
+      font-size: var(--type-label);
+    }
+    .numeric, .metric-value, .workout-value, input[type="number"], .rest-timer-value,
+    .graph-stat-val, .cal-day { font-variant-numeric: tabular-nums lining-nums; }
+    .metric-value { font-size: var(--type-value); line-height: 1; font-weight: 850; letter-spacing: -0.035em; color: var(--white); }
+    .workout-name { font-size: var(--type-display); line-height: 1; font-weight: 850; letter-spacing: -0.045em; color: var(--white); }
+    .workout-value { font-size: var(--type-caption); font-weight: 750; color: var(--text-mid); }
+    .body-copy { font-size: var(--type-body); color: var(--text-mid); }
+    .caption { font-size: var(--type-caption); color: var(--text-mid); }
+    .row-main { flex: 1; min-width: 0; }
+    .row-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+    .exercise-name { font-size: var(--type-body); font-weight: 750; color: var(--white); }
+    .exercise-name.is-complete { color: var(--muted); text-decoration: line-through; }
+    .recent-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+    .trend { font-size: var(--type-caption); font-weight: 850; }
+    .trend--up { color: var(--green); }
+    .trend--down { color: var(--red); }
+    .trend--flat { color: var(--text-dim); }
+    .status-badge { border-radius: var(--radius-pill); padding: 2px 7px; font-size: var(--type-label); font-weight: 750; }
+    .status-badge--skipped { color: var(--text-dim); background: var(--bg-deep); }
+    .status-badge--progress { color: var(--cyan); background: var(--cyan-glow); }
+    .set-value { display: flex; align-items: center; gap: 6px; font-size: var(--type-body); font-weight: 800; }
+    .history-value, .orphan-name { font-size: var(--type-caption); font-weight: 650; color: var(--text-mid); }
+    .detail-value { font-weight: 700; color: var(--white); }
+    .empty-copy { text-align: center; padding: 14px 0; font-size: var(--type-caption); color: var(--muted); }
+    .resume-title { font-size: var(--type-body); font-weight: 750; color: var(--cyan); margin-bottom: 2px; }
+    .settings-link { color: var(--text-dim); }
+    .stat-change--positive .graph-stat-val { color: var(--green); }
+    .stat-change--negative .graph-stat-val { color: var(--red); }
+
+    .card { border: 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-card); }
+    .card--glow { box-shadow: var(--shadow-card); }
+    .card--inner, .card--deep { border: 0; border-radius: var(--radius-md); }
+    .stats-grid .stat-item + .stat-item { border-left: 1px solid var(--border); }
+    .exercise-item { border: 0; border-radius: var(--radius-md); box-shadow: inset 0 -1px var(--border); }
+    .exercise-item.partial { border: 0; box-shadow: inset 3px 0 var(--cyan), inset 0 -1px var(--border); background: var(--bg-card); }
+    .exercise-item.done { border: 0; background: var(--bg-card); }
+    .set-row { border: 0; border-radius: var(--radius-md); }
+    .progress-bar-wrap { border: 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-card); position: relative; overflow: hidden; }
+    .progress-bar-wrap::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--wk, var(--cyan)); }
+    .progress-bar-fill { background: var(--cyan); box-shadow: none; }
+    .progress-title { color: var(--cyan); font-size: 1.125rem; line-height: 1.1; font-weight: 850; letter-spacing: -0.025em; }
+    .graph-stat { border: 0; border-radius: var(--radius-md); }
+    .graph-stat + .graph-stat { box-shadow: inset 1px 0 var(--border); }
+    .cal-day.worked { background: transparent; border: 0; color: var(--text-mid); }
+    .cal-day.worked::before { content: ''; position: absolute; top: 2px; width: 4px; height: 4px; border-radius: 50%; background: var(--wk); }
+    .wk-swatch, .color-swatch-btn.selected { box-shadow: none; }
+    .ex-accent-bar.wk-accent { background: var(--wk); }
+
+    button, select, input { min-height: var(--touch-min); }
+    .btn-back, .cal-nav, .btn-delete-day, .btn-edit-day { min-width: var(--touch-min); min-height: var(--touch-min); }
+    .btn-primary { background: var(--cyan); color: var(--bg); border-radius: var(--radius-md); box-shadow: var(--shadow-raised); }
+    .btn-success { background: var(--green); color: #031308; }
+    .btn-complete-ex { background: var(--green); border: 0; color: #031308; box-shadow: var(--shadow-raised); }
+    .btn-resume { background: var(--cyan); color: var(--bg); }
+    .btn-skip-toggle.active { color: var(--amber); border-color: var(--yellow-dim); background: var(--yellow-bg); }
+    .rest-timer-value { color: var(--amber); font-size: var(--type-value); }
+    .input-weight { font-size: var(--type-display); font-weight: 850; letter-spacing: -0.04em; }
+    button:active:not(:disabled) { transform: scale(var(--pressed-scale)); filter: brightness(0.92); }
+    button:disabled { opacity: 0.42; cursor: not-allowed; }
+    input:focus, select:focus { box-shadow: var(--shadow-focus); }
+
     /* ── Hover states — pointer devices only, so a tap doesn't leave a "stuck" hover on touch ── */
     @media (hover: hover) {
       .btn-back:hover { color: var(--cyan); }
-      .btn-primary:hover  { background: linear-gradient(135deg, #22c55e, #16a34a); box-shadow: 0 4px 16px rgba(22,163,74,0.45); }
+      .btn-primary:hover  { background: #67e8f9; box-shadow: var(--shadow-raised); }
+      .btn-primary.btn-success:hover { background: #4ade80; }
       .btn-secondary:hover { border-color: var(--border-hi); color: var(--white); }
       .btn-danger:hover { background: rgba(127,29,29,0.3); }
-      .btn-log:hover:not(:disabled) { border-color: var(--cyan-dim); background: linear-gradient(135deg, rgba(245,158,11,0.08), var(--bg-card)); box-shadow: 0 0 12px var(--cyan-glow); }
-      .btn-complete-ex:hover  { background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(245,158,11,0.1)); box-shadow: 0 0 24px rgba(245,158,11,0.2); }
+      .btn-log:hover:not(:disabled) { border-color: var(--cyan); background: var(--bg-inner); box-shadow: var(--shadow-focus); }
+      .btn-complete-ex:hover  { background: #4ade80; box-shadow: var(--shadow-raised); }
       .btn-session:hover { border-color: var(--violet-dim); }
       .btn-session:hover::before { opacity: 1; }
       .btn-nav:hover { border-color: var(--border-hi); color: var(--text-mid); }
-      .btn-resume:hover { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+      .btn-resume:hover { background: #67e8f9; }
       .btn-abandon:hover { border-color: var(--red-dim); color: var(--red); }
       .btn-clear-all:hover { color: var(--red); border-color: var(--red); }
       .btn-delete-day:hover { color: var(--red); }
@@ -2173,9 +2258,9 @@ const icons = {
 function progressBarHTML(completed, total, title) {
   const pct = total > 0 ? (completed / total) * 100 : 0;
   return `
-    <div class="progress-bar-wrap mb-4">
+    <div class="progress-bar-wrap mb-4" style="${wkStyle(currentWorkout()?.color ?? 0)}">
       <div class="progress-bar-labels mb-1">
-        <span class="label" style="color:var(--cyan)">${esc(title).toUpperCase()}</span>
+        <span class="label progress-title">${esc(title).toUpperCase()}</span>
         <span class="label">${completed}/${total}</span>
       </div>
       <div class="progress-bar-track">
@@ -2296,15 +2381,15 @@ function renderSelect() {
     <div class="card card--glow mb-4">
       <div class="stats-grid">
         <div class="stat-item">
-          <div style="font-size:1.375rem;font-weight:800;color:var(--cyan);letter-spacing:-0.02em">${stats.lastWorkout}</div>
+          <div class="metric-value numeric">${stats.lastWorkout}</div>
           <div class="label mt-1">Last session</div>
         </div>
         <div class="stat-item">
-          <div style="font-size:1.375rem;font-weight:800;color:var(--cyan);letter-spacing:-0.02em">${stats.totalSessions}</div>
+          <div class="metric-value numeric">${stats.totalSessions}</div>
           <div class="label mt-1">Total sessions</div>
         </div>
         <div class="stat-item">
-          <div style="font-size:1.375rem;font-weight:800;color:var(--cyan);letter-spacing:-0.02em">${stats.thisWeek}</div>
+          <div class="metric-value numeric">${stats.thisWeek}</div>
           <div class="label mt-1">This week</div>
         </div>
       </div>
@@ -2318,7 +2403,7 @@ function renderSelect() {
   const resumeWorkout = session ? workoutById(session.sessionType) : null;
   const resumeHTML = sessionHasProgress(session) ? `
     <div class="resume-banner mb-4">
-      <div style="font-weight:700;font-size:0.875rem;color:var(--blue);margin-bottom:2px">${esc(resumeWorkout?.name ?? 'Workout')} in progress</div>
+      <div class="resume-title">${esc(resumeWorkout?.name ?? 'Workout')} in progress</div>
       <div class="label mb-3">${session.exercises.length}/${resumeWorkout?.exercises.length ?? 0} exercises complete</div>
       <div class="flex-row">
         <button type="button" class="btn-resume" onclick="resumeSession()">RESUME</button>
@@ -2352,7 +2437,7 @@ function renderSelect() {
         <div class="space-y-2">
           <button type="button" class="btn-nav" onclick="setState({view:'workoutNew'})">${icons.plus} New Workout</button>
           <button type="button" class="btn-nav" onclick="setState({view:'history'})">View History</button>
-          <button type="button" class="btn-nav" onclick="setState({view:'settings'})" style="color:var(--text-dim)">⚙ Settings</button>
+          <button type="button" class="btn-nav settings-link" onclick="setState({view:'settings'})">⚙ Settings</button>
         </div>
       </div>
     </div>`;
@@ -2385,38 +2470,38 @@ function renderWorkout() {
       const prevMaxReps = prev ? Math.max(...prev.sets.map(s => s.reps)) : null;
       const lastMaxReps = Math.max(...recent.sets.map(s => s.reps));
 
-      let trendIcon = '='; let trendColor = 'var(--text-dim)';
+      let trendIcon = '='; let trendClass = 'trend--flat';
       if (prevWeight !== null) {
-        if (lastWeight > prevWeight) { trendIcon = '↑'; trendColor = 'var(--green)'; }
-        else if (lastWeight < prevWeight) { trendIcon = '↓'; trendColor = 'var(--red)'; }
-        else if (lastMaxReps > prevMaxReps) { trendIcon = '↑'; trendColor = 'var(--green)'; }
-        else if (lastMaxReps < prevMaxReps) { trendIcon = '↓'; trendColor = 'var(--red)'; }
+        if (lastWeight > prevWeight) { trendIcon = '↑'; trendClass = 'trend--up'; }
+        else if (lastWeight < prevWeight) { trendIcon = '↓'; trendClass = 'trend--down'; }
+        else if (lastMaxReps > prevMaxReps) { trendIcon = '↑'; trendClass = 'trend--up'; }
+        else if (lastMaxReps < prevMaxReps) { trendIcon = '↓'; trendClass = 'trend--down'; }
       }
 
       recentHTML = `
-        <div style="display:flex;align-items:center;gap:6px;margin-top:6px">
+        <div class="recent-row">
           <span class="label">Last</span>
-          <span style="font-size:0.75rem;font-weight:700;color:var(--text-mid)">${lastReps} @ ${lastWeight}kg</span>
-          ${prevWeight !== null ? `<span style="font-size:0.75rem;font-weight:800;color:${trendColor}">${trendIcon}</span>` : ''}
+          <span class="workout-value numeric">${lastReps} @ ${lastWeight}kg</span>
+          ${prevWeight !== null ? `<span class="trend ${trendClass}">${trendIcon}</span>` : ''}
         </div>`;
     }
 
     // Status badge
     let statusBadge = '';
     if (skipped) {
-      statusBadge = `<span style="font-size:0.65rem;font-weight:700;color:var(--text-dim);background:var(--bg-deep);border:1px solid var(--border-mid);border-radius:9999px;padding:2px 7px;letter-spacing:0.04em">SKIPPED</span>`;
+      statusBadge = `<span class="status-badge status-badge--skipped">SKIPPED</span>`;
     } else if (isDone) {
       statusBadge = `<span class="check-circle">${icons.checkFill}</span>`;
     } else if (isPartial) {
-      statusBadge = `<span style="font-size:0.65rem;font-weight:700;color:var(--cyan);background:var(--cyan-glow);border:1px solid var(--cyan-dim);border-radius:9999px;padding:2px 7px">${partialEx.sets}/${partialEx.target}</span>`;
+      statusBadge = `<span class="status-badge status-badge--progress numeric">${partialEx.sets}/${partialEx.target}</span>`;
     }
 
     return `
       <div class="exercise-row-wrap" data-idx="${idx}">
         <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''} ${skipped ? 'skipped' : ''}" onclick="selectExercise(${idx})">
-          <div style="flex:1">
-            <div class="flex-row mb-1" style="align-items:center;gap:8px">
-              <div style="font-size:0.875rem;font-weight:700;${isDone ? 'text-decoration:line-through;color:var(--muted)' : 'color:var(--white)'}">${esc(ex.name)}</div>
+          <div class="row-main">
+            <div class="row-heading">
+              <div class="exercise-name ${isDone ? 'is-complete' : ''}">${esc(ex.name)}</div>
               ${statusBadge}
             </div>
             <div class="label">${ex.weight > 0 ? ex.weight + 'kg' : 'BW'} · ${esc(ex.targetReps)} reps</div>
@@ -2440,7 +2525,7 @@ function renderWorkout() {
     <div class="space-y-2">
       ${orphans.map(o => `
         <div class="card--inner">
-          <div style="font-size:0.8rem;font-weight:700;color:var(--text-mid)">${esc(o.name)}</div>
+          <div class="orphan-name">${esc(o.name)}</div>
           <div class="label mt-1">${o.sets} set${o.sets > 1 ? 's' : ''} · no longer in this workout</div>
         </div>`).join('')}
     </div>`;
@@ -2454,7 +2539,7 @@ function renderWorkout() {
   const bottomHTML = (started > 0 || sessionHasProgress()) ? `
     <div class="mt-4 space-y-2">
       ${started > 0 ? `
-      <button type="button" class="btn-primary" onclick="completeSession()">
+      <button type="button" class="btn-primary btn-success" onclick="completeSession()">
         ${icons.check} COMPLETE SESSION (${done.length}/${total})
       </button>` : ''}
       <button type="button" class="btn-secondary" onclick="abandonSession()">Abandon Session</button>
@@ -2489,7 +2574,7 @@ function renderExercise() {
   const lastHTML = lastSession ? `
     <div class="card--deep mb-3">
       <div class="label mb-1">Last session</div>
-      <div style="font-size:0.875rem;color:var(--text-mid);font-weight:600">${lastSession.sets.map(s => s.reps).join('-')} @ ${lastSession.sets[0]?.weight ?? '?'}kg</div>
+      <div class="body-copy numeric">${lastSession.sets.map(s => s.reps).join('-')} @ ${lastSession.sets[0]?.weight ?? '?'}kg</div>
     </div>` : '';
 
   // Weight modified warning — always emitted (hidden when not applicable) so
@@ -2505,7 +2590,7 @@ function renderExercise() {
   // never fight a keystroke-triggered render the way a setState-on-input
   // field would.
   const setsHTML = state.sets.length === 0
-    ? `<p style="text-align:center;padding:14px 0;font-size:0.75rem;color:var(--muted)">No sets logged yet</p>`
+    ? `<p class="empty-copy">No sets logged yet</p>`
     : state.sets.map((set, idx) => {
         if (state.editingSetIdx === idx) {
           return `
@@ -2531,8 +2616,8 @@ function renderExercise() {
         <div class="set-row-wrap">
           <button type="button" class="set-row set-row-tap" onclick="setState({editingSetIdx:${idx}})" aria-label="Edit set ${idx + 1}">
             <span class="label">Set ${idx + 1}</span>
-            <span style="display:flex;align-items:center;gap:6px">
-              <span style="font-weight:700;font-size:0.9rem">${set.weight}kg × ${set.reps}</span>
+            <span class="set-value numeric">
+              <span>${set.weight}kg × ${set.reps}</span>
               <span class="set-edit-hint">${icons.pencil}</span>
             </span>
           </button>
@@ -2589,7 +2674,7 @@ function renderExercise() {
       ${history.slice(1).map(entry => `
         <div class="card--inner">
           <div class="label mb-1">${new Date(entry.date).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>
-          <div style="font-size:0.8rem;color:var(--text-mid);font-weight:600">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0]?.weight ?? '?'}kg</div>
+          <div class="history-value numeric">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0]?.weight ?? '?'}kg</div>
         </div>`).join('')}
     </div>` : '';
 
@@ -2602,9 +2687,9 @@ function renderExercise() {
         <div class="card card--glow mb-3">
           <div class="ex-header">
             <div class="ex-accent-bar wk-accent" style="${wkStyle(workout?.color ?? 0)}"></div>
-            <div style="flex:1">
+            <div class="row-main">
               <div class="label mb-1">${esc(workout?.name ?? '')}</div>
-              <h2 class="title-lg mb-3">${esc(ex.name)}</h2>
+              <h2 class="title-lg workout-name mb-3">${esc(ex.name)}</h2>
               ${lastHTML}
 
               <div class="mb-3">
@@ -2632,8 +2717,8 @@ function renderExercise() {
         ${actionHTML}
 
         <div class="grid-2 mb-2 mt-3">
-          <div class="card--deep"><span class="label">Target </span><span style="font-weight:600">${esc(ex.targetReps)} reps</span></div>
-          <div class="card--deep"><span class="label">Rest </span><span style="font-weight:600">${esc(ex.rest)}</span></div>
+          <div class="card--deep"><span class="label">Target </span><span class="detail-value numeric">${esc(ex.targetReps)} reps</span></div>
+          <div class="card--deep"><span class="label">Rest </span><span class="detail-value numeric">${esc(ex.rest)}</span></div>
         </div>
         ${notesHTML}
 
@@ -2803,8 +2888,8 @@ function renderProgressContent() {
             <div class="graph-stat-val">${fmt(peak)}${unit}</div>
             <div class="graph-stat-lbl">Peak</div>
           </div>
-          <div class="graph-stat" style="border-color:${gain >= 0 ? 'var(--green-dim)' : 'var(--red-dim)'}">
-            <div class="graph-stat-val" style="color:${gain >= 0 ? 'var(--green)' : 'var(--red)'}">${gain >= 0 ? '+' : ''}${fmt(gain)}${unit}</div>
+          <div class="graph-stat ${gain >= 0 ? 'stat-change--positive' : 'stat-change--negative'}">
+            <div class="graph-stat-val">${gain >= 0 ? '+' : ''}${fmt(gain)}${unit}</div>
             <div class="graph-stat-lbl">Progress</div>
           </div>
         </div>`;
