@@ -4,50 +4,69 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Workout Tracker</title>
-  <meta name="theme-color" content="#070b14" />
+  <meta name="theme-color" content="#070c16" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Workouts" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Web fonts are attached AFTER window load, so a slow or blocked font host
+       never delays first paint or the page-load event. The app paints in the
+       fallback stack (system-ui) and swaps to Teko/Hanken once they arrive. -->
+  <script>
+    addEventListener('load', function () {
+      var l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.href = 'https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap';
+      document.head.appendChild(l);
+    });
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:         #070b14;
-      --bg-card:    #0d1424;
-      --bg-inner:   #111d35;
-      --bg-deep:    #080f1e;
-      --border:     #1a2540;
-      --border-mid: #243050;
-      --border-hi:  #2e3f6a;
-      --cyan:       #22d3ee;
-      --cyan-dim:   #0891b2;
-      --cyan-glow:  rgba(34,211,238,0.12);
-      --cyan-glow2: rgba(34,211,238,0.06);
-      --white:      #e8f2ff;
-      --muted:      #8296b3;
-      --text-mid:   #8aadd4;
-      --text-dim:   #748aa8;
-      --green:      #22c55e;
-      --green-dim:  #14532d;
-      --green-bg:   #071a0f;
-      --blue:       #60a5fa;
-      --blue-dim:   #1e3a8a;
-      --blue-bg:    #060f25;
-      --red:        #f87171;
-      --red-dim:    #7f1d1d;
-      --red-bg:     #1a0808;
-      --yellow:     #fbbf24;
-      --yellow-dim: #78350f;
-      --yellow-bg:  #1a1000;
-      --amber:      #fbbf24;
-      --orange:     #fb923c;
-      --violet:       #a78bfa;
-      --violet-dim:   #5b21b6;
-      --violet-mid:   #7c3aed;
-      --violet-glow:  rgba(167,139,250,0.14);
-      --violet-glow2: rgba(167,139,250,0.07);
+      /* ── Cadence "Dusk": deep navy, steel-blue lead, copper sun accent.
+         Token NAMES are unchanged so every component re-grounds by value. ── */
+      --bg:         #070c16;
+      --bg-card:    #101a2b;
+      --bg-inner:   #16233a;
+      --bg-deep:    #0b1420;
+      --border:     #20304a;
+      --border-mid: #2a3c58;
+      --border-hi:  #35496a;
+      --cyan:       #5b9dff;   /* primary accent (steel-blue) */
+      --cyan-dim:   #3a6fae;
+      --cyan-glow:  rgba(91,157,255,0.14);
+      --cyan-glow2: rgba(91,157,255,0.06);
+      --white:      #dfe8f5;
+      --muted:      #7789a1;
+      --text-mid:   #9fb2cc;
+      --text-dim:   #7d90a8;
+      --green:      #34d9a6;
+      --green-dim:  #12463a;
+      --green-bg:   #06170f;
+      --blue:       #5b9dff;
+      --blue-dim:   #24406e;
+      --blue-bg:    #08111f;
+      --red:        #ff7f8f;
+      --red-dim:    #7f2230;
+      --red-bg:     #180a0d;
+      --yellow:     #ffc36a;   /* records / gold */
+      --yellow-dim: #6a4a18;
+      --yellow-bg:  #1a1206;
+      --amber:      #ff8f5e;   /* copper sun accent */
+      --orange:     #ff8f5e;
+      --violet:       #8aa0ff;
+      --violet-dim:   #3a4a8a;
+      --violet-mid:   #5b6fd0;
+      --violet-glow:  rgba(138,160,255,0.14);
+      --violet-glow2: rgba(138,160,255,0.07);
+
+      /* Type: Teko (condensed display + numerals), Hanken Grotesk (body). */
+      --font-display: 'Teko', system-ui, sans-serif;
+      --font-body: 'Hanken Grotesk', -apple-system, system-ui, sans-serif;
 
       /* Deliberate type scale and shared component primitives. */
       --type-display: 2rem;
@@ -80,7 +99,7 @@
     html, body {
       background: var(--bg);
       color: var(--white);
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+      font-family: var(--font-body);
       min-height: 100vh;
       -webkit-tap-highlight-color: transparent;
     }
@@ -123,6 +142,61 @@
     .label     { font-size: 0.7rem;   color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; }
     .text-cyan { color: var(--cyan); }
     .text-muted { color: var(--muted); }
+    /* Teko (condensed display) carries titles + numerals; body stays Hanken.
+       Teko sits tighter, so let short display strings breathe a touch. */
+    .title-xl, .title-lg, .input-weight, .graph-stat-val {
+      font-family: var(--font-display);
+      letter-spacing: 0;
+    }
+    .title-xl { letter-spacing: 0.005em; }
+
+    /* ── Cadence exercise hero: the load orb + sets-progress ring ── */
+    .ex-hero { text-align: center; }
+    .ex-hero-name { margin: 2px 0 4px; }
+    .ex-orb-wrap { position: relative; width: 216px; height: 216px; margin: 10px auto 2px; display: grid; place-items: center; }
+    .ex-orb-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ex-ring-bg { fill: none; stroke: #1c2b42; stroke-width: 6; }
+    .ex-ring-fg { fill: none; stroke: var(--cyan); stroke-width: 6; stroke-linecap: round;
+      filter: drop-shadow(0 0 5px var(--cyan-glow)); transition: stroke-dashoffset 0.55s cubic-bezier(.4,0,.2,1); }
+    .ex-orb { position: relative; width: 178px; height: 178px; border-radius: 50%;
+      background: radial-gradient(circle at 42% 34%, #24344f, #16223a 52%, #0d1626 100%);
+      box-shadow: 0 16px 40px rgba(91,157,255,0.22), inset 0 2px 10px rgba(210,225,255,0.10), inset 0 -14px 28px rgba(255,130,80,0.14);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .ex-orb-cap { font-family: var(--font-body); font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .ex-orb input.ex-orb-num { width: 150px; flex: none; background: transparent; border: none; box-shadow: none; padding: 0;
+      font-size: 3.6rem; line-height: 0.95; color: var(--white); text-align: center; }
+    .ex-orb input.ex-orb-num:focus { border: none; box-shadow: none; color: var(--cyan); outline: none; }
+    .ex-orb-sub { font-family: var(--font-body); font-size: 0.66rem; color: var(--cyan); font-weight: 600; margin-top: 3px; }
+    .ex-hero .modified-label { margin-top: 8px; }
+    .ex-hero .card--deep { text-align: left; margin-top: 12px; }
+
+    /* ── Cadence rest ring: countdown drains the arc, copper → green at done ── */
+    .rest-ring-card { text-align: center; }
+    .rest-ring-wrap { position: relative; width: 132px; height: 132px; margin: 4px auto 2px; display: grid; place-items: center; }
+    .rest-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+    .rest-ring-bg { fill: none; stroke: #1c2b42; stroke-width: 8; }
+    .rest-ring-fg { fill: none; stroke: var(--amber); stroke-width: 8; stroke-linecap: round;
+      filter: drop-shadow(0 0 5px rgba(255,143,94,0.5)); transition: stroke-dashoffset 0.95s linear, stroke 0.4s; }
+    .rest-ring-fg.done { stroke: var(--green); }
+    .rest-ring-wrap .rest-timer-value { position: relative; z-index: 2; margin: 0; font-family: var(--font-display); }
+    .rest-ring-card .flex-row { justify-content: center; gap: 10px; }
+    .rest-ring-card .btn-secondary { width: auto; padding: 9px 22px; }
+
+    /* ── Cadence home: resume card + accented stat tiles ── */
+    .metric-value { font-family: var(--font-display); }
+    .metric-value.sun-val { color: var(--amber); }
+    .metric-value.pos-val { color: var(--green); }
+    .resume-card { display: flex; align-items: center; gap: 16px; text-align: left; }
+    .resume-ring { position: relative; width: 64px; height: 64px; flex: 0 0 64px; }
+    .resume-ring svg { width: 100%; height: 100%; display: block; }
+    .resume-ring-bg { fill: none; stroke: #1c2b42; stroke-width: 5; }
+    .resume-ring-fg { fill: none; stroke: var(--cyan); stroke-width: 5; stroke-linecap: round;
+      filter: drop-shadow(0 0 4px var(--cyan-glow)); }
+    .resume-ring-num { position: absolute; inset: 0; display: grid; place-items: center;
+      font-family: var(--font-display); font-size: 1.05rem; color: var(--white); }
+    .resume-info { flex: 1; min-width: 0; }
+    .resume-info .resume-title { font-family: var(--font-display); font-size: 1.4rem; color: var(--white); margin: 1px 0 9px; }
+    .resume-actions { gap: 8px; }
 
     /* ── Cards ── */
     .card {
@@ -575,11 +649,9 @@
     .stat-item { text-align: center; padding: 10px 6px; }
 
     /* ── Resume banner ── */
+    /* Resume card ground; .card (borderless, shadowed) supplies border/radius/padding. */
     .resume-banner {
-      background: linear-gradient(135deg, rgba(37,99,235,0.15), rgba(37,99,235,0.06));
-      border: 1px solid #1e3a8a;
-      border-radius: 12px;
-      padding: 14px;
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-deep));
     }
 
 
@@ -1283,6 +1355,7 @@ let state = {
   // surviving a reload must never show a bogus countdown, and simply never
   // saving it sidesteps that rather than needing a staleness check.
   restEndsAt:     null,
+  restTotalSec:   null,
   lastDeletedHistory: null,
 };
 
@@ -1771,8 +1844,9 @@ function addSet() {
   const session  = saveExerciseToSession(sets);
   // Auto-start (or restart) the rest countdown for the exercise's own rest
   // window — see the "REST TIMER" section below.
-  const restEndsAt = Date.now() + parseRestSeconds(state.activeExercise?.rest) * 1000;
-  setState({ sets, repInput, activeSession: session, restEndsAt });
+  const restTotalSec = parseRestSeconds(state.activeExercise?.rest);
+  const restEndsAt = Date.now() + restTotalSec * 1000;
+  setState({ sets, repInput, activeSession: session, restEndsAt, restTotalSec });
 }
 
 // ============================================================
@@ -1821,9 +1895,12 @@ function tickRestTimer() {
   const el = document.getElementById('restTimerValue');
   if (!el || !state.restEndsAt) { clearRestInterval(); return; }
   const remaining = Math.ceil((state.restEndsAt - Date.now()) / 1000);
+  const ring = document.getElementById('restRingFg');
+  const C = 2 * Math.PI * 52;
   if (remaining <= 0) {
     el.textContent = 'Rest complete';
     el.classList.add('rest-timer-done');
+    if (ring) { ring.style.strokeDashoffset = C.toFixed(1); ring.classList.add('done'); }
     const plusBtn = document.getElementById('restPlusBtn');
     if (plusBtn) plusBtn.disabled = true;
     clearRestInterval(); // timer ended — stop ticking
@@ -1832,6 +1909,11 @@ function tickRestTimer() {
   const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
   const ss = String(remaining % 60).padStart(2, '0');
   el.textContent = `${mm}:${ss}`;
+  if (ring) {
+    const total = state.restTotalSec || 0;
+    const frac = total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 1;
+    ring.style.strokeDashoffset = (C * (1 - frac)).toFixed(1);
+  }
 }
 
 // Exactly one interval is ever live: called after every render, it always
@@ -1850,7 +1932,7 @@ function skipRest() {
 function addRestTime(seconds) {
   harvestOpenSetEdit();
   if (!state.restEndsAt) return;
-  setState({ restEndsAt: state.restEndsAt + seconds * 1000 });
+  setState({ restEndsAt: state.restEndsAt + seconds * 1000, restTotalSec: (state.restTotalSec || 0) + seconds });
 }
 
 function renderRestTimer() {
@@ -1859,10 +1941,20 @@ function renderRestTimer() {
   const done = remaining <= 0;
   const mm = String(Math.floor(Math.max(0, remaining) / 60)).padStart(2, '0');
   const ss = String(Math.max(0, remaining) % 60).padStart(2, '0');
+  const total = state.restTotalSec || 0;
+  const frac  = done ? 0 : (total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 1);
+  const C     = 2 * Math.PI * 52;
   return `
-    <div class="card card--glow mb-3 rest-timer-card">
+    <div class="card card--glow mb-3 rest-timer-card rest-ring-card">
       <div class="label mb-1">Rest</div>
-      <div id="restTimerValue" class="rest-timer-value${done ? ' rest-timer-done' : ''}">${done ? 'Rest complete' : `${mm}:${ss}`}</div>
+      <div class="rest-ring-wrap">
+        <svg class="rest-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="rest-ring-bg" cx="60" cy="60" r="52"></circle>
+          <circle class="rest-ring-fg${done ? ' done' : ''}" id="restRingFg" cx="60" cy="60" r="52"
+                  style="stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${(C * (1 - frac)).toFixed(1)}"></circle>
+        </svg>
+        <div id="restTimerValue" class="rest-timer-value${done ? ' rest-timer-done' : ''}">${done ? 'Rest complete' : `${mm}:${ss}`}</div>
+      </div>
       <div class="flex-row mt-2">
         <button type="button" class="btn-secondary" onclick="skipRest()">Skip</button>
         <button type="button" class="btn-secondary" id="restPlusBtn" onclick="addRestTime(30)" ${done ? 'disabled' : ''}>+30s</button>
@@ -2385,11 +2477,11 @@ function renderSelect() {
           <div class="label mt-1">Last session</div>
         </div>
         <div class="stat-item">
-          <div class="metric-value numeric">${stats.totalSessions}</div>
+          <div class="metric-value numeric sun-val">${stats.totalSessions}</div>
           <div class="label mt-1">Total sessions</div>
         </div>
         <div class="stat-item">
-          <div class="metric-value numeric">${stats.thisWeek}</div>
+          <div class="metric-value numeric pos-val">${stats.thisWeek}</div>
           <div class="label mt-1">This week</div>
         </div>
       </div>
@@ -2401,13 +2493,28 @@ function renderSelect() {
     </div>`;
 
   const resumeWorkout = session ? workoutById(session.sessionType) : null;
+  const rDone  = session?.exercises?.length ?? 0;
+  const rTotal = resumeWorkout?.exercises.length ?? 0;
+  const rFrac  = rTotal > 0 ? Math.min(1, rDone / rTotal) : 0;
+  const rC     = 2 * Math.PI * 26;
   const resumeHTML = sessionHasProgress(session) ? `
-    <div class="resume-banner mb-4">
-      <div class="resume-title">${esc(resumeWorkout?.name ?? 'Workout')} in progress</div>
-      <div class="label mb-3">${session.exercises.length}/${resumeWorkout?.exercises.length ?? 0} exercises complete</div>
-      <div class="flex-row">
-        <button type="button" class="btn-resume" onclick="resumeSession()">RESUME</button>
-        <button type="button" class="btn-abandon" onclick="abandonSession()">ABANDON</button>
+    <div class="card card--glow resume-card resume-banner mb-4">
+      <div class="resume-ring">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle class="resume-ring-bg" cx="32" cy="32" r="26"></circle>
+          <circle class="resume-ring-fg" cx="32" cy="32" r="26"
+                  style="stroke-dasharray:${rC.toFixed(1)};stroke-dashoffset:${(rC * (1 - rFrac)).toFixed(1)}"
+                  transform="rotate(-90 32 32)"></circle>
+        </svg>
+        <span class="resume-ring-num">${rDone}/${rTotal}</span>
+      </div>
+      <div class="resume-info">
+        <div class="label">In progress</div>
+        <div class="resume-title">${esc(resumeWorkout?.name ?? 'Workout')}</div>
+        <div class="flex-row resume-actions">
+          <button type="button" class="btn-resume" onclick="resumeSession()">RESUME</button>
+          <button type="button" class="btn-abandon" onclick="abandonSession()">ABANDON</button>
+        </div>
       </div>
     </div>` : '';
 
@@ -2570,6 +2677,10 @@ function renderExercise() {
   const target      = targetSetsFor(ex);
   const progression = state.sets.length >= target ? getProgressionStatus(ex, state.sets) : null;
 
+  // Load-orb sets-progress ring geometry (r must match the SVG circle below).
+  const orbR = 110, orbC = 2 * Math.PI * orbR;
+  const orbFrac = target > 0 ? Math.min(1, state.sets.length / target) : 0;
+
   // Last session
   const lastHTML = lastSession ? `
     <div class="card--deep mb-3">
@@ -2684,25 +2795,27 @@ function renderExercise() {
         <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
         ${progressBarHTML(done.length, total, workout?.name ?? '')}
 
-        <div class="card card--glow mb-3">
-          <div class="ex-header">
-            <div class="ex-accent-bar wk-accent" style="${wkStyle(workout?.color ?? 0)}"></div>
-            <div class="row-main">
-              <div class="label mb-1">${esc(workout?.name ?? '')}</div>
-              <h2 class="title-lg workout-name mb-3">${esc(ex.name)}</h2>
-              ${lastHTML}
+        <div class="card card--glow mb-3 ex-hero">
+          <div class="label ex-hero-workout">${esc(workout?.name ?? '')}</div>
+          <h2 class="title-lg workout-name ex-hero-name">${esc(ex.name)}</h2>
 
-              <div class="mb-3">
-                <div class="label mb-2">Weight (kg)</div>
-                <input type="number" inputmode="decimal" step="0.5" min="0" id="weightInput"
-                       value="${state.weight}" class="input-weight" aria-label="Weight in kilograms"
-                       oninput="onWeightInput(this)" onchange="onWeightInput(this)" onblur="onWeightBlur(this)" />
-                ${modifiedHTML}
-              </div>
-
-              ${repsHTML}
+          <div class="ex-orb-wrap">
+            <svg class="ex-orb-ring" viewBox="0 0 240 240" aria-hidden="true">
+              <circle class="ex-ring-bg" cx="120" cy="120" r="110"></circle>
+              <circle class="ex-ring-fg" cx="120" cy="120" r="110"
+                      style="stroke-dasharray:${orbC.toFixed(1)};stroke-dashoffset:${(orbC * (1 - orbFrac)).toFixed(1)}"></circle>
+            </svg>
+            <div class="ex-orb">
+              <span class="ex-orb-cap">Load · kg</span>
+              <input type="number" inputmode="decimal" step="0.5" min="0" id="weightInput"
+                     value="${state.weight}" class="input-weight ex-orb-num" aria-label="Weight in kilograms"
+                     oninput="onWeightInput(this)" onchange="onWeightInput(this)" onblur="onWeightBlur(this)" />
+              <span class="ex-orb-sub">Set ${state.sets.length + 1} · target ${esc(String(ex.targetReps))}</span>
             </div>
           </div>
+          ${modifiedHTML}
+          ${lastHTML}
+          ${repsHTML}
         </div>
 
         ${renderRestTimer()}

@@ -2,8 +2,10 @@
 
 A workout tracker used on a phone, in a gym. Everything lives in `index.html`:
 markup, CSS and JS in one file, vanilla, no framework, no build step, no
-bundler. Data is in `localStorage`. The only network call is an optional
-Google Sheets sync.
+bundler. Data is in `localStorage`. The only data network call is an optional
+Google Sheets sync. The UI also fetches Google Fonts (Teko + Hanken Grotesk),
+but only after `window` `load` and never render-blocking, so the app works
+fully offline (it falls back to `system-ui`).
 
 **Mobile only.** Do not spend effort on desktop behaviour. Assume a phone,
 one thumb, possibly no signal.
