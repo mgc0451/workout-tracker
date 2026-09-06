@@ -853,6 +853,7 @@
       text-align: center;
     }
     .graph-stat-val { font-size: 1rem; font-weight: 800; color: var(--cyan); letter-spacing: -0.02em; }
+    .graph-stat-val.peak-val { color: var(--yellow); }
     .graph-stat-lbl { font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; margin-top: 2px; }
 
     .btn-save-back {
@@ -2998,7 +2999,7 @@ function renderProgressContent() {
             <div class="graph-stat-lbl">Current</div>
           </div>
           <div class="graph-stat">
-            <div class="graph-stat-val">${fmt(peak)}${unit}</div>
+            <div class="graph-stat-val peak-val">${fmt(peak)}${unit}</div>
             <div class="graph-stat-lbl">Peak</div>
           </div>
           <div class="graph-stat ${gain >= 0 ? 'stat-change--positive' : 'stat-change--negative'}">
@@ -3083,10 +3084,16 @@ function buildGraphSVG(points, mode) {
     return `<text x="${xScale(i).toFixed(1)}" y="${H - padB + 14}" text-anchor="middle" fill="var(--text-dim)" font-size="9">${label}</text>`;
   });
 
-  // Dots on each point
-  const dots = points.map((p, i) =>
-    `<circle cx="${xScale(i).toFixed(1)}" cy="${yScale(p.val).toFixed(1)}" r="3" fill="var(--cyan)" />`
-  ).join('');
+  // Dots on each point; the latest reads as a copper "sun" endpoint with a halo.
+  const lastI = points.length - 1;
+  const dots = points.map((p, i) => {
+    const cx = xScale(i).toFixed(1), cy = yScale(p.val).toFixed(1);
+    if (i === lastI) {
+      return `<circle cx="${cx}" cy="${cy}" r="7" fill="var(--amber)" opacity="0.16" />`
+           + `<circle cx="${cx}" cy="${cy}" r="3.8" fill="var(--amber)" stroke="var(--bg-card)" stroke-width="1.5" />`;
+    }
+    return `<circle cx="${cx}" cy="${cy}" r="3" fill="var(--cyan)" />`;
+  }).join('');
 
   return `
     <svg class="graph-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
