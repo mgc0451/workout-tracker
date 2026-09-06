@@ -150,6 +150,26 @@
     }
     .title-xl { letter-spacing: 0.005em; }
 
+    /* ── Cadence exercise hero: the load orb + sets-progress ring ── */
+    .ex-hero { text-align: center; }
+    .ex-hero-name { margin: 2px 0 4px; }
+    .ex-orb-wrap { position: relative; width: 216px; height: 216px; margin: 10px auto 2px; display: grid; place-items: center; }
+    .ex-orb-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ex-ring-bg { fill: none; stroke: #1c2b42; stroke-width: 6; }
+    .ex-ring-fg { fill: none; stroke: var(--cyan); stroke-width: 6; stroke-linecap: round;
+      filter: drop-shadow(0 0 5px var(--cyan-glow)); transition: stroke-dashoffset 0.55s cubic-bezier(.4,0,.2,1); }
+    .ex-orb { position: relative; width: 178px; height: 178px; border-radius: 50%;
+      background: radial-gradient(circle at 42% 34%, #24344f, #16223a 52%, #0d1626 100%);
+      box-shadow: 0 16px 40px rgba(91,157,255,0.22), inset 0 2px 10px rgba(210,225,255,0.10), inset 0 -14px 28px rgba(255,130,80,0.14);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .ex-orb-cap { font-family: var(--font-body); font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .ex-orb input.ex-orb-num { width: 150px; background: transparent; border: none; box-shadow: none; padding: 0;
+      font-size: 3.6rem; line-height: 0.95; color: var(--white); text-align: center; }
+    .ex-orb input.ex-orb-num:focus { border: none; box-shadow: none; color: var(--cyan); outline: none; }
+    .ex-orb-sub { font-family: var(--font-body); font-size: 0.66rem; color: var(--cyan); font-weight: 600; margin-top: 3px; }
+    .ex-hero .modified-label { margin-top: 8px; }
+    .ex-hero .card--deep { text-align: left; margin-top: 12px; }
+
     /* ── Cards ── */
     .card {
       background: var(--bg-card);
@@ -2596,6 +2616,10 @@ function renderExercise() {
   const target      = targetSetsFor(ex);
   const progression = state.sets.length >= target ? getProgressionStatus(ex, state.sets) : null;
 
+  // Load-orb sets-progress ring geometry (r must match the SVG circle below).
+  const orbR = 110, orbC = 2 * Math.PI * orbR;
+  const orbFrac = target > 0 ? Math.min(1, state.sets.length / target) : 0;
+
   // Last session
   const lastHTML = lastSession ? `
     <div class="card--deep mb-3">
@@ -2710,25 +2734,27 @@ function renderExercise() {
         <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
         ${progressBarHTML(done.length, total, workout?.name ?? '')}
 
-        <div class="card card--glow mb-3">
-          <div class="ex-header">
-            <div class="ex-accent-bar wk-accent" style="${wkStyle(workout?.color ?? 0)}"></div>
-            <div class="row-main">
-              <div class="label mb-1">${esc(workout?.name ?? '')}</div>
-              <h2 class="title-lg workout-name mb-3">${esc(ex.name)}</h2>
-              ${lastHTML}
+        <div class="card card--glow mb-3 ex-hero">
+          <div class="label ex-hero-workout">${esc(workout?.name ?? '')}</div>
+          <h2 class="title-lg workout-name ex-hero-name">${esc(ex.name)}</h2>
 
-              <div class="mb-3">
-                <div class="label mb-2">Weight (kg)</div>
-                <input type="number" inputmode="decimal" step="0.5" min="0" id="weightInput"
-                       value="${state.weight}" class="input-weight" aria-label="Weight in kilograms"
-                       oninput="onWeightInput(this)" onchange="onWeightInput(this)" onblur="onWeightBlur(this)" />
-                ${modifiedHTML}
-              </div>
-
-              ${repsHTML}
+          <div class="ex-orb-wrap">
+            <svg class="ex-orb-ring" viewBox="0 0 240 240" aria-hidden="true">
+              <circle class="ex-ring-bg" cx="120" cy="120" r="110"></circle>
+              <circle class="ex-ring-fg" cx="120" cy="120" r="110"
+                      style="stroke-dasharray:${orbC.toFixed(1)};stroke-dashoffset:${(orbC * (1 - orbFrac)).toFixed(1)}"></circle>
+            </svg>
+            <div class="ex-orb">
+              <span class="ex-orb-cap">Load · kg</span>
+              <input type="number" inputmode="decimal" step="0.5" min="0" id="weightInput"
+                     value="${state.weight}" class="input-weight ex-orb-num" aria-label="Weight in kilograms"
+                     oninput="onWeightInput(this)" onchange="onWeightInput(this)" onblur="onWeightBlur(this)" />
+              <span class="ex-orb-sub">Set ${state.sets.length + 1} · target ${esc(String(ex.targetReps))}</span>
             </div>
           </div>
+          ${modifiedHTML}
+          ${lastHTML}
+          ${repsHTML}
         </div>
 
         ${renderRestTimer()}
