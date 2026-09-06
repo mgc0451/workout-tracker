@@ -170,6 +170,18 @@
     .ex-hero .modified-label { margin-top: 8px; }
     .ex-hero .card--deep { text-align: left; margin-top: 12px; }
 
+    /* ── Cadence rest ring: countdown drains the arc, copper → green at done ── */
+    .rest-ring-card { text-align: center; }
+    .rest-ring-wrap { position: relative; width: 132px; height: 132px; margin: 4px auto 2px; display: grid; place-items: center; }
+    .rest-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+    .rest-ring-bg { fill: none; stroke: #1c2b42; stroke-width: 8; }
+    .rest-ring-fg { fill: none; stroke: var(--amber); stroke-width: 8; stroke-linecap: round;
+      filter: drop-shadow(0 0 5px rgba(255,143,94,0.5)); transition: stroke-dashoffset 0.95s linear, stroke 0.4s; }
+    .rest-ring-fg.done { stroke: var(--green); }
+    .rest-ring-wrap .rest-timer-value { position: relative; z-index: 2; margin: 0; font-family: var(--font-display); }
+    .rest-ring-card .flex-row { justify-content: center; gap: 10px; }
+    .rest-ring-card .btn-secondary { width: auto; padding: 9px 22px; }
+
     /* ── Cards ── */
     .card {
       background: var(--bg-card);
@@ -1329,6 +1341,7 @@ let state = {
   // surviving a reload must never show a bogus countdown, and simply never
   // saving it sidesteps that rather than needing a staleness check.
   restEndsAt:     null,
+  restTotalSec:   null,
   lastDeletedHistory: null,
 };
 
@@ -1817,8 +1830,9 @@ function addSet() {
   const session  = saveExerciseToSession(sets);
   // Auto-start (or restart) the rest countdown for the exercise's own rest
   // window — see the "REST TIMER" section below.
-  const restEndsAt = Date.now() + parseRestSeconds(state.activeExercise?.rest) * 1000;
-  setState({ sets, repInput, activeSession: session, restEndsAt });
+  const restTotalSec = parseRestSeconds(state.activeExercise?.rest);
+  const restEndsAt = Date.now() + restTotalSec * 1000;
+  setState({ sets, repInput, activeSession: session, restEndsAt, restTotalSec });
 }
 
 // ============================================================
@@ -1867,9 +1881,12 @@ function tickRestTimer() {
   const el = document.getElementById('restTimerValue');
   if (!el || !state.restEndsAt) { clearRestInterval(); return; }
   const remaining = Math.ceil((state.restEndsAt - Date.now()) / 1000);
+  const ring = document.getElementById('restRingFg');
+  const C = 2 * Math.PI * 52;
   if (remaining <= 0) {
     el.textContent = 'Rest complete';
     el.classList.add('rest-timer-done');
+    if (ring) { ring.style.strokeDashoffset = C.toFixed(1); ring.classList.add('done'); }
     const plusBtn = document.getElementById('restPlusBtn');
     if (plusBtn) plusBtn.disabled = true;
     clearRestInterval(); // timer ended — stop ticking
@@ -1878,6 +1895,11 @@ function tickRestTimer() {
   const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
   const ss = String(remaining % 60).padStart(2, '0');
   el.textContent = `${mm}:${ss}`;
+  if (ring) {
+    const total = state.restTotalSec || 0;
+    const frac = total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 1;
+    ring.style.strokeDashoffset = (C * (1 - frac)).toFixed(1);
+  }
 }
 
 // Exactly one interval is ever live: called after every render, it always
@@ -1896,7 +1918,7 @@ function skipRest() {
 function addRestTime(seconds) {
   harvestOpenSetEdit();
   if (!state.restEndsAt) return;
-  setState({ restEndsAt: state.restEndsAt + seconds * 1000 });
+  setState({ restEndsAt: state.restEndsAt + seconds * 1000, restTotalSec: (state.restTotalSec || 0) + seconds });
 }
 
 function renderRestTimer() {
@@ -1905,10 +1927,20 @@ function renderRestTimer() {
   const done = remaining <= 0;
   const mm = String(Math.floor(Math.max(0, remaining) / 60)).padStart(2, '0');
   const ss = String(Math.max(0, remaining) % 60).padStart(2, '0');
+  const total = state.restTotalSec || 0;
+  const frac  = done ? 0 : (total > 0 ? Math.max(0, Math.min(1, remaining / total)) : 1);
+  const C     = 2 * Math.PI * 52;
   return `
-    <div class="card card--glow mb-3 rest-timer-card">
+    <div class="card card--glow mb-3 rest-timer-card rest-ring-card">
       <div class="label mb-1">Rest</div>
-      <div id="restTimerValue" class="rest-timer-value${done ? ' rest-timer-done' : ''}">${done ? 'Rest complete' : `${mm}:${ss}`}</div>
+      <div class="rest-ring-wrap">
+        <svg class="rest-ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="rest-ring-bg" cx="60" cy="60" r="52"></circle>
+          <circle class="rest-ring-fg${done ? ' done' : ''}" id="restRingFg" cx="60" cy="60" r="52"
+                  style="stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${(C * (1 - frac)).toFixed(1)}"></circle>
+        </svg>
+        <div id="restTimerValue" class="rest-timer-value${done ? ' rest-timer-done' : ''}">${done ? 'Rest complete' : `${mm}:${ss}`}</div>
+      </div>
       <div class="flex-row mt-2">
         <button type="button" class="btn-secondary" onclick="skipRest()">Skip</button>
         <button type="button" class="btn-secondary" id="restPlusBtn" onclick="addRestTime(30)" ${done ? 'disabled' : ''}>+30s</button>
