@@ -182,6 +182,22 @@
     .rest-ring-card .flex-row { justify-content: center; gap: 10px; }
     .rest-ring-card .btn-secondary { width: auto; padding: 9px 22px; }
 
+    /* ── Cadence home: resume card + accented stat tiles ── */
+    .metric-value { font-family: var(--font-display); }
+    .metric-value.sun-val { color: var(--amber); }
+    .metric-value.pos-val { color: var(--green); }
+    .resume-card { display: flex; align-items: center; gap: 16px; text-align: left; }
+    .resume-ring { position: relative; width: 64px; height: 64px; flex: 0 0 64px; }
+    .resume-ring svg { width: 100%; height: 100%; display: block; }
+    .resume-ring-bg { fill: none; stroke: #1c2b42; stroke-width: 5; }
+    .resume-ring-fg { fill: none; stroke: var(--cyan); stroke-width: 5; stroke-linecap: round;
+      filter: drop-shadow(0 0 4px var(--cyan-glow)); }
+    .resume-ring-num { position: absolute; inset: 0; display: grid; place-items: center;
+      font-family: var(--font-display); font-size: 1.05rem; color: var(--white); }
+    .resume-info { flex: 1; min-width: 0; }
+    .resume-info .resume-title { font-family: var(--font-display); font-size: 1.4rem; color: var(--white); margin: 1px 0 9px; }
+    .resume-actions { gap: 8px; }
+
     /* ── Cards ── */
     .card {
       background: var(--bg-card);
@@ -634,9 +650,9 @@
 
     /* ── Resume banner ── */
     .resume-banner {
-      background: linear-gradient(135deg, rgba(37,99,235,0.15), rgba(37,99,235,0.06));
-      border: 1px solid #1e3a8a;
-      border-radius: 12px;
+      background: linear-gradient(135deg, var(--bg-card), var(--bg-deep));
+      border: 1px solid var(--border-hi);
+      border-radius: 14px;
       padding: 14px;
     }
 
@@ -2463,11 +2479,11 @@ function renderSelect() {
           <div class="label mt-1">Last session</div>
         </div>
         <div class="stat-item">
-          <div class="metric-value numeric">${stats.totalSessions}</div>
+          <div class="metric-value numeric sun-val">${stats.totalSessions}</div>
           <div class="label mt-1">Total sessions</div>
         </div>
         <div class="stat-item">
-          <div class="metric-value numeric">${stats.thisWeek}</div>
+          <div class="metric-value numeric pos-val">${stats.thisWeek}</div>
           <div class="label mt-1">This week</div>
         </div>
       </div>
@@ -2479,13 +2495,28 @@ function renderSelect() {
     </div>`;
 
   const resumeWorkout = session ? workoutById(session.sessionType) : null;
+  const rDone  = session?.exercises?.length ?? 0;
+  const rTotal = resumeWorkout?.exercises.length ?? 0;
+  const rFrac  = rTotal > 0 ? Math.min(1, rDone / rTotal) : 0;
+  const rC     = 2 * Math.PI * 26;
   const resumeHTML = sessionHasProgress(session) ? `
-    <div class="resume-banner mb-4">
-      <div class="resume-title">${esc(resumeWorkout?.name ?? 'Workout')} in progress</div>
-      <div class="label mb-3">${session.exercises.length}/${resumeWorkout?.exercises.length ?? 0} exercises complete</div>
-      <div class="flex-row">
-        <button type="button" class="btn-resume" onclick="resumeSession()">RESUME</button>
-        <button type="button" class="btn-abandon" onclick="abandonSession()">ABANDON</button>
+    <div class="card card--glow resume-card resume-banner mb-4">
+      <div class="resume-ring">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle class="resume-ring-bg" cx="32" cy="32" r="26"></circle>
+          <circle class="resume-ring-fg" cx="32" cy="32" r="26"
+                  style="stroke-dasharray:${rC.toFixed(1)};stroke-dashoffset:${(rC * (1 - rFrac)).toFixed(1)}"
+                  transform="rotate(-90 32 32)"></circle>
+        </svg>
+        <span class="resume-ring-num">${rDone}/${rTotal}</span>
+      </div>
+      <div class="resume-info">
+        <div class="label">In progress</div>
+        <div class="resume-title">${esc(resumeWorkout?.name ?? 'Workout')}</div>
+        <div class="flex-row resume-actions">
+          <button type="button" class="btn-resume" onclick="resumeSession()">RESUME</button>
+          <button type="button" class="btn-abandon" onclick="abandonSession()">ABANDON</button>
+        </div>
       </div>
     </div>` : '';
 
