@@ -4,50 +4,69 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Workout Tracker</title>
-  <meta name="theme-color" content="#070b14" />
+  <meta name="theme-color" content="#070c16" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Workouts" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Web fonts are attached AFTER window load, so a slow or blocked font host
+       never delays first paint or the page-load event. The app paints in the
+       fallback stack (system-ui) and swaps to Teko/Hanken once they arrive. -->
+  <script>
+    addEventListener('load', function () {
+      var l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.href = 'https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap';
+      document.head.appendChild(l);
+    });
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:         #070b14;
-      --bg-card:    #0d1424;
-      --bg-inner:   #111d35;
-      --bg-deep:    #080f1e;
-      --border:     #1a2540;
-      --border-mid: #243050;
-      --border-hi:  #2e3f6a;
-      --cyan:       #22d3ee;
-      --cyan-dim:   #0891b2;
-      --cyan-glow:  rgba(34,211,238,0.12);
-      --cyan-glow2: rgba(34,211,238,0.06);
-      --white:      #e8f2ff;
-      --muted:      #8296b3;
-      --text-mid:   #8aadd4;
-      --text-dim:   #748aa8;
-      --green:      #22c55e;
-      --green-dim:  #14532d;
-      --green-bg:   #071a0f;
-      --blue:       #60a5fa;
-      --blue-dim:   #1e3a8a;
-      --blue-bg:    #060f25;
-      --red:        #f87171;
-      --red-dim:    #7f1d1d;
-      --red-bg:     #1a0808;
-      --yellow:     #fbbf24;
-      --yellow-dim: #78350f;
-      --yellow-bg:  #1a1000;
-      --amber:      #fbbf24;
-      --orange:     #fb923c;
-      --violet:       #a78bfa;
-      --violet-dim:   #5b21b6;
-      --violet-mid:   #7c3aed;
-      --violet-glow:  rgba(167,139,250,0.14);
-      --violet-glow2: rgba(167,139,250,0.07);
+      /* ── Cadence "Dusk": deep navy, steel-blue lead, copper sun accent.
+         Token NAMES are unchanged so every component re-grounds by value. ── */
+      --bg:         #070c16;
+      --bg-card:    #101a2b;
+      --bg-inner:   #16233a;
+      --bg-deep:    #0b1420;
+      --border:     #20304a;
+      --border-mid: #2a3c58;
+      --border-hi:  #35496a;
+      --cyan:       #5b9dff;   /* primary accent (steel-blue) */
+      --cyan-dim:   #3a6fae;
+      --cyan-glow:  rgba(91,157,255,0.14);
+      --cyan-glow2: rgba(91,157,255,0.06);
+      --white:      #dfe8f5;
+      --muted:      #7789a1;
+      --text-mid:   #9fb2cc;
+      --text-dim:   #6b7f9a;
+      --green:      #34d9a6;
+      --green-dim:  #12463a;
+      --green-bg:   #06170f;
+      --blue:       #5b9dff;
+      --blue-dim:   #24406e;
+      --blue-bg:    #08111f;
+      --red:        #ff7f8f;
+      --red-dim:    #7f2230;
+      --red-bg:     #180a0d;
+      --yellow:     #ffc36a;   /* records / gold */
+      --yellow-dim: #6a4a18;
+      --yellow-bg:  #1a1206;
+      --amber:      #ff8f5e;   /* copper sun accent */
+      --orange:     #ff8f5e;
+      --violet:       #8aa0ff;
+      --violet-dim:   #3a4a8a;
+      --violet-mid:   #5b6fd0;
+      --violet-glow:  rgba(138,160,255,0.14);
+      --violet-glow2: rgba(138,160,255,0.07);
+
+      /* Type: Teko (condensed display + numerals), Hanken Grotesk (body). */
+      --font-display: 'Teko', system-ui, sans-serif;
+      --font-body: 'Hanken Grotesk', -apple-system, system-ui, sans-serif;
 
       /* Deliberate type scale and shared component primitives. */
       --type-display: 2rem;
@@ -80,7 +99,7 @@
     html, body {
       background: var(--bg);
       color: var(--white);
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+      font-family: var(--font-body);
       min-height: 100vh;
       -webkit-tap-highlight-color: transparent;
     }
@@ -123,6 +142,13 @@
     .label     { font-size: 0.7rem;   color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; }
     .text-cyan { color: var(--cyan); }
     .text-muted { color: var(--muted); }
+    /* Teko (condensed display) carries titles + numerals; body stays Hanken.
+       Teko sits tighter, so let short display strings breathe a touch. */
+    .title-xl, .title-lg, .input-weight, .graph-stat-val {
+      font-family: var(--font-display);
+      letter-spacing: 0;
+    }
+    .title-xl { letter-spacing: 0.005em; }
 
     /* ── Cards ── */
     .card {

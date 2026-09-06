@@ -19,7 +19,7 @@ console.log('\n── Manifest + meta ──');
     viewport: document.querySelector('meta[name=viewport]')?.content,
   }));
   ok('manifest linked relatively', meta.manifest === 'manifest.webmanifest', String(meta.manifest));
-  ok('theme-color set', meta.theme === '#070b14', String(meta.theme));
+  ok('theme-color set', meta.theme === '#070c16', String(meta.theme));
   ok('apple web-app capable', meta.appleCapable === 'yes');
   ok('apple touch icon relative', meta.touchIcon === 'icon-192.png', String(meta.touchIcon));
   ok('viewport-fit=cover present', /viewport-fit=cover/.test(meta.viewport), meta.viewport);
