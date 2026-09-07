@@ -135,6 +135,17 @@ and the progress graphs alike. Consequences to respect:
 - **Session-local state stays session-local.** Reordering or skipping an
   exercise mid-session writes to `activeSession`, never to `workouts`. A
   machine being occupied must not rewrite the user's plan.
+- **Card accents use `box-shadow: inset`, never `border`.** `.card--inner` and
+  `.card--deep` are reset to `border: 0` after their base rule, so a
+  `border-left` accent silently vanishes (equal specificity, later rule wins).
+  Use `box-shadow: inset 3px 0 <colour>` — see `.exercise-item.partial`,
+  `.last-session`, `.hist-row`, `.streak-banner`.
+- **Entrance/loop animations live behind `@media (prefers-reduced-motion:
+  no-preference)`.** Never park an element at an animated *initial* state
+  (`opacity: 0`, `scale(0)`, a hidden dash offset) outside that block, or a
+  reduced-motion user is stranded on the hidden state. The final, static look
+  must be the default; motion only adds to it. See the "Motion & interaction"
+  CSS block and `animateCountUps()` (which also bails under reduced motion).
 
 ---
 
@@ -150,7 +161,7 @@ node tests/run.mjs              # all suites — starts its own server
 node tests/run.mjs sync pwa     # just those
 ```
 
-164 checks across 9 suites. They must all pass before committing.
+181 checks across 10 suites. They must all pass before committing.
 
 **Adapt navigation if the UI moves; never weaken an assertion to make a suite
 go green.** If a suite is wrong, fix the suite deliberately and say so.
@@ -165,6 +176,7 @@ go green.** If a suite is wrong, fix the suite deliberately and say so.
 | `wp3` / `newfeat` | set editing/deletion, PR recompute, reorder/skip |
 | `sync` | offline queue: retry, idempotent drain, corrupt queue |
 | `resttimer` | parsing, auto-start, survival across re-render, no interval leaks |
+| `review2` | sync hang/double-send, skip-only reachability, open-edit survival, keyboard inset |
 
 Update propagation through the service worker is *not* covered by the suites —
 a `page.route` cannot intercept a service-worker fetch, so testing it that way
