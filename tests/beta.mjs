@@ -1,0 +1,59 @@
+import { chromium, devices } from './_playwright.mjs';
+
+const ROOT = (process.env.APP_URL || 'http://localhost:8199/index.html').replace(/index\.html$/, '');
+let pass = 0, fail = 0;
+const ok = (name, condition, extra = '') => condition
+  ? (pass++, console.log(`  PASS  ${name}`))
+  : (fail++, console.log(`  FAIL  ${name}  ${extra}`));
+const browser = await chromium.launch();
+const context = await browser.newContext({ ...devices['iPhone 13'] });
+const page = await context.newPage();
+const errors = [];
+page.on('pageerror', error => errors.push(error.message));
+
+console.log('\n── Classic / Beta isolation ──');
+await page.goto(`${ROOT}index.html`);
+ok('Classic exposes an opt-in Beta link', await page.getByRole('link', { name: /Open the Beta/ }).getAttribute('href') === 'beta/');
+ok('Classic still renders its original home', await page.getByText('Workout Tracker', { exact: true }).isVisible());
+
+await page.goto(`${ROOT}beta/`);
+ok('Beta loads without runtime errors', errors.length === 0, errors.join('; '));
+ok('Beta identifies the Command Center', await page.getByText('Command center').isVisible());
+ok('Beta offers a Classic return link', await page.getByRole('link', { name: /Classic/ }).getAttribute('href') === '../');
+ok('Beta has Today, Train and Insights navigation', await page.locator('.beta-bottom-nav button').count() === 3);
+ok('Beta uses the shared workouts key', await page.evaluate(() => localStorage.getItem('workouts') !== null));
+await page.waitForFunction(() => navigator.serviceWorker.getRegistration('./').then(registration => !!registration), null, { timeout: 15000 }).catch(() => {});
+ok('Beta registers only its scoped worker', await page.evaluate(async () => {
+  const registration = await navigator.serviceWorker.getRegistration('./');
+  return registration?.scope.endsWith('/beta/');
+}));
+
+console.log('\n── Shared session handoff ──');
+await page.getByRole('button', { name: /Start training/i }).click();
+ok('Beta starts the suggested workout', await page.locator('.exercise-item').count() > 0);
+ok('Beta workout uses the live session command surface', await page.locator('.beta-next-move').isVisible());
+ok('Beta workout exposes its movement queue', await page.locator('.beta-queue-row').count() > 0);
+await page.locator('.exercise-item').first().click();
+ok('Beta exercise uses the dedicated lift stage', await page.locator('.beta-lift-stage').isVisible());
+ok('Beta exercise shows its position and prescription',
+  await page.locator('.beta-lift-position').isVisible() && await page.locator('.beta-prescription').isVisible());
+await page.locator('#repsInput').fill('8');
+await page.locator('#btnLogSet').click();
+ok('Beta persists progress only after the first logged set', await page.evaluate(() => {
+  const session = JSON.parse(localStorage.getItem('currentSession'));
+  return session?.exercises?.[0]?.sets?.length === 1;
+}));
+await page.goto(`${ROOT}index.html`);
+ok('Classic can see the Beta-started session state', await page.evaluate(() => JSON.parse(localStorage.getItem('currentSession'))?.sessionType != null));
+
+console.log('\n── Beta assets ──');
+const manifest = await (await page.request.get(`${ROOT}beta/manifest.webmanifest`)).json();
+ok('Beta manifest is independently scoped', manifest.start_url === '.' && manifest.scope === '.');
+const sw = await (await page.request.get(`${ROOT}beta/sw.js`)).text();
+ok('Beta worker precaches the Beta shell', sw.includes("'./index.html'") && sw.includes("'./beta.css'"));
+ok('Beta worker has its own document fallback', sw.includes('caches.match(BETA_SHELL)'));
+
+await context.close();
+await browser.close();
+console.log(`\n${pass} passed, ${fail} failed`);
+process.exit(fail ? 1 : 0);

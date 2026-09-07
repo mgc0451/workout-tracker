@@ -42,17 +42,33 @@ npm i -D playwright && npx playwright install chromium
 node tests/run.mjs
 ```
 
-The runner starts its own server and runs all 9 suites (164 checks).
+The runner starts its own server and discovers every suite in `tests/`,
+including the Classic/Beta handoff coverage.
 
 ## Layout
 
 ```
 index.html            the whole app — markup, CSS and JS
+beta/                 opt-in Command Center redesign (same saved data)
 sw.js                 service worker (offline support)
 manifest.webmanifest  PWA manifest
 tests/                Playwright suites + runner
+ARCHITECTURE.md        Classic/Beta boundaries and data-flow decisions
+HANDOVER.md            current branch state and integration checklist
 CLAUDE.md             architecture notes and gotchas for contributors
 ```
+
+The **Beta** link opens the redesigned app without replacing the classic UI.
+Both experiences deliberately use the same validated `localStorage` schema,
+so workouts, history and an active session move between them. Beta-only UI
+preferences must use `beta:`-prefixed keys. Beta has a worker scoped to
+`/beta/`, keeping its cache lifecycle and offline fallback independent from
+Classic.
+
+Beta's Command Center includes a cinematic workout console with a live next-
+movement focus, full movement queue, session telemetry and a dedicated lift
+stage. These render changes stay inside `beta/`; Classic remains the stable
+experience.
 
 ## Data
 
