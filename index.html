@@ -223,7 +223,9 @@
     }
 
     /* ── "Last session" reads as a target to beat, not just a stat ── */
-    .last-session { border-left: 2px solid var(--cyan); }
+    /* Accent via box-shadow inset, NOT border-left: the later
+       `.card--inner, .card--deep { border: 0 }` reset would zero a border. */
+    .last-session { box-shadow: inset 3px 0 var(--cyan); }
 
     /* ── Set-progress pips: one dot per target set, lit as sets land ── */
     .sets-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -240,9 +242,10 @@
     }
 
     /* ── Previous-session rows: a trend read at a glance ── */
-    .hist-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-left: 2px solid var(--border-hi); }
-    .hist-row.hist-up   { border-left-color: var(--green-dim); }
-    .hist-row.hist-down { border-left-color: var(--red-dim); }
+    /* Left accent via box-shadow inset (see note above — border would be reset). */
+    .hist-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: inset 3px 0 var(--border-hi); }
+    .hist-row.hist-up   { box-shadow: inset 3px 0 var(--green-dim); }
+    .hist-row.hist-down { box-shadow: inset 3px 0 var(--red-dim); }
     .hist-row-main { min-width: 0; }
     .hist-trend { font-size: 0.78rem; font-weight: 800; flex: none; line-height: 1; }
     .hist-trend.up   { color: var(--green); }
@@ -1027,6 +1030,10 @@
     .exercise-item { border: 0; border-radius: var(--radius-md); box-shadow: inset 0 -1px var(--border); }
     .exercise-item.partial { border: 0; box-shadow: inset 3px 0 var(--cyan), inset 0 -1px var(--border); background: var(--bg-card); }
     .exercise-item.done { border: 0; background: var(--bg-card); }
+    /* Trend-tinted left edge — reinforces the ↑/↓ arrow so the session list
+       reads as progression at a glance. Only on cards with no other status. */
+    .exercise-item.ex-up   { box-shadow: inset 3px 0 var(--green-dim), inset 0 -1px var(--border); }
+    .exercise-item.ex-down { box-shadow: inset 3px 0 var(--red-dim), inset 0 -1px var(--border); }
     .set-row { border: 0; border-radius: var(--radius-md); }
     .progress-bar-wrap { border: 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-card); position: relative; overflow: hidden; }
     .progress-bar-wrap::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--wk, var(--cyan)); }
@@ -1041,8 +1048,12 @@
 
     button, select, input { min-height: var(--touch-min); }
     .btn-back, .cal-nav, .btn-delete-day, .btn-edit-day { min-width: var(--touch-min); min-height: var(--touch-min); }
-    .btn-primary { background: var(--cyan); color: var(--bg); border-radius: var(--radius-md); box-shadow: var(--shadow-raised); }
-    .btn-success { background: var(--green); color: #031308; }
+    /* START WORKOUT and other primary CTAs share the load-orb gradient — the
+       twin of .btn-log — so the two hero actions read as one system. */
+    .btn-primary { background: linear-gradient(135deg, #4f8cf0 0%, var(--cyan) 44%, var(--amber) 120%); color: var(--bg); font-weight: 800; letter-spacing: 0.03em; text-shadow: 0 1px 0 rgba(255,255,255,0.12); border-radius: var(--radius-md); box-shadow: var(--shadow-raised), 0 12px 28px -8px rgba(91,157,255,0.5), 0 8px 20px -10px rgba(255,143,94,0.4); }
+    /* btn-success (COMPLETE SESSION) keeps its solid green — it comes after
+       .btn-primary here, so the green wins on the combined class. */
+    .btn-success { background: var(--green); color: #031308; box-shadow: var(--shadow-raised), 0 12px 26px -10px rgba(52,217,166,0.5); }
     .btn-complete-ex { background: var(--green); border: 0; color: #031308; box-shadow: var(--shadow-raised); }
     .btn-resume { background: var(--cyan); color: var(--bg); }
     .btn-skip-toggle.active { color: var(--amber); border-color: var(--yellow-dim); background: var(--yellow-bg); }
@@ -1064,7 +1075,6 @@
         radial-gradient(45% 55% at 28% 22%, rgba(91,157,255,0.10), transparent 70%),
         radial-gradient(40% 50% at 82% 8%, rgba(255,143,94,0.075), transparent 72%);
     }
-    .ex-orb { will-change: box-shadow, transform; }
     .graph-dot { transform-box: fill-box; transform-origin: center; }
 
     @media (prefers-reduced-motion: no-preference) {
@@ -1072,7 +1082,7 @@
       @keyframes ambientDrift { from { transform: translate3d(-3%,-1%,0); } to { transform: translate3d(4%,3%,0); } }
 
       /* Load orb breathes its glow at idle, punches on a logged set (.flare) */
-      .ex-orb { animation: orbBreathe 5.5s ease-in-out infinite; }
+      .ex-orb { will-change: box-shadow, transform; animation: orbBreathe 5.5s ease-in-out infinite; }
       @keyframes orbBreathe {
         0%, 100% { box-shadow: 0 16px 40px rgba(91,157,255,0.22), inset 0 2px 10px rgba(210,225,255,0.10), inset 0 -14px 28px rgba(255,130,80,0.14); }
         50%      { box-shadow: 0 18px 52px rgba(91,157,255,0.32), inset 0 2px 10px rgba(210,225,255,0.14), inset 0 -16px 32px rgba(255,130,80,0.20); }
@@ -1108,8 +1118,8 @@
     /* ── Hover states — pointer devices only, so a tap doesn't leave a "stuck" hover on touch ── */
     @media (hover: hover) {
       .btn-back:hover { color: var(--cyan); }
-      .btn-primary:hover  { background: #67e8f9; box-shadow: var(--shadow-raised); }
-      .btn-primary.btn-success:hover { background: #4ade80; }
+      .btn-primary:hover  { filter: brightness(1.06); box-shadow: var(--shadow-raised), 0 14px 32px -8px rgba(91,157,255,0.6), 0 10px 22px -10px rgba(255,143,94,0.45); }
+      .btn-primary.btn-success:hover { background: #4ade80; filter: none; }
       .btn-secondary:hover { border-color: var(--border-hi); color: var(--white); }
       .btn-danger:hover { background: rgba(127,29,29,0.3); }
       .btn-log:hover:not(:disabled) { filter: brightness(1.06); box-shadow: 0 -8px 12px -4px var(--bg), 0 14px 32px -8px rgba(91,157,255,0.65), 0 10px 22px -10px rgba(255,143,94,0.5); }
@@ -2579,11 +2589,11 @@ function renderSelect() {
           <div class="label mt-1">Last session</div>
         </div>
         <div class="stat-item">
-          <div class="metric-value numeric sun-val">${stats.totalSessions}</div>
+          <div class="metric-value numeric sun-val js-countup">${stats.totalSessions}</div>
           <div class="label mt-1">Total sessions</div>
         </div>
         <div class="stat-item">
-          <div class="metric-value numeric pos-val">${stats.thisWeek}</div>
+          <div class="metric-value numeric pos-val js-countup">${stats.thisWeek}</div>
           <div class="label mt-1">This week</div>
         </div>
       </div>
@@ -2671,6 +2681,7 @@ function renderWorkout() {
     const skipped    = isSkipped(ex.name);
 
     let recentHTML = '';
+    let cardAccent = '';   // trend-tinted left edge on the card (see .exercise-item.ex-*)
     if (recent && !isDone) {
       const lastWeight  = recent.sets[0]?.weight;
       const lastReps    = recent.sets.map(s => s.reps).join('-');
@@ -2685,6 +2696,12 @@ function renderWorkout() {
         else if (lastWeight < prevWeight) { trendIcon = '↓'; trendClass = 'trend--down'; }
         else if (lastMaxReps > prevMaxReps) { trendIcon = '↑'; trendClass = 'trend--up'; }
         else if (lastMaxReps < prevMaxReps) { trendIcon = '↓'; trendClass = 'trend--down'; }
+      }
+
+      // Only tint the card when it has no other status treatment (partial gets
+      // its own cyan bar; skipped is dimmed) so the signals never collide.
+      if (!isPartial && !skipped) {
+        cardAccent = trendClass === 'trend--up' ? 'ex-up' : trendClass === 'trend--down' ? 'ex-down' : '';
       }
 
       recentHTML = `
@@ -2707,7 +2724,7 @@ function renderWorkout() {
 
     return `
       <div class="exercise-row-wrap" data-idx="${idx}">
-        <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''} ${skipped ? 'skipped' : ''}" onclick="selectExercise(${idx})">
+        <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''} ${skipped ? 'skipped' : ''} ${cardAccent}" onclick="selectExercise(${idx})">
           <div class="row-main">
             <div class="row-heading">
               <div class="exercise-name ${isDone ? 'is-complete' : ''}">${esc(ex.name)}</div>
@@ -2786,7 +2803,7 @@ function renderExercise() {
   // Set-progress pips beside the "Sets X/Y" header — one dot per target set,
   // lit as sets are logged. Capped so an unusually high target set count can't
   // overflow the header row.
-  const setPipsHTML = (target > 0 && target <= 12)
+  const setPipsHTML = (target > 0 && target <= 8)
     ? `<span class="set-pips" aria-hidden="true">${
         Array.from({ length: target }, (_, i) =>
           `<span class="set-pip${i < state.sets.length ? ' done' : ''}"></span>`).join('')}</span>`
