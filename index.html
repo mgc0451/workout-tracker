@@ -1087,7 +1087,7 @@
     .btn-primary { background: linear-gradient(135deg, #4f8cf0 0%, var(--cyan) 44%, var(--amber) 120%); color: var(--bg); font-weight: 800; letter-spacing: 0.03em; text-shadow: 0 1px 0 rgba(255,255,255,0.12); border-radius: var(--radius-md); box-shadow: var(--shadow-raised), 0 12px 28px -8px rgba(91,157,255,0.5), 0 8px 20px -10px rgba(255,143,94,0.4); }
     /* btn-success (COMPLETE SESSION) keeps its solid green — it comes after
        .btn-primary here, so the green wins on the combined class. */
-    .btn-success { background: var(--green); color: #031308; box-shadow: var(--shadow-raised), 0 12px 26px -10px rgba(52,217,166,0.5); }
+    .btn-success { background: var(--green); color: #031308; text-shadow: none; box-shadow: var(--shadow-raised), 0 12px 26px -10px rgba(52,217,166,0.5); }
     .btn-complete-ex { background: var(--green); border: 0; color: #031308; box-shadow: var(--shadow-raised); }
     .btn-resume { background: var(--cyan); color: var(--bg); }
     .btn-skip-toggle.active { color: var(--amber); border-color: var(--yellow-dim); background: var(--yellow-bg); }
@@ -1602,6 +1602,7 @@ function goBack() {
       break;
     }
     case 'exercise': setState({ view: 'workout', activeExercise: null, sets: [], repInput: '', editingSetIdx: null, restEndsAt: null }); break;
+    case 'summary':  setState({ view: 'select', summary: null }); break;
     case 'history':  setState({ view: 'select' }); break;
     case 'settings': setState({ view: 'select' }); break;
     case 'workouts':    setState({ view: 'select' }); break;
@@ -1948,7 +1949,6 @@ function buildSessionSummary(validExercises, workout) {
     : null;
   return {
     workoutName: workout?.name ?? 'Workout',
-    exerciseCount: validExercises.length,
     totalSets, totalVolume, totalReps, prCount, durationMin, top,
   };
 }
@@ -2790,7 +2790,7 @@ function renderSummary() {
 
   return `
     <div class="screen">
-      <div class="container container--home summary-wrap">
+      <div class="container container--home">
         <div class="summary-head">
           <div class="summary-check">${icons.check24}</div>
           <div class="label">Session complete</div>
@@ -2950,7 +2950,7 @@ function renderExercise() {
   // Set-progress pips beside the "Sets X/Y" header — one dot per target set,
   // lit as sets are logged. Capped so an unusually high target set count can't
   // overflow the header row.
-  const setPipsHTML = (target > 0 && target <= 8)
+  const setPipsHTML = (target > 0 && target <= 10)
     ? `<span class="set-pips" aria-hidden="true">${
         Array.from({ length: target }, (_, i) =>
           `<span class="set-pip${i < state.sets.length ? ' done' : ''}"></span>`).join('')}</span>`
