@@ -1,11 +1,15 @@
-const CACHE = 'workout-tracker-v1';
+const CACHE = 'workout-tracker-v3';
 
 const SHELL_ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './beta/',
+  './beta/index.html',
+  './beta/beta.css',
+  './beta/manifest.webmanifest'
 ];
 
 // ============================================================
@@ -74,7 +78,7 @@ self.addEventListener('fetch', event => {
         .catch(err => {
           console.warn('Network fetch failed, trying cache:', err);
           return caches.match(request)
-            .then(cached => cached || caches.match('./index.html'))
+            .then(cached => cached || caches.match(url.pathname.includes('/beta/') ? './beta/index.html' : './index.html'))
             .catch(cacheErr => {
               console.warn('Cache fallback failed:', cacheErr);
               return new Response('Offline', { status: 503 });

@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Workout Tracker</title>
-  <meta name="theme-color" content="#070c16" />
+  <title>Workout Tracker Beta</title>
+  <meta name="theme-color" content="#090b0a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Workouts" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="apple-mobile-web-app-title" content="Workout Beta" />
+  <link rel="apple-touch-icon" href="../icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,6 +23,7 @@
       document.head.appendChild(l);
     });
   </script>
+  <link rel="stylesheet" href="beta.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1051,7 +1052,7 @@
       z-index: 50;
       top: max(10px, env(safe-area-inset-top));
       right: max(12px, env(safe-area-inset-right));
-      min-height: 44px;
+      min-height: 36px;
       padding: 8px 12px;
       border: 1px solid rgba(91,157,255,0.4);
       border-radius: 999px;
@@ -1068,7 +1069,7 @@
 </head>
 <body>
 <div id="app"></div>
-<a class="beta-switch" href="beta/" aria-label="Open the Beta experience">Beta ↗</a>
+<a class="classic-switch" href="../" aria-label="Return to the Classic experience">← Classic</a>
 
 <script>
 'use strict';
@@ -2464,113 +2465,62 @@ function buildCalendarHTML() {
 // ============================================================
 // SELECT SCREEN (tabbed: Workout | Progress)
 // ============================================================
+function renderBetaNav(active = 'today') {
+  return `<nav class="beta-bottom-nav" aria-label="Primary navigation">
+    <button type="button" class="${active === 'today' ? 'active' : ''}" onclick="setState({view:'select',homeTab:'workout'})">Today</button>
+    <button type="button" class="${active === 'train' ? 'active' : ''}" onclick="setState({view:'workouts'})">Train</button>
+    <button type="button" class="${active === 'insights' ? 'active' : ''}" onclick="setState({view:'select',homeTab:'progress'})">Insights</button>
+  </nav>`;
+}
+
 function renderSelect() {
   const tab = state.homeTab;
-
-  const tabBar = `
-    <div class="tab-bar mb-0" role="tablist" aria-label="Home tabs">
-      <button type="button" class="tab-btn ${tab === 'workout' ? 'active' : ''}" role="tab" aria-selected="${tab === 'workout'}" onclick="setState({homeTab:'workout'})">Workout</button>
-      <button type="button" class="tab-btn ${tab === 'progress' ? 'active' : ''}" role="tab" aria-selected="${tab === 'progress'}" onclick="setState({homeTab:'progress'})">Progress</button>
-    </div>`;
+  const dateStr = new Date().toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'short'});
 
   if (tab === 'progress') {
-    const dateStr = new Date().toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'short'});
-    return `
-      <div class="screen">
-        <div class="container container--home">
-          <div class="text-center mb-4">
-            <div class="label mb-1">MATT · ${dateStr}</div>
-            <h1 class="title-xl mb-4">Workout Tracker</h1>
-            ${tabBar}
-          </div>
-          ${renderProgressContent()}
-        </div>
-      </div>`;
+    return `<div class="screen"><div class="container container--home">
+      <header class="beta-brand"><div class="beta-kicker">Performance archive</div><h1 class="beta-wordmark">Your <em>signal</em></h1></header>
+      ${renderProgressContent()}
+      <div class="beta-section-head"><h3>Session log</h3><span>Full history</span></div>
+      <button type="button" class="btn-nav" onclick="setState({view:'history'})">Open training history ${icons.chevron}</button>
+      <button type="button" class="btn-nav settings-link mt-2" onclick="setState({view:'settings'})">Settings ${icons.chevron}</button>
+    </div>${renderBetaNav('insights')}</div>`;
   }
 
-  // ── Workout tab ──
-  const stats   = getQuickStats();
+  const stats = getQuickStats();
   const session = state.activeSession;
-
-  const statsHTML = stats ? `
-    <div class="card card--glow mb-4">
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="metric-value numeric">${stats.lastWorkout}</div>
-          <div class="label mt-1">Last session</div>
-        </div>
-        <div class="stat-item">
-          <div class="metric-value numeric sun-val">${stats.totalSessions}</div>
-          <div class="label mt-1">Total sessions</div>
-        </div>
-        <div class="stat-item">
-          <div class="metric-value numeric pos-val">${stats.thisWeek}</div>
-          <div class="label mt-1">This week</div>
-        </div>
-      </div>
-    </div>` : `
-    <div class="empty-state mb-4">
-      <div class="empty-state-icon">🏋️</div>
-      <div class="empty-state-title">No sessions yet</div>
-      <div class="empty-state-sub">Pick a session below to get started.<br>Your stats will appear here after your first workout.</div>
-    </div>`;
-
   const resumeWorkout = session ? workoutById(session.sessionType) : null;
-  const rDone  = session?.exercises?.length ?? 0;
+  const rDone = completedExercises().length;
   const rTotal = resumeWorkout?.exercises.length ?? 0;
-  const rFrac  = rTotal > 0 ? Math.min(1, rDone / rTotal) : 0;
-  const rC     = 2 * Math.PI * 26;
-  const resumeHTML = sessionHasProgress(session) ? `
-    <div class="card card--glow resume-card resume-banner mb-4">
-      <div class="resume-ring">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <circle class="resume-ring-bg" cx="32" cy="32" r="26"></circle>
-          <circle class="resume-ring-fg" cx="32" cy="32" r="26"
-                  style="stroke-dasharray:${rC.toFixed(1)};stroke-dashoffset:${(rC * (1 - rFrac)).toFixed(1)}"
-                  transform="rotate(-90 32 32)"></circle>
-        </svg>
-        <span class="resume-ring-num">${rDone}/${rTotal}</span>
-      </div>
-      <div class="resume-info">
-        <div class="label">In progress</div>
-        <div class="resume-title">${esc(resumeWorkout?.name ?? 'Workout')}</div>
-        <div class="flex-row resume-actions">
-          <button type="button" class="btn-resume" onclick="resumeSession()">RESUME</button>
-          <button type="button" class="btn-abandon" onclick="abandonSession()">ABANDON</button>
-        </div>
-      </div>
-    </div>` : '';
+  const suggested = resumeWorkout || state.workouts[0] || null;
+  const style = suggested ? wkStyle(suggested.color) : '';
 
-  const startBtnHTML = state.workouts.length === 0 ? `
-    <div class="empty-state mb-6">
-      <div class="empty-state-icon">📋</div>
-      <div class="empty-state-title">No workouts yet</div>
-      <div class="empty-state-sub">Create a workout to start tracking sessions.</div>
-      <button type="button" class="btn-primary empty-state-action" onclick="setState({view:'workoutNew'})">${icons.plus} New Workout</button>
-    </div>` : `
-    <div class="mb-6">
-      <button type="button" class="btn-primary" onclick="setState({view:'workouts'})">${icons.chevron} START WORKOUT</button>
-    </div>`;
+  const resumeHTML = sessionHasProgress(session) ? `<div class="card beta-resume resume-banner mt-3">
+    <div class="label" style="color:var(--amber)">Live session · ${rDone}/${rTotal} movements</div>
+    <div class="resume-title">${esc(resumeWorkout?.name ?? 'Workout')}</div>
+    <div class="flex-row resume-actions"><button type="button" class="btn-resume" onclick="resumeSession()">Resume signal →</button><button type="button" class="btn-abandon" onclick="abandonSession()">Abandon</button></div>
+  </div>` : '';
 
-  return `
-    <div class="screen">
-      <div class="container container--home">
-        <div class="text-center mb-4">
-          <div class="label mb-1">MATT · ${new Date().toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'short'})}</div>
-          <h1 class="title-xl mb-4">Workout Tracker</h1>
-          ${tabBar}
-        </div>
-        ${statsHTML}
-        ${resumeHTML}
-        ${startBtnHTML}
-        ${buildCalendarHTML()}
-        <div class="space-y-2">
-          <button type="button" class="btn-nav" onclick="setState({view:'workoutNew'})">${icons.plus} New Workout</button>
-          <button type="button" class="btn-nav" onclick="setState({view:'history'})">View History</button>
-          <button type="button" class="btn-nav settings-link" onclick="setState({view:'settings'})">⚙ Settings</button>
-        </div>
-      </div>
-    </div>`;
+  const hero = suggested ? `<section class="beta-hero" style="${style}">
+    <div class="beta-hero-radar" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
+    <div class="beta-eyebrow">${sessionHasProgress(session) ? 'Continue training' : 'Recommended next'}</div>
+    <h2>${esc(suggested.name)}</h2>
+    <div class="beta-meta">${suggested.exercises.length} movements · ${esc(suggested.label || 'Custom')} protocol</div>
+    <button type="button" class="beta-start" onclick="${sessionHasProgress(session) ? 'resumeSession()' : `startSession('${suggested.id}')`}"><span>${sessionHasProgress(session) ? 'Resume workout' : 'Start training'}</span><span>→</span></button>
+  </section>` : `<section class="beta-hero"><div class="beta-eyebrow">Build your system</div><h2>No protocol yet</h2><div class="beta-meta">Create a workout to begin tracking.</div><button type="button" class="beta-start" onclick="setState({view:'workoutNew'})"><span>Create workout</span><span>+</span></button></section>`;
+
+  return `<div class="screen"><div class="container container--home">
+    <header class="beta-brand"><div class="beta-kicker"><i></i>${dateStr} · System ready</div><h1 class="beta-wordmark">Command <em>center</em></h1><div class="beta-brand-code">WT / 02<br>TRAINING OS</div></header>
+    ${hero}${resumeHTML}
+    <div class="beta-section-head"><h3>Live signals</h3><span>This cycle</span></div>
+    <div class="beta-signals">
+      <div class="beta-signal"><strong>${stats?.thisWeek ?? 0}</strong><small>This week</small></div>
+      <div class="beta-signal"><strong>${stats?.totalSessions ?? 0}</strong><small>Sessions</small></div>
+      <div class="beta-signal"><strong>${stats?.lastWorkout ?? '—'}</strong><small>Last trained</small></div>
+    </div>
+    <div class="beta-section-head"><h3>Activity map</h3><span>Tap a day</span></div>
+    ${buildCalendarHTML()}
+  </div>${renderBetaNav('today')}</div>`;
 }
 
 // ============================================================
@@ -2627,8 +2577,9 @@ function renderWorkout() {
     }
 
     return `
-      <div class="exercise-row-wrap" data-idx="${idx}">
+      <div class="exercise-row-wrap beta-queue-row" data-idx="${idx}">
         <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''} ${skipped ? 'skipped' : ''}" onclick="selectExercise(${idx})">
+          <span class="beta-queue-index">${String(idx + 1).padStart(2, '0')}</span>
           <div class="row-main">
             <div class="row-heading">
               <div class="exercise-name ${isDone ? 'is-complete' : ''}">${esc(ex.name)}</div>
@@ -2661,6 +2612,23 @@ function renderWorkout() {
     </div>`;
 
   const started    = done.length + partial.length + orphans.length;
+  const nextIdx    = exercises.findIndex(ex => !done.includes(ex.name) && !isSkipped(ex.name));
+  const nextEx     = nextIdx >= 0 ? exercises[nextIdx] : null;
+  const elapsedMin = Math.max(0, Math.floor((Date.now() - new Date(state.activeSession?.startedAt || Date.now())) / 60000));
+  const progress   = total > 0 ? Math.min(100, Math.round(done.length / total * 100)) : 0;
+  const nextHTML   = nextEx ? `
+    <section class="beta-next-move" style="${wkStyle(workout?.color)}">
+      <div class="beta-next-orbit" aria-hidden="true"><span>${progress}</span><small>%</small></div>
+      <div class="beta-next-copy">
+        <span class="beta-live-tag"><i></i>${partial.some(p => p.name === nextEx.name) ? 'Continue movement' : 'Up next'}</span>
+        <h2>${esc(nextEx.name)}</h2>
+        <p>${nextEx.weight > 0 ? `${nextEx.weight} kg` : 'Bodyweight'} · ${esc(nextEx.targetReps)} reps · ${targetSetsFor(nextEx)} sets</p>
+      </div>
+      <button type="button" onclick="selectExercise(${nextIdx})">${partial.some(p => p.name === nextEx.name) ? 'Continue' : 'Enter'} <span>↗</span></button>
+    </section>` : `
+    <section class="beta-next-move beta-next-complete">
+      <div class="beta-next-copy"><span class="beta-live-tag"><i></i>Protocol clear</span><h2>All movements complete</h2><p>Review your work, then close the session.</p></div>
+    </section>`;
   // Abandon must stay reachable for a session that has only been reordered or
   // had exercises skipped, otherwise it can never be cleared from the UI.
   // Complete needs at least one logged set — completeSession() no-ops without
@@ -2676,11 +2644,16 @@ function renderWorkout() {
     </div>` : '';
 
   return `
-    <div class="screen">
+    <div class="screen beta-session-screen">
       <div class="container">
-        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
-        ${progressBarHTML(done.length, total, workout?.name ?? '')}
-        <div class="space-y-2">${items}</div>
+        <header class="beta-session-top">
+          <button type="button" class="btn-back" onclick="goBack()">${icons.back} Exit</button>
+          <div class="beta-session-clock"><span>Live</span><strong>${elapsedMin} min</strong></div>
+        </header>
+        <div class="beta-session-title"><span>Active protocol</span><h1>${esc(workout?.name ?? '')}</h1><div>${done.length}/${total} complete</div></div>
+        ${nextHTML}
+        <div class="beta-section-head"><h3>Movement queue</h3><span>Tap to enter · reorder below</span></div>
+        <div class="beta-queue">${items}</div>
         ${orphansHTML}
         ${bottomHTML}
       </div>
@@ -2695,10 +2668,12 @@ function renderExercise() {
   const workout     = currentWorkout();
   const history     = getExerciseHistory(ex.name);
   const lastSession = history[0] || null;
-  const done        = completedExercises();
   const total       = workout?.exercises.length ?? 0;
   const target      = targetSetsFor(ex);
   const progression = state.sets.length >= target ? getProgressionStatus(ex, state.sets) : null;
+  const exerciseOrder = orderedExercises();
+  const exerciseIdx   = exerciseOrder.findIndex(item => item.name === ex.name);
+  const nextExercise  = exerciseOrder.slice(exerciseIdx + 1).find(item => !isSkipped(item.name)) || null;
 
   // Load-orb sets-progress ring geometry (r must match the SVG circle below).
   const orbR = 110, orbC = 2 * Math.PI * orbR;
@@ -2813,12 +2788,15 @@ function renderExercise() {
     </div>` : '';
 
   return `
-    <div class="screen">
+    <div class="screen beta-lift-screen">
       <div class="container">
-        <button type="button" class="btn-back" onclick="goBack()">${icons.back} Back</button>
-        ${progressBarHTML(done.length, total, workout?.name ?? '')}
+        <header class="beta-lift-top">
+          <button type="button" class="btn-back" onclick="goBack()">${icons.back} Queue</button>
+          <div class="beta-lift-position"><span>${String(exerciseIdx + 1).padStart(2, '0')}</span><i></i><small>${String(total).padStart(2, '0')}</small></div>
+          <div class="beta-live-tag"><i></i>Live</div>
+        </header>
 
-        <div class="card card--glow mb-3 ex-hero">
+        <div class="card card--glow mb-3 ex-hero beta-lift-stage">
           <div class="label ex-hero-workout">${esc(workout?.name ?? '')}</div>
           <h2 class="title-lg workout-name ex-hero-name">${esc(ex.name)}</h2>
 
@@ -2839,6 +2817,11 @@ function renderExercise() {
           ${modifiedHTML}
           ${lastHTML}
           ${repsHTML}
+          <div class="beta-prescription">
+            <div><span>Target</span><strong>${esc(ex.targetReps)}</strong><small>reps</small></div>
+            <div><span>Rest</span><strong>${esc(ex.rest).replace(/\s*(min|sec).*/i, '')}</strong><small>${/sec/i.test(ex.rest) ? 'sec' : 'min'}</small></div>
+            <div><span>Progress</span><strong>${state.sets.length}/${target}</strong><small>sets</small></div>
+          </div>
         </div>
 
         ${renderRestTimer()}
@@ -2852,11 +2835,9 @@ function renderExercise() {
 
         ${actionHTML}
 
-        <div class="grid-2 mb-2 mt-3">
-          <div class="card--deep"><span class="label">Target </span><span class="detail-value numeric">${esc(ex.targetReps)} reps</span></div>
-          <div class="card--deep"><span class="label">Rest </span><span class="detail-value numeric">${esc(ex.rest)}</span></div>
-        </div>
         ${notesHTML}
+
+        ${nextExercise ? `<div class="beta-next-preview"><span>Next movement</span><strong>${esc(nextExercise.name)}</strong><small>${nextExercise.weight > 0 ? `${nextExercise.weight} kg` : 'Bodyweight'} · ${esc(nextExercise.targetReps)} reps</small></div>` : ''}
 
         ${historyHTML}
       </div>
@@ -3171,6 +3152,7 @@ function renderWorkouts() {
         ${items}
         <button type="button" class="btn-primary mt-4" onclick="setState({view:'workoutNew'})">${icons.plus} New Workout</button>
       </div>
+      ${renderBetaNav('train')}
     </div>`;
 }
 
@@ -3412,7 +3394,7 @@ window.addEventListener('online', () => drainSyncQueue());
 // ============================================================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW registration failed:', e));
+    navigator.serviceWorker.register('../sw.js').catch(e => console.warn('SW registration failed:', e));
   });
 }
 </script>

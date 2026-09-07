@@ -1,8 +1,9 @@
 # Working on this codebase
 
-A workout tracker used on a phone, in a gym. Everything lives in `index.html`:
-markup, CSS and JS in one file, vanilla, no framework, no build step, no
-bundler. Data is in `localStorage`. The only data network call is an optional
+A workout tracker used on a phone, in a gym. The production experience lives
+in `index.html`; an opt-in redesign lives in `beta/index.html`. Each shell is
+vanilla HTML, CSS and JS with no framework, build step or bundler. They share
+the same `localStorage` records. The only data network call is an optional
 Google Sheets sync. The UI also fetches Google Fonts (Teko + Hanken Grotesk),
 but only after `window` `load` and never render-blocking, so the app works
 fully offline (it falls back to `system-ui`).
@@ -12,11 +13,47 @@ one thumb, possibly no signal.
 
 ```
 index.html            the entire app
+beta/index.html       Beta shell; currently carries a copy of the app core
+beta/beta.css         Beta-only visual overrides
+beta/manifest.webmanifest  Beta install metadata
 sw.js                 service worker (offline)
 manifest.webmanifest  PWA manifest
 icon-192.png .. 512   home-screen icons
 tests/                Playwright suites — see "Verifying changes"
 ```
+
+Read `ARCHITECTURE.md` before changing shared behavior and `HANDOVER.md` before
+rebasing or merging this branch.
+
+### Classic and Beta change rule
+
+Classic is the stable product. Do not restructure it merely to support Beta.
+The only intentional Classic UI addition is the link to `beta/`.
+
+Beta currently duplicates the core JavaScript because the original app is a
+single inline document. Until that core is deliberately extracted, every
+change to persistence, validation, sessions, logging, PR calculation, editor
+harvesting, timers, sync, or escaping in `index.html` must be reviewed and
+ported to `beta/index.html`. Visual and render-only differences should remain
+Beta-specific. Never resolve a rebase conflict by blindly choosing all of
+either file: preserve upstream core fixes in both shells, then reapply the
+small Beta render differences.
+
+The intentional Beta render divergences currently live in `renderSelect()`,
+`renderWorkout()`, `renderExercise()` and `renderWorkouts()`, with their visual
+system in `beta/beta.css`. When porting a Classic fix inside one of those large
+functions, preserve the Beta structure while copying the corrected behavior;
+do not replace the entire function from either side.
+
+Both shells intentionally use `workouts`, `workoutHistory`, `currentSession`
+and `syncQueue`. Do not add a Beta version of those keys. Beta-only preferences
+must start with `beta:` and must not alter records read by Classic.
+
+The root worker owns both URL trees. Any new Beta asset must be added to
+`SHELL_ASSETS`; Beta navigation must continue to fall back to
+`./beta/index.html`, never the Classic document. Bump `CACHE` whenever the
+pre-cached shell changes and update cache assertions without weakening offline
+coverage.
 
 ---
 
@@ -150,7 +187,8 @@ node tests/run.mjs              # all suites — starts its own server
 node tests/run.mjs sync pwa     # just those
 ```
 
-164 checks across 9 suites. They must all pass before committing.
+The runner discovers all suites, including `beta`. They must all pass before
+committing.
 
 **Adapt navigation if the UI moves; never weaken an assertion to make a suite
 go green.** If a suite is wrong, fix the suite deliberately and say so.
@@ -165,6 +203,7 @@ go green.** If a suite is wrong, fix the suite deliberately and say so.
 | `wp3` / `newfeat` | set editing/deletion, PR recompute, reorder/skip |
 | `sync` | offline queue: retry, idempotent drain, corrupt queue |
 | `resttimer` | parsing, auto-start, survival across re-render, no interval leaks |
+| `beta` | shell isolation, navigation, shared-session handoff, Beta offline assets |
 
 Update propagation through the service worker is *not* covered by the suites —
 a `page.route` cannot intercept a service-worker fetch, so testing it that way

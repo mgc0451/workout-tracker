@@ -67,9 +67,9 @@ console.log('\n── Service worker + offline ──');
   await page.reload();
   await page.waitForTimeout(1500);
   const keys = await page.evaluate(() => caches.keys());
-  ok('versioned cache exists', keys.includes('workout-tracker-v1'), JSON.stringify(keys));
+  ok('versioned cache exists', keys.includes('workout-tracker-v3'), JSON.stringify(keys));
   const cachedIdx = await page.evaluate(async () => {
-    const c = await caches.open('workout-tracker-v1');
+    const c = await caches.open('workout-tracker-v3');
     const r = await c.match('./index.html') || await c.match(location.href);
     return !!r;
   });
