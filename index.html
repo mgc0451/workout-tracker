@@ -222,6 +222,33 @@
       padding: 8px 10px;
     }
 
+    /* ── "Last session" reads as a target to beat, not just a stat ── */
+    .last-session { border-left: 2px solid var(--cyan); }
+
+    /* ── Set-progress pips: one dot per target set, lit as sets land ── */
+    .sets-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .set-pips  { display: inline-flex; gap: 6px; }
+    .set-pip {
+      width: 9px; height: 9px; border-radius: 50%;
+      border: 1.5px solid var(--border-hi); background: transparent;
+      transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .set-pip.done {
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--cyan), var(--amber));
+      box-shadow: 0 0 8px rgba(91,157,255,0.55);
+    }
+
+    /* ── Previous-session rows: a trend read at a glance ── */
+    .hist-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-left: 2px solid var(--border-hi); }
+    .hist-row.hist-up   { border-left-color: var(--green-dim); }
+    .hist-row.hist-down { border-left-color: var(--red-dim); }
+    .hist-row-main { min-width: 0; }
+    .hist-trend { font-size: 0.78rem; font-weight: 800; flex: none; line-height: 1; }
+    .hist-trend.up   { color: var(--green); }
+    .hist-trend.down { color: var(--red); }
+    .hist-trend.flat { color: var(--muted); }
+
     /* ── Buttons ── */
     button { cursor: pointer; border: none; font-family: inherit; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent; }
     button:focus-visible, input:focus-visible, select:focus-visible {
@@ -285,18 +312,22 @@
 
     .btn-log {
       width: 100%;
-      background: linear-gradient(135deg, var(--bg-inner), var(--bg-card));
-      border: 1px solid var(--border-hi);
-      color: var(--white);
-      padding: 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 0.875rem;
+      /* The screen's primary action: a bold steel-blue→copper gradient that
+         echoes the load orb (blue rim, copper underglow) and finally lights up
+         the sheen sweep + ctaGlow wired in the Motion block. */
+      background: linear-gradient(135deg, #4f8cf0 0%, var(--cyan) 44%, var(--amber) 120%);
+      border: 1px solid rgba(255,255,255,0.20);
+      color: #0a1220;
+      padding: 15px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.12);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
       position: sticky;
       /* --kb is the on-screen keyboard's height, published by the
          visualViewport listener below. iOS resizes only the visual viewport
@@ -306,7 +337,9 @@
          existed to avoid. */
       bottom: calc(env(safe-area-inset-bottom, 0px) + var(--kb, 0px));
       z-index: 5;
-      box-shadow: 0 -8px 12px -4px var(--bg);
+      box-shadow: 0 -8px 12px -4px var(--bg),
+                  0 12px 28px -8px rgba(91,157,255,0.55),
+                  0 8px 20px -10px rgba(255,143,94,0.45);
       transition: bottom 0.15s ease-out;
     }
     .btn-log:active:not(:disabled) { transform: scale(0.98); }
@@ -1015,9 +1048,62 @@
     .btn-skip-toggle.active { color: var(--amber); border-color: var(--yellow-dim); background: var(--yellow-bg); }
     .rest-timer-value { color: var(--amber); font-size: var(--type-value); }
     .input-weight { font-size: var(--type-display); font-weight: 850; letter-spacing: -0.04em; }
-    button:active:not(:disabled) { transform: scale(var(--pressed-scale)); filter: brightness(0.92); }
+    button:active:not(:disabled) { transform: translateY(1px) scale(var(--pressed-scale)); filter: brightness(0.92); }
     button:disabled { opacity: 0.42; cursor: not-allowed; }
     input:focus, select:focus { box-shadow: var(--shadow-focus); }
+
+    /* ══ Motion & interaction ══════════════════════════════════════════════
+       Every entrance/loop animation keeps its animated (hidden/offset) initial
+       state ONLY inside @media (prefers-reduced-motion: no-preference), so
+       reduced-motion users always land on the final, static state — nothing
+       is ever parked at opacity:0 or a hidden dash offset waiting on motion. */
+    body::after {
+      content: ''; position: fixed; left: -20%; right: -20%; top: -10%; height: 62%;
+      z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(45% 55% at 28% 22%, rgba(91,157,255,0.10), transparent 70%),
+        radial-gradient(40% 50% at 82% 8%, rgba(255,143,94,0.075), transparent 72%);
+    }
+    .ex-orb { will-change: box-shadow, transform; }
+    .graph-dot { transform-box: fill-box; transform-origin: center; }
+
+    @media (prefers-reduced-motion: no-preference) {
+      body::after { animation: ambientDrift 24s ease-in-out infinite alternate; }
+      @keyframes ambientDrift { from { transform: translate3d(-3%,-1%,0); } to { transform: translate3d(4%,3%,0); } }
+
+      /* Load orb breathes its glow at idle, punches on a logged set (.flare) */
+      .ex-orb { animation: orbBreathe 5.5s ease-in-out infinite; }
+      @keyframes orbBreathe {
+        0%, 100% { box-shadow: 0 16px 40px rgba(91,157,255,0.22), inset 0 2px 10px rgba(210,225,255,0.10), inset 0 -14px 28px rgba(255,130,80,0.14); }
+        50%      { box-shadow: 0 18px 52px rgba(91,157,255,0.32), inset 0 2px 10px rgba(210,225,255,0.14), inset 0 -16px 32px rgba(255,130,80,0.20); }
+      }
+      .ex-orb.flare { animation: orbFlare 0.55s cubic-bezier(.2,.7,.3,1); }
+      @keyframes orbFlare {
+        0%   { transform: scale(1); }
+        32%  { transform: scale(1.045); box-shadow: 0 22px 66px rgba(91,157,255,0.5), inset 0 2px 12px rgba(255,220,190,0.45), inset 0 -16px 34px rgba(255,140,90,0.4); }
+        100% { transform: scale(1); }
+      }
+
+      /* Primary CTAs pull the eye with a slow glow + a periodic sheen sweep. */
+      .btn-log, .btn-primary { animation: ctaGlow 3s ease-in-out infinite; }
+      @keyframes ctaGlow { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.09); } }
+      .btn-primary, .btn-complete-ex, .btn-resume { position: relative; }
+      .btn-primary, .btn-log, .btn-complete-ex, .btn-resume { overflow: hidden; }
+      .btn-primary::after, .btn-log::after, .btn-complete-ex::after, .btn-resume::after {
+        content: ''; position: absolute; top: 0; left: -65%; width: 42%; height: 100%; pointer-events: none;
+        background: linear-gradient(100deg, transparent, rgba(255,255,255,0.26), transparent);
+        transform: skewX(-18deg); animation: sheen 4.8s ease-in-out infinite;
+      }
+      @keyframes sheen { 0%,64% { left: -65%; } 84%,100% { left: 130%; } }
+
+      /* Progress reveal: line draws on, area fades up, dots pop left→right. */
+      .graph-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: graphDraw 0.9s ease forwards; }
+      @keyframes graphDraw { to { stroke-dashoffset: 0; } }
+      .graph-area { animation: areaFade 1s ease backwards; }
+      @keyframes areaFade { from { opacity: 0; } to { opacity: 1; } }
+      .graph-dot { animation: dotPop 0.32s ease backwards; }
+      @keyframes dotPop { from { transform: scale(0); } to { transform: scale(1); } }
+    }
 
     /* ── Hover states — pointer devices only, so a tap doesn't leave a "stuck" hover on touch ── */
     @media (hover: hover) {
@@ -1026,7 +1112,7 @@
       .btn-primary.btn-success:hover { background: #4ade80; }
       .btn-secondary:hover { border-color: var(--border-hi); color: var(--white); }
       .btn-danger:hover { background: rgba(127,29,29,0.3); }
-      .btn-log:hover:not(:disabled) { border-color: var(--cyan); background: var(--bg-inner); box-shadow: var(--shadow-focus); }
+      .btn-log:hover:not(:disabled) { filter: brightness(1.06); box-shadow: 0 -8px 12px -4px var(--bg), 0 14px 32px -8px rgba(91,157,255,0.65), 0 10px 22px -10px rgba(255,143,94,0.5); }
       .btn-complete-ex:hover  { background: #4ade80; box-shadow: var(--shadow-raised); }
       .btn-session:hover { border-color: var(--violet-dim); }
       .btn-session:hover::before { opacity: 1; }
@@ -1848,6 +1934,21 @@ function addSet() {
   const restTotalSec = parseRestSeconds(state.activeExercise?.rest);
   const restEndsAt = Date.now() + restTotalSec * 1000;
   setState({ sets, repInput, activeSession: session, restEndsAt, restTotalSec });
+  flashOrb();   // brief flare on the load orb as visual confirmation the set landed
+}
+
+// One-shot flare on the exercise load orb — the confirmation that a set was
+// logged. Retrigger-safe: strip the class and force a reflow before re-adding
+// so a fast tapper gets a fresh animation each set rather than a dead one.
+// The CSS keyframe lives behind prefers-reduced-motion: no-preference, so a
+// reduced-motion user simply sees nothing move here.
+function flashOrb() {
+  const orb = document.querySelector('.ex-orb');
+  if (!orb) return;
+  orb.classList.remove('flare');
+  void orb.offsetWidth;          // reflow so removing + re-adding restarts the animation
+  orb.classList.add('flare');
+  setTimeout(() => orb.classList.remove('flare'), 600);
 }
 
 // ============================================================
@@ -2682,9 +2783,18 @@ function renderExercise() {
   const orbR = 110, orbC = 2 * Math.PI * orbR;
   const orbFrac = target > 0 ? Math.min(1, state.sets.length / target) : 0;
 
+  // Set-progress pips beside the "Sets X/Y" header — one dot per target set,
+  // lit as sets are logged. Capped so an unusually high target set count can't
+  // overflow the header row.
+  const setPipsHTML = (target > 0 && target <= 12)
+    ? `<span class="set-pips" aria-hidden="true">${
+        Array.from({ length: target }, (_, i) =>
+          `<span class="set-pip${i < state.sets.length ? ' done' : ''}"></span>`).join('')}</span>`
+    : '';
+
   // Last session
   const lastHTML = lastSession ? `
-    <div class="card--deep mb-3">
+    <div class="card--deep last-session mb-3">
       <div class="label mb-1">Last session</div>
       <div class="body-copy numeric">${lastSession.sets.map(s => s.reps).join('-')} @ ${lastSession.sets[0]?.weight ?? '?'}kg</div>
     </div>` : '';
@@ -2780,14 +2890,32 @@ function renderExercise() {
 
   const notesHTML = ex.notes ? `<div class="note-box mb-3">💡 ${esc(ex.notes)}</div>` : '';
 
+  // Previous sessions — newest first. Each row shows a weight trend vs. the
+  // session before it (the next-older row), so history reads as a progression
+  // rather than a flat ledger. The oldest row has nothing to compare against.
+  const histRows = history.slice(1);
   const historyHTML = history.length > 1 ? `
     <div class="section-label"><span>Previous sessions</span></div>
     <div class="space-y-2">
-      ${history.slice(1).map(entry => `
-        <div class="card--inner">
-          <div class="label mb-1">${new Date(entry.date).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>
-          <div class="history-value numeric">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0]?.weight ?? '?'}kg</div>
-        </div>`).join('')}
+      ${histRows.map((entry, i) => {
+        const w    = Number(entry.sets[0]?.weight);
+        const older = histRows[i + 1];
+        const wOld = older ? Number(older.sets[0]?.weight) : NaN;
+        let rowCls = '', trend = '';
+        if (Number.isFinite(w) && Number.isFinite(wOld)) {
+          if (w > wOld)      { rowCls = ' hist-up';   trend = `<span class="hist-trend up">▲</span>`; }
+          else if (w < wOld) { rowCls = ' hist-down'; trend = `<span class="hist-trend down">▼</span>`; }
+          else               { trend = `<span class="hist-trend flat">–</span>`; }
+        }
+        return `
+        <div class="card--inner hist-row${rowCls}">
+          <div class="hist-row-main">
+            <div class="label mb-1">${new Date(entry.date).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>
+            <div class="history-value numeric">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0]?.weight ?? '?'}kg</div>
+          </div>
+          ${trend}
+        </div>`;
+      }).join('')}
     </div>` : '';
 
   return `
@@ -2822,7 +2950,10 @@ function renderExercise() {
         ${renderRestTimer()}
 
         <div class="card card--glow mb-3">
-          <div class="title-sm mb-3">Sets ${state.sets.length}/${target}</div>
+          <div class="sets-head mb-3">
+            <span class="title-sm">Sets ${state.sets.length}/${target}</span>
+            ${setPipsHTML}
+          </div>
           ${state.sets.length > 0 ? `<div class="space-y-2 mb-3">${setsHTML}</div>` : setsHTML}
           ${removeHTML}
           ${progHTML}
@@ -2995,15 +3126,15 @@ function renderProgressContent() {
       statsHTML = `
         <div class="graph-stat-row">
           <div class="graph-stat">
-            <div class="graph-stat-val">${fmt(latest)}${unit}</div>
+            <div class="graph-stat-val js-countup">${fmt(latest)}${unit}</div>
             <div class="graph-stat-lbl">Current</div>
           </div>
           <div class="graph-stat">
-            <div class="graph-stat-val peak-val">${fmt(peak)}${unit}</div>
+            <div class="graph-stat-val peak-val js-countup">${fmt(peak)}${unit}</div>
             <div class="graph-stat-lbl">Peak</div>
           </div>
           <div class="graph-stat ${gain >= 0 ? 'stat-change--positive' : 'stat-change--negative'}">
-            <div class="graph-stat-val">${gain >= 0 ? '+' : ''}${fmt(gain)}${unit}</div>
+            <div class="graph-stat-val js-countup">${gain >= 0 ? '+' : ''}${fmt(gain)}${unit}</div>
             <div class="graph-stat-lbl">Progress</div>
           </div>
         </div>`;
@@ -3088,11 +3219,12 @@ function buildGraphSVG(points, mode) {
   const lastI = points.length - 1;
   const dots = points.map((p, i) => {
     const cx = xScale(i).toFixed(1), cy = yScale(p.val).toFixed(1);
+    const delay = `style="animation-delay:${(i * 0.04).toFixed(2)}s"`;
     if (i === lastI) {
-      return `<circle cx="${cx}" cy="${cy}" r="7" fill="var(--amber)" opacity="0.16" />`
-           + `<circle cx="${cx}" cy="${cy}" r="3.8" fill="var(--amber)" stroke="var(--bg-card)" stroke-width="1.5" />`;
+      return `<circle class="graph-dot" ${delay} cx="${cx}" cy="${cy}" r="7" fill="var(--amber)" opacity="0.16" />`
+           + `<circle class="graph-dot" ${delay} cx="${cx}" cy="${cy}" r="3.8" fill="var(--amber)" stroke="var(--bg-card)" stroke-width="1.5" />`;
     }
-    return `<circle cx="${cx}" cy="${cy}" r="3" fill="var(--cyan)" />`;
+    return `<circle class="graph-dot" ${delay} cx="${cx}" cy="${cy}" r="3" fill="var(--cyan)" />`;
   }).join('');
 
   return `
@@ -3103,8 +3235,8 @@ function buildGraphSVG(points, mode) {
           <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/>
         </linearGradient>
       </defs>
-      <path d="${areaPath}" fill="url(#gfill)" />
-      <path d="${linePath}" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path class="graph-area" d="${areaPath}" fill="url(#gfill)" />
+      <path class="graph-line" pathLength="1" d="${linePath}" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       ${dots}
       ${yTicks.join('')}
       ${xTicks.join('')}
@@ -3375,6 +3507,45 @@ function render() {
   } else {
     clearRestInterval();
   }
+
+  animateCountUps();
+}
+
+// Count the graph stat numbers up from zero to their final value on each
+// render of the progress view. Purely decorative: every element already
+// contains its exact final text, so we snapshot that, parse out an optional
+// leading sign, the number, and any trailing unit ("kg"), then animate only
+// the numeric part before restoring the original string verbatim — the DOM
+// never ends on a rounded or reformatted value. Skipped entirely under
+// prefers-reduced-motion, which leaves the final text untouched.
+function animateCountUps() {
+  const els = document.querySelectorAll('.js-countup');
+  if (!els.length) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  els.forEach(el => {
+    const finalText = el.textContent;
+    const m = finalText.match(/^([+-]?)(\d+(?:\.\d+)?)(.*)$/);
+    if (!m) return;
+    const sign = m[1], target = parseFloat(m[2]), suffix = m[3];
+    const decimals = (m[2].split('.')[1] || '').length;
+    if (!Number.isFinite(target)) return;
+
+    const DURATION = 550;
+    const start = performance.now();
+    const step = now => {
+      const t = Math.min(1, (now - start) / DURATION);
+      const eased = 1 - Math.pow(1 - t, 3);   // easeOutCubic
+      if (t < 1) {
+        el.textContent = sign + (target * eased).toFixed(decimals) + suffix;
+        requestAnimationFrame(step);
+      } else {
+        el.textContent = finalText;           // restore the exact original string
+      }
+    };
+    el.textContent = sign + (0).toFixed(decimals) + suffix;
+    requestAnimationFrame(step);
+  });
 }
 
 // ============================================================
