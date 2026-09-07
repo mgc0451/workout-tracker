@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Workout Tracker</title>
-  <meta name="theme-color" content="#070c16" />
+  <title>Workout Tracker Beta</title>
+  <meta name="theme-color" content="#090b0a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Workouts" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="apple-mobile-web-app-title" content="Workout Beta" />
+  <link rel="apple-touch-icon" href="../icon-192.png" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,6 +23,7 @@
       document.head.appendChild(l);
     });
   </script>
+  <link rel="stylesheet" href="beta.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -222,74 +223,6 @@
       padding: 8px 10px;
     }
 
-    /* ── "Last session" reads as a target to beat, not just a stat ── */
-    /* Accent via box-shadow inset, NOT border-left: the later
-       `.card--inner, .card--deep { border: 0 }` reset would zero a border. */
-    .last-session { box-shadow: inset 3px 0 var(--cyan); }
-
-    /* ── Set-progress pips: one dot per target set, lit as sets land ── */
-    .sets-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .set-pips  { display: inline-flex; gap: 6px; }
-    .set-pip {
-      width: 9px; height: 9px; border-radius: 50%;
-      border: 1.5px solid var(--border-hi); background: transparent;
-      transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
-    }
-    .set-pip.done {
-      border-color: transparent;
-      background: linear-gradient(135deg, var(--cyan), var(--amber));
-      box-shadow: 0 0 8px rgba(91,157,255,0.55);
-    }
-
-    /* ── Previous-session rows: a trend read at a glance ── */
-    /* Left accent via box-shadow inset (see note above — border would be reset). */
-    .hist-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; box-shadow: inset 3px 0 var(--border-hi); }
-    .hist-row.hist-up   { box-shadow: inset 3px 0 var(--green-dim); }
-    .hist-row.hist-down { box-shadow: inset 3px 0 var(--red-dim); }
-    .hist-row-main { min-width: 0; }
-    .hist-trend { font-size: 0.78rem; font-weight: 800; flex: none; line-height: 1; }
-    .hist-trend.up   { color: var(--green); }
-    .hist-trend.down { color: var(--red); }
-    .hist-trend.flat { color: var(--muted); }
-
-    /* ── Week-streak banner (home) ── */
-    .streak-banner {
-      display: flex; align-items: center; gap: 10px;
-      padding: 11px 14px; border-radius: var(--radius-md);
-      background: linear-gradient(100deg, rgba(255,143,94,0.15), rgba(255,195,106,0.05));
-      box-shadow: inset 0 0 0 1px rgba(255,143,94,0.28), inset 3px 0 var(--amber);
-    }
-    .streak-flame { font-size: 1.15rem; line-height: 1; }
-    .streak-num   { font-family: var(--font-display); font-size: 1.55rem; font-weight: 700; color: var(--yellow); line-height: 1; }
-    .streak-text  { font-weight: 800; color: var(--white); font-size: 0.85rem; }
-    .streak-tail  { margin-left: auto; font-size: 0.66rem; color: var(--amber); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
-
-    /* ── Session summary (post-workout recap) ── */
-    .summary-head { text-align: center; margin: 8px 0 18px; }
-    .summary-check {
-      width: 66px; height: 66px; margin: 0 auto 12px; border-radius: 50%;
-      display: grid; place-items: center; color: var(--green);
-      background: radial-gradient(circle at 50% 40%, rgba(52,217,166,0.22), rgba(52,217,166,0.05) 70%);
-      box-shadow: inset 0 0 0 1.5px rgba(52,217,166,0.5), 0 8px 26px -8px rgba(52,217,166,0.5);
-    }
-    .summary-check svg { width: 30px; height: 30px; }
-    .summary-name { margin-top: 2px; }
-    .summary-pr {
-      text-align: center; margin: 0 auto 16px; padding: 10px 16px; border-radius: var(--radius-pill);
-      font-weight: 800; font-size: 0.92rem; color: var(--yellow); width: fit-content;
-      background: linear-gradient(100deg, rgba(255,195,106,0.16), rgba(255,143,94,0.10));
-      box-shadow: inset 0 0 0 1px rgba(255,195,106,0.4);
-    }
-    .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .summary-tile {
-      background: var(--bg-card); border-radius: var(--radius-md); padding: 16px 12px; text-align: center;
-      box-shadow: var(--shadow-card);
-    }
-    .summary-tile-val { font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; color: var(--cyan); line-height: 1; letter-spacing: -0.02em; }
-    .summary-tile-lbl { font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-top: 5px; }
-    .summary-top { text-align: center; margin-top: 14px; color: var(--text-mid); font-size: 0.85rem; }
-    .summary-top .numeric { color: var(--white); font-weight: 700; }
-
     /* ── Buttons ── */
     button { cursor: pointer; border: none; font-family: inherit; transition: all 0.15s ease; -webkit-tap-highlight-color: transparent; }
     button:focus-visible, input:focus-visible, select:focus-visible {
@@ -353,22 +286,18 @@
 
     .btn-log {
       width: 100%;
-      /* The screen's primary action: a bold steel-blue→copper gradient that
-         echoes the load orb (blue rim, copper underglow) and finally lights up
-         the sheen sweep + ctaGlow wired in the Motion block. */
-      background: linear-gradient(135deg, #4f8cf0 0%, var(--cyan) 44%, var(--amber) 120%);
-      border: 1px solid rgba(255,255,255,0.20);
-      color: #0a1220;
-      padding: 15px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 0.9rem;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.12);
+      background: linear-gradient(135deg, var(--bg-inner), var(--bg-card));
+      border: 1px solid var(--border-hi);
+      color: var(--white);
+      padding: 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.875rem;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
       position: sticky;
       /* --kb is the on-screen keyboard's height, published by the
          visualViewport listener below. iOS resizes only the visual viewport
@@ -378,9 +307,7 @@
          existed to avoid. */
       bottom: calc(env(safe-area-inset-bottom, 0px) + var(--kb, 0px));
       z-index: 5;
-      box-shadow: 0 -8px 12px -4px var(--bg),
-                  0 12px 28px -8px rgba(91,157,255,0.55),
-                  0 8px 20px -10px rgba(255,143,94,0.45);
+      box-shadow: 0 -8px 12px -4px var(--bg);
       transition: bottom 0.15s ease-out;
     }
     .btn-log:active:not(:disabled) { transform: scale(0.98); }
@@ -800,12 +727,17 @@
       position: relative;
     }
     .cal-day.empty { pointer-events: none; }
-    /* "You are here": today is a soft cyan ring chip so it reads at a glance. */
-    .cal-day.today {
-      color: var(--cyan);
-      font-weight: 800;
-      background: rgba(91,157,255,0.10);
-      box-shadow: inset 0 0 0 1.5px var(--cyan-dim);
+    .cal-day.today { color: var(--white); }
+    .cal-day.today::after {
+      content: '';
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--cyan);
     }
     .cal-day.worked {
       background: linear-gradient(135deg, var(--wks), transparent);
@@ -846,7 +778,7 @@
     .tab-btn.active {
       background: var(--bg-card);
       color: var(--white);
-      box-shadow: 0 1px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -2px 0 var(--cyan);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
     }
 
     /* ── Select dropdown ── */
@@ -1063,10 +995,6 @@
     .exercise-item { border: 0; border-radius: var(--radius-md); box-shadow: inset 0 -1px var(--border); }
     .exercise-item.partial { border: 0; box-shadow: inset 3px 0 var(--cyan), inset 0 -1px var(--border); background: var(--bg-card); }
     .exercise-item.done { border: 0; background: var(--bg-card); }
-    /* Trend-tinted left edge — reinforces the ↑/↓ arrow so the session list
-       reads as progression at a glance. Only on cards with no other status. */
-    .exercise-item.ex-up   { box-shadow: inset 3px 0 var(--green-dim), inset 0 -1px var(--border); }
-    .exercise-item.ex-down { box-shadow: inset 3px 0 var(--red-dim), inset 0 -1px var(--border); }
     .set-row { border: 0; border-radius: var(--radius-md); }
     .progress-bar-wrap { border: 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-card); position: relative; overflow: hidden; }
     .progress-bar-wrap::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--wk, var(--cyan)); }
@@ -1074,95 +1002,32 @@
     .progress-title { color: var(--cyan); font-size: 1.125rem; line-height: 1.1; font-weight: 850; letter-spacing: -0.025em; }
     .graph-stat { border: 0; border-radius: var(--radius-md); }
     .graph-stat + .graph-stat { box-shadow: inset 1px 0 var(--border); }
-    /* Trained days read as filled tinted pills in the workout's colour, so a
-       month of training looks like a streak rather than a scatter of dots. */
-    .cal-day.worked { background: var(--wks); border: 0; border-radius: 6px; color: var(--white); font-weight: 800; box-shadow: inset 0 0 0 1px var(--wks); }
+    .cal-day.worked { background: transparent; border: 0; color: var(--text-mid); }
+    .cal-day.worked::before { content: ''; position: absolute; top: 2px; width: 4px; height: 4px; border-radius: 50%; background: var(--wk); }
     .wk-swatch, .color-swatch-btn.selected { box-shadow: none; }
     .ex-accent-bar.wk-accent { background: var(--wk); }
 
     button, select, input { min-height: var(--touch-min); }
     .btn-back, .cal-nav, .btn-delete-day, .btn-edit-day { min-width: var(--touch-min); min-height: var(--touch-min); }
-    /* START WORKOUT and other primary CTAs share the load-orb gradient — the
-       twin of .btn-log — so the two hero actions read as one system. */
-    .btn-primary { background: linear-gradient(135deg, #4f8cf0 0%, var(--cyan) 44%, var(--amber) 120%); color: var(--bg); font-weight: 800; letter-spacing: 0.03em; text-shadow: 0 1px 0 rgba(255,255,255,0.12); border-radius: var(--radius-md); box-shadow: var(--shadow-raised), 0 12px 28px -8px rgba(91,157,255,0.5), 0 8px 20px -10px rgba(255,143,94,0.4); }
-    /* btn-success (COMPLETE SESSION) keeps its solid green — it comes after
-       .btn-primary here, so the green wins on the combined class. */
-    .btn-success { background: var(--green); color: #031308; text-shadow: none; box-shadow: var(--shadow-raised), 0 12px 26px -10px rgba(52,217,166,0.5); }
+    .btn-primary { background: var(--cyan); color: var(--bg); border-radius: var(--radius-md); box-shadow: var(--shadow-raised); }
+    .btn-success { background: var(--green); color: #031308; }
     .btn-complete-ex { background: var(--green); border: 0; color: #031308; box-shadow: var(--shadow-raised); }
     .btn-resume { background: var(--cyan); color: var(--bg); }
     .btn-skip-toggle.active { color: var(--amber); border-color: var(--yellow-dim); background: var(--yellow-bg); }
     .rest-timer-value { color: var(--amber); font-size: var(--type-value); }
     .input-weight { font-size: var(--type-display); font-weight: 850; letter-spacing: -0.04em; }
-    button:active:not(:disabled) { transform: translateY(1px) scale(var(--pressed-scale)); filter: brightness(0.92); }
+    button:active:not(:disabled) { transform: scale(var(--pressed-scale)); filter: brightness(0.92); }
     button:disabled { opacity: 0.42; cursor: not-allowed; }
     input:focus, select:focus { box-shadow: var(--shadow-focus); }
-
-    /* ══ Motion & interaction ══════════════════════════════════════════════
-       Every entrance/loop animation keeps its animated (hidden/offset) initial
-       state ONLY inside @media (prefers-reduced-motion: no-preference), so
-       reduced-motion users always land on the final, static state — nothing
-       is ever parked at opacity:0 or a hidden dash offset waiting on motion. */
-    body::after {
-      content: ''; position: fixed; left: -20%; right: -20%; top: -10%; height: 62%;
-      z-index: 0; pointer-events: none;
-      background:
-        radial-gradient(45% 55% at 28% 22%, rgba(91,157,255,0.10), transparent 70%),
-        radial-gradient(40% 50% at 82% 8%, rgba(255,143,94,0.075), transparent 72%);
-    }
-    .graph-dot { transform-box: fill-box; transform-origin: center; }
-
-    @media (prefers-reduced-motion: no-preference) {
-      body::after { animation: ambientDrift 24s ease-in-out infinite alternate; }
-      @keyframes ambientDrift { from { transform: translate3d(-3%,-1%,0); } to { transform: translate3d(4%,3%,0); } }
-
-      /* Load orb breathes its glow at idle, punches on a logged set (.flare) */
-      .ex-orb { will-change: box-shadow, transform; animation: orbBreathe 5.5s ease-in-out infinite; }
-      @keyframes orbBreathe {
-        0%, 100% { box-shadow: 0 16px 40px rgba(91,157,255,0.22), inset 0 2px 10px rgba(210,225,255,0.10), inset 0 -14px 28px rgba(255,130,80,0.14); }
-        50%      { box-shadow: 0 18px 52px rgba(91,157,255,0.32), inset 0 2px 10px rgba(210,225,255,0.14), inset 0 -16px 32px rgba(255,130,80,0.20); }
-      }
-      .ex-orb.flare { animation: orbFlare 0.55s cubic-bezier(.2,.7,.3,1); }
-      @keyframes orbFlare {
-        0%   { transform: scale(1); }
-        32%  { transform: scale(1.045); box-shadow: 0 22px 66px rgba(91,157,255,0.5), inset 0 2px 12px rgba(255,220,190,0.45), inset 0 -16px 34px rgba(255,140,90,0.4); }
-        100% { transform: scale(1); }
-      }
-
-      /* Primary CTAs pull the eye with a slow glow + a periodic sheen sweep. */
-      .btn-log, .btn-primary { animation: ctaGlow 3s ease-in-out infinite; }
-      @keyframes ctaGlow { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.09); } }
-      .btn-primary, .btn-complete-ex, .btn-resume { position: relative; }
-      .btn-primary, .btn-log, .btn-complete-ex, .btn-resume { overflow: hidden; }
-      .btn-primary::after, .btn-log::after, .btn-complete-ex::after, .btn-resume::after {
-        content: ''; position: absolute; top: 0; left: -65%; width: 42%; height: 100%; pointer-events: none;
-        background: linear-gradient(100deg, transparent, rgba(255,255,255,0.26), transparent);
-        transform: skewX(-18deg); animation: sheen 4.8s ease-in-out infinite;
-      }
-      @keyframes sheen { 0%,64% { left: -65%; } 84%,100% { left: 130%; } }
-
-      /* Progress reveal: line draws on, area fades up, dots pop left→right. */
-      .graph-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: graphDraw 0.9s ease forwards; }
-      @keyframes graphDraw { to { stroke-dashoffset: 0; } }
-      .graph-area { animation: areaFade 1s ease backwards; }
-      @keyframes areaFade { from { opacity: 0; } to { opacity: 1; } }
-      .graph-dot { animation: dotPop 0.32s ease backwards; }
-      @keyframes dotPop { from { transform: scale(0); } to { transform: scale(1); } }
-
-      /* Session-complete check pops in; the PR banner rises just after. */
-      .summary-check { animation: checkPop 0.5s cubic-bezier(.2,.8,.3,1.3) backwards; }
-      @keyframes checkPop { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-      .summary-pr { animation: prRise 0.5s ease 0.15s backwards; }
-      @keyframes prRise { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
-    }
 
     /* ── Hover states — pointer devices only, so a tap doesn't leave a "stuck" hover on touch ── */
     @media (hover: hover) {
       .btn-back:hover { color: var(--cyan); }
-      .btn-primary:hover  { filter: brightness(1.06); box-shadow: var(--shadow-raised), 0 14px 32px -8px rgba(91,157,255,0.6), 0 10px 22px -10px rgba(255,143,94,0.45); }
-      .btn-primary.btn-success:hover { background: #4ade80; filter: none; }
+      .btn-primary:hover  { background: #67e8f9; box-shadow: var(--shadow-raised); }
+      .btn-primary.btn-success:hover { background: #4ade80; }
       .btn-secondary:hover { border-color: var(--border-hi); color: var(--white); }
       .btn-danger:hover { background: rgba(127,29,29,0.3); }
-      .btn-log:hover:not(:disabled) { filter: brightness(1.06); box-shadow: 0 -8px 12px -4px var(--bg), 0 14px 32px -8px rgba(91,157,255,0.65), 0 10px 22px -10px rgba(255,143,94,0.5); }
+      .btn-log:hover:not(:disabled) { border-color: var(--cyan); background: var(--bg-inner); box-shadow: var(--shadow-focus); }
       .btn-complete-ex:hover  { background: #4ade80; box-shadow: var(--shadow-raised); }
       .btn-session:hover { border-color: var(--violet-dim); }
       .btn-session:hover::before { opacity: 1; }
@@ -1187,7 +1052,7 @@
       z-index: 50;
       top: max(10px, env(safe-area-inset-top));
       right: max(12px, env(safe-area-inset-right));
-      min-height: 44px;
+      min-height: 36px;
       padding: 8px 12px;
       border: 1px solid rgba(91,157,255,0.4);
       border-radius: 999px;
@@ -1204,7 +1069,7 @@
 </head>
 <body>
 <div id="app"></div>
-<a class="beta-switch" href="beta/" aria-label="Open the Beta experience">Beta ↗</a>
+<a class="classic-switch" href="../" aria-label="Return to the Classic experience">← Classic</a>
 
 <script>
 'use strict';
@@ -1516,9 +1381,6 @@ let state = {
   restEndsAt:     null,
   restTotalSec:   null,
   lastDeletedHistory: null,
-  // Transient recap of the session that was just finished (see completeSession /
-  // renderSummary). Never persisted — a reload lands back on the home screen.
-  summary:        null,
 };
 
 const SEED_HISTORY = [{"date":"2026-03-13T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":28.0,"reps":8},{"weight":28.0,"reps":8},{"weight":28.0,"reps":8}]},{"date":"2026-03-13T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":41.0,"reps":10},{"weight":41.0,"reps":10},{"weight":41.0,"reps":9}]},{"date":"2026-03-13T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":18.0,"reps":9},{"weight":18.0,"reps":9},{"weight":18.0,"reps":9}]},{"date":"2026-03-13T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":87.5,"reps":7},{"weight":87.5,"reps":7},{"weight":87.5,"reps":7}]},{"date":"2026-03-13T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":40.0,"reps":8},{"weight":40.0,"reps":8},{"weight":40.0,"reps":8}]},{"date":"2026-03-13T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":84.5,"reps":15},{"weight":84.5,"reps":15}]},{"date":"2026-03-09T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":190.0,"reps":12},{"weight":190.0,"reps":12},{"weight":190.0,"reps":12}]},{"date":"2026-03-09T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":60.0,"reps":6},{"weight":60.0,"reps":6},{"weight":60.0,"reps":6}]},{"date":"2026-03-09T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":82.0,"reps":10},{"weight":82.0,"reps":10},{"weight":82.0,"reps":10}]},{"date":"2026-03-09T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":14.0,"reps":14},{"weight":14.0,"reps":14},{"weight":14.0,"reps":14}]},{"date":"2026-03-09T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":32.5,"reps":10},{"weight":32.5,"reps":10},{"weight":32.5,"reps":10}]},{"date":"2026-03-09T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":14.0,"reps":10},{"weight":14.0,"reps":10},{"weight":14.0,"reps":10}]},{"date":"2026-03-08T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":30.0,"reps":9},{"weight":30.0,"reps":9},{"weight":30.0,"reps":9}]},{"date":"2026-03-08T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":36.0,"reps":9},{"weight":36.0,"reps":9},{"weight":36.0,"reps":9}]},{"date":"2026-03-08T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":32.5,"reps":15},{"weight":32.5,"reps":15},{"weight":32.5,"reps":14}]},{"date":"2026-03-08T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":36.25,"reps":15},{"weight":36.25,"reps":15},{"weight":36.25,"reps":15}]},{"date":"2026-03-08T09:00:00.000Z","exercise":"Overhead Tricep Extension","session":"C","sets":[{"weight":28.75,"reps":10},{"weight":28.75,"reps":10},{"weight":28.75,"reps":10}]},{"date":"2026-03-08T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":19},{"weight":0.0,"reps":19}]},{"date":"2026-03-07T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":26.0,"reps":10},{"weight":26.0,"reps":10},{"weight":26.0,"reps":10}]},{"date":"2026-03-07T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":41.0,"reps":10},{"weight":41.0,"reps":10},{"weight":41.0,"reps":9}]},{"date":"2026-03-07T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":87.5,"reps":6},{"weight":87.5,"reps":6},{"weight":87.5,"reps":6}]},{"date":"2026-03-07T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":18.0,"reps":8},{"weight":18.0,"reps":8},{"weight":18.0,"reps":8}]},{"date":"2026-03-07T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":82.0,"reps":15},{"weight":82.0,"reps":15},{"weight":82.0,"reps":13}]},{"date":"2026-03-07T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":35.0,"reps":10},{"weight":35.0,"reps":10},{"weight":35.0,"reps":10}]},{"date":"2026-03-05T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":57.5,"reps":8},{"weight":57.5,"reps":8},{"weight":57.5,"reps":8}]},{"date":"2026-03-05T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":180.0,"reps":15},{"weight":180.0,"reps":15},{"weight":180.0,"reps":15}]},{"date":"2026-03-05T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":82.0,"reps":9},{"weight":82.0,"reps":9},{"weight":82.0,"reps":9}]},{"date":"2026-03-05T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":14.0,"reps":13},{"weight":14.0,"reps":13},{"weight":14.0,"reps":13}]},{"date":"2026-03-05T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":32.5,"reps":9},{"weight":32.5,"reps":9},{"weight":32.5,"reps":9}]},{"date":"2026-03-05T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":14.0,"reps":10},{"weight":14.0,"reps":10},{"weight":14.0,"reps":9}]},{"date":"2026-03-04T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":30.0,"reps":8},{"weight":30.0,"reps":8},{"weight":30.0,"reps":8}]},{"date":"2026-03-04T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":36.0,"reps":8},{"weight":36.0,"reps":8},{"weight":36.0,"reps":8}]},{"date":"2026-03-04T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":30.0,"reps":15},{"weight":30.0,"reps":15},{"weight":30.0,"reps":15}]},{"date":"2026-03-04T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":36.25,"reps":13},{"weight":36.25,"reps":13},{"weight":36.25,"reps":13}]},{"date":"2026-03-04T09:00:00.000Z","exercise":"Overhead Tricep Extension","session":"C","sets":[{"weight":26.25,"reps":10},{"weight":26.25,"reps":10},{"weight":26.25,"reps":10}]},{"date":"2026-03-04T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":18},{"weight":0.0,"reps":18},{"weight":0.0,"reps":18}]},{"date":"2026-03-03T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":85.0,"reps":7},{"weight":85.0,"reps":7},{"weight":85.0,"reps":7}]},{"date":"2026-03-03T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":26.0,"reps":10},{"weight":26.0,"reps":10},{"weight":26.0,"reps":9}]},{"date":"2026-03-03T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":40.0,"reps":9},{"weight":40.0,"reps":9},{"weight":40.0,"reps":8}]},{"date":"2026-03-03T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":16.0,"reps":10},{"weight":16.0,"reps":10},{"weight":16.0,"reps":10}]},{"date":"2026-03-03T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":75.0,"reps":15},{"weight":75.0,"reps":15},{"weight":75.0,"reps":15}]},{"date":"2026-03-03T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":35.0,"reps":10},{"weight":35.0,"reps":10},{"weight":35.0,"reps":9}]},{"date":"2026-03-01T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":180.0,"reps":13},{"weight":180.0,"reps":13},{"weight":180.0,"reps":13}]},{"date":"2026-03-01T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":57.5,"reps":7},{"weight":57.5,"reps":7},{"weight":57.5,"reps":7}]},{"date":"2026-03-01T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":81.5,"reps":10},{"weight":80.0,"reps":10},{"weight":80.0,"reps":10}]},{"date":"2026-03-01T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":14.0,"reps":12},{"weight":14.0,"reps":12},{"weight":14.0,"reps":12}]},{"date":"2026-03-01T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":32.5,"reps":8},{"weight":32.5,"reps":8},{"weight":32.5,"reps":8}]},{"date":"2026-03-01T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":14.0,"reps":9},{"weight":14.0,"reps":9},{"weight":14.0,"reps":9}]},{"date":"2026-02-28T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":28.0,"reps":10},{"weight":28.0,"reps":10},{"weight":28.0,"reps":10}]},{"date":"2026-02-28T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":33.5,"reps":10},{"weight":33.5,"reps":10},{"weight":33.5,"reps":10}]},{"date":"2026-02-28T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":30.0,"reps":15},{"weight":30.0,"reps":15},{"weight":30.0,"reps":14}]},{"date":"2026-02-28T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":33.75,"reps":15},{"weight":33.75,"reps":15},{"weight":33.75,"reps":15}]},{"date":"2026-02-28T09:00:00.000Z","exercise":"Overhead Tricep Extension","session":"C","sets":[{"weight":26.25,"reps":10},{"weight":26.25,"reps":10},{"weight":26.25,"reps":9}]},{"date":"2026-02-28T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":17},{"weight":0.0,"reps":17},{"weight":0.0,"reps":17}]},{"date":"2026-02-27T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":82.5,"reps":7},{"weight":82.5,"reps":7},{"weight":82.5,"reps":7}]},{"date":"2026-02-27T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":26.0,"reps":10},{"weight":26.0,"reps":10},{"weight":26.0,"reps":8}]},{"date":"2026-02-27T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":40.0,"reps":8},{"weight":40.0,"reps":8},{"weight":40.0,"reps":8}]},{"date":"2026-02-27T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":16.0,"reps":9},{"weight":16.0,"reps":9},{"weight":16.0,"reps":9}]},{"date":"2026-02-27T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":75.0,"reps":13},{"weight":75.0,"reps":13},{"weight":75.0,"reps":13}]},{"date":"2026-02-27T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":35.0,"reps":9},{"weight":35.0,"reps":9},{"weight":35.0,"reps":9}]},{"date":"2026-02-25T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":57.5,"reps":6},{"weight":57.5,"reps":6},{"weight":57.5,"reps":5}]},{"date":"2026-02-25T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":170.0,"reps":15},{"weight":170.0,"reps":15},{"weight":170.0,"reps":15}]},{"date":"2026-02-25T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":80.0,"reps":10},{"weight":80.0,"reps":9},{"weight":80.0,"reps":8}]},{"date":"2026-02-25T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":12.0,"reps":15},{"weight":12.0,"reps":15},{"weight":12.0,"reps":15}]},{"date":"2026-02-25T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":30.0,"reps":10},{"weight":30.0,"reps":10},{"weight":30.0,"reps":10}]},{"date":"2026-02-25T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":14.0,"reps":8},{"weight":14.0,"reps":8},{"weight":14.0,"reps":8}]},{"date":"2026-02-24T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":28.0,"reps":9},{"weight":28.0,"reps":9},{"weight":28.0,"reps":9}]},{"date":"2026-02-24T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":33.5,"reps":8},{"weight":33.5,"reps":8},{"weight":33.5,"reps":8}]},{"date":"2026-02-24T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":27.5,"reps":15},{"weight":27.5,"reps":15},{"weight":27.5,"reps":15}]},{"date":"2026-02-24T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":33.75,"reps":13},{"weight":33.75,"reps":13},{"weight":33.75,"reps":13}]},{"date":"2026-02-24T09:00:00.000Z","exercise":"Overhead Tricep Extension","session":"C","sets":[{"weight":21.25,"reps":12},{"weight":23.75,"reps":10},{"weight":23.75,"reps":10}]},{"date":"2026-02-24T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":16},{"weight":0.0,"reps":16},{"weight":0.0,"reps":16}]},{"date":"2026-02-23T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":26.0,"reps":8},{"weight":26.0,"reps":8},{"weight":26.0,"reps":8}]},{"date":"2026-02-23T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":38.5,"reps":10},{"weight":38.5,"reps":10},{"weight":38.5,"reps":10}]},{"date":"2026-02-23T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":90.0,"reps":5},{"weight":90.0,"reps":5},{"weight":90.0,"reps":5}]},{"date":"2026-02-23T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":16.0,"reps":8},{"weight":16.0,"reps":8},{"weight":16.0,"reps":8}]},{"date":"2026-02-23T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":68.0,"reps":15},{"weight":68.0,"reps":15},{"weight":68.0,"reps":15}]},{"date":"2026-02-23T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":35.0,"reps":8},{"weight":35.0,"reps":8},{"weight":35.0,"reps":8}]},{"date":"2026-02-21T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":52.5,"reps":6},{"weight":52.5,"reps":6}]},{"date":"2026-02-21T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":160.0,"reps":12},{"weight":160.0,"reps":12}]},{"date":"2026-02-21T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":67.0,"reps":8},{"weight":77.0,"reps":8},{"weight":77.0,"reps":8}]},{"date":"2026-02-21T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":12.0,"reps":12},{"weight":12.0,"reps":12}]},{"date":"2026-02-21T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":12.0,"reps":8},{"weight":12.0,"reps":8}]},{"date":"2026-02-21T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":30.0,"reps":8},{"weight":30.0,"reps":8}]},{"date":"2026-02-20T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":28.5,"reps":8},{"weight":28.5,"reps":8}]},{"date":"2026-02-20T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":26.0,"reps":8},{"weight":26.0,"reps":8}]},{"date":"2026-02-20T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":31.25,"reps":12},{"weight":31.25,"reps":12}]},{"date":"2026-02-20T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":25.0,"reps":12},{"weight":25.0,"reps":12}]},{"date":"2026-02-20T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":15},{"weight":0.0,"reps":15}]},{"date":"2026-02-19T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":24.0,"reps":8},{"weight":24.0,"reps":8}]},{"date":"2026-02-19T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":38.5,"reps":8},{"weight":38.5,"reps":8}]},{"date":"2026-02-19T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":80.0,"reps":5},{"weight":80.0,"reps":5}]},{"date":"2026-02-19T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":14.0,"reps":8},{"weight":14.0,"reps":8}]},{"date":"2026-02-19T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":68.0,"reps":12},{"weight":68.0,"reps":12}]},{"date":"2026-02-19T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":30.0,"reps":8},{"weight":30.0,"reps":8}]},{"date":"2026-02-17T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":52.5,"reps":8},{"weight":52.5,"reps":8},{"weight":52.5,"reps":8}]},{"date":"2026-02-17T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":160.0,"reps":15},{"weight":160.0,"reps":15},{"weight":160.0,"reps":15}]},{"date":"2026-02-17T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":77.0,"reps":10},{"weight":77.0,"reps":10},{"weight":77.0,"reps":10}]},{"date":"2026-02-17T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":12.0,"reps":15},{"weight":12.0,"reps":15},{"weight":12.0,"reps":14}]},{"date":"2026-02-17T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":12.0,"reps":12},{"weight":12.0,"reps":12},{"weight":12.0,"reps":11}]},{"date":"2026-02-17T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":28.0,"reps":12},{"weight":28.0,"reps":11},{"weight":28.0,"reps":10}]},{"date":"2026-02-16T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":26.0,"reps":12},{"weight":26.0,"reps":12},{"weight":26.0,"reps":12}]},{"date":"2026-02-16T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":28.5,"reps":12},{"weight":28.5,"reps":12},{"weight":28.5,"reps":12}]},{"date":"2026-02-16T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":25.0,"reps":15},{"weight":25.0,"reps":15},{"weight":25.0,"reps":15}]},{"date":"2026-02-16T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":31.25,"reps":15},{"weight":31.25,"reps":15},{"weight":31.25,"reps":15}]},{"date":"2026-02-16T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":15},{"weight":0.0,"reps":15}]},{"date":"2026-02-15T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":24.0,"reps":12},{"weight":24.0,"reps":12},{"weight":24.0,"reps":12}]},{"date":"2026-02-15T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":80.0,"reps":8},{"weight":80.0,"reps":8},{"weight":80.0,"reps":8}]},{"date":"2026-02-15T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":38.5,"reps":10},{"weight":38.5,"reps":9},{"weight":38.5,"reps":9}]},{"date":"2026-02-15T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":14.0,"reps":12},{"weight":14.0,"reps":12},{"weight":14.0,"reps":12}]},{"date":"2026-02-15T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":68.0,"reps":15},{"weight":68.0,"reps":15},{"weight":68.0,"reps":13}]},{"date":"2026-02-15T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":30.0,"reps":12},{"weight":30.0,"reps":12},{"weight":30.0,"reps":10}]},{"date":"2026-02-13T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":50.0,"reps":8},{"weight":50.0,"reps":8},{"weight":50.0,"reps":8}]},{"date":"2026-02-13T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":150.0,"reps":15},{"weight":150.0,"reps":15},{"weight":150.0,"reps":15}]},{"date":"2026-02-13T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":77.0,"reps":9},{"weight":77.0,"reps":9},{"weight":77.0,"reps":8}]},{"date":"2026-02-13T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":12.0,"reps":14},{"weight":12.0,"reps":14},{"weight":12.0,"reps":12}]},{"date":"2026-02-13T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":12.0,"reps":12},{"weight":12.0,"reps":11},{"weight":12.0,"reps":11}]},{"date":"2026-02-13T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":26.25,"reps":12},{"weight":26.25,"reps":12},{"weight":26.25,"reps":12}]},{"date":"2026-02-12T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":26.0,"reps":12},{"weight":26.0,"reps":12},{"weight":26.0,"reps":10}]},{"date":"2026-02-12T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":28.5,"reps":10},{"weight":28.5,"reps":10},{"weight":28.5,"reps":10}]},{"date":"2026-02-12T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":20.0,"reps":15},{"weight":25.0,"reps":15},{"weight":25.0,"reps":14}]},{"date":"2026-02-12T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":31.25,"reps":13},{"weight":31.25,"reps":13},{"weight":31.25,"reps":13}]},{"date":"2026-02-12T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":15},{"weight":0.0,"reps":15},{"weight":0.0,"reps":15}]},{"date":"2026-02-11T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":24.0,"reps":10},{"weight":24.0,"reps":10},{"weight":24.0,"reps":10}]},{"date":"2026-02-11T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":75.0,"reps":8},{"weight":75.0,"reps":8},{"weight":75.0,"reps":8}]},{"date":"2026-02-11T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":38.5,"reps":8},{"weight":38.5,"reps":8},{"weight":38.5,"reps":8}]},{"date":"2026-02-11T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":14.0,"reps":12},{"weight":14.0,"reps":12},{"weight":14.0,"reps":10}]},{"date":"2026-02-11T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":68.0,"reps":13},{"weight":68.0,"reps":13},{"weight":68.0,"reps":13}]},{"date":"2026-02-11T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":30.0,"reps":10},{"weight":30.0,"reps":10},{"weight":30.0,"reps":10}]},{"date":"2026-02-09T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":50.0,"reps":7},{"weight":50.0,"reps":7},{"weight":50.0,"reps":7}]},{"date":"2026-02-09T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":150.0,"reps":13},{"weight":150.0,"reps":13},{"weight":150.0,"reps":13}]},{"date":"2026-02-09T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":67.0,"reps":12},{"weight":67.0,"reps":12},{"weight":67.0,"reps":12}]},{"date":"2026-02-09T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":12.0,"reps":12},{"weight":12.0,"reps":12},{"weight":12.0,"reps":12}]},{"date":"2026-02-09T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":12.0,"reps":10},{"weight":12.0,"reps":10},{"weight":12.0,"reps":10}]},{"date":"2026-02-09T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":23.75,"reps":13},{"weight":23.75,"reps":12},{"weight":23.75,"reps":12}]},{"date":"2026-02-08T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":24.0,"reps":12},{"weight":24.0,"reps":12},{"weight":24.0,"reps":12}]},{"date":"2026-02-08T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":23.5,"reps":12},{"weight":23.5,"reps":12},{"weight":23.5,"reps":12}]},{"date":"2026-02-08T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":20.0,"reps":15},{"weight":20.0,"reps":15},{"weight":20.0,"reps":15}]},{"date":"2026-02-08T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":28.75,"reps":15},{"weight":28.75,"reps":15},{"weight":28.75,"reps":15}]},{"date":"2026-02-08T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":15},{"weight":0.0,"reps":15},{"weight":0.0,"reps":15}]},{"date":"2026-02-07T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":70.0,"reps":8},{"weight":70.0,"reps":8},{"weight":70.0,"reps":8}]},{"date":"2026-02-07T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":22.0,"reps":12},{"weight":22.0,"reps":12},{"weight":22.0,"reps":12}]},{"date":"2026-02-07T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":33.5,"reps":10},{"weight":33.5,"reps":10},{"weight":33.5,"reps":10}]},{"date":"2026-02-07T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":14.0,"reps":10},{"weight":14.0,"reps":10},{"weight":14.0,"reps":10}]},{"date":"2026-02-07T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":61.0,"reps":15},{"weight":61.0,"reps":15},{"weight":61.0,"reps":15}]},{"date":"2026-02-07T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":25.0,"reps":12},{"weight":25.0,"reps":12},{"weight":25.0,"reps":12}]},{"date":"2026-02-05T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":47.5,"reps":8},{"weight":47.5,"reps":8},{"weight":47.5,"reps":8}]},{"date":"2026-02-05T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":140.0,"reps":15},{"weight":140.0,"reps":15},{"weight":140.0,"reps":15}]},{"date":"2026-02-05T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":67.0,"reps":10},{"weight":67.0,"reps":10},{"weight":67.0,"reps":10}]},{"date":"2026-02-05T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":12.0,"reps":10},{"weight":12.0,"reps":10},{"weight":12.0,"reps":10}]},{"date":"2026-02-05T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":12.0,"reps":10},{"weight":12.0,"reps":10},{"weight":12.0,"reps":9}]},{"date":"2026-02-05T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":21.25,"reps":12},{"weight":21.25,"reps":12},{"weight":21.25,"reps":12}]},{"date":"2026-02-04T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":24.0,"reps":11},{"weight":24.0,"reps":11},{"weight":24.0,"reps":10}]},{"date":"2026-02-04T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":26.25,"reps":15},{"weight":26.25,"reps":15},{"weight":26.25,"reps":15}]},{"date":"2026-02-04T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":23.5,"reps":10},{"weight":23.5,"reps":10},{"weight":23.5,"reps":10}]},{"date":"2026-02-04T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":20.0,"reps":15},{"weight":20.0,"reps":15},{"weight":20.0,"reps":14}]},{"date":"2026-02-03T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":60.0,"reps":10},{"weight":60.0,"reps":10},{"weight":60.0,"reps":10}]},{"date":"2026-02-03T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":22.0,"reps":12},{"weight":22.0,"reps":12},{"weight":22.0,"reps":11}]},{"date":"2026-02-03T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":33.5,"reps":10},{"weight":33.5,"reps":10},{"weight":33.5,"reps":8}]},{"date":"2026-02-03T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":14.0,"reps":10},{"weight":14.0,"reps":10},{"weight":14.0,"reps":8}]},{"date":"2026-02-03T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":61.0,"reps":12},{"weight":61.0,"reps":12},{"weight":61.0,"reps":12}]},{"date":"2026-02-03T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":25.0,"reps":9},{"weight":25.0,"reps":10},{"weight":25.0,"reps":10}]},{"date":"2026-02-01T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":45.0,"reps":7},{"weight":45.0,"reps":7},{"weight":45.0,"reps":9}]},{"date":"2026-02-01T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":67.0,"reps":9},{"weight":67.0,"reps":9},{"weight":67.0,"reps":8}]},{"date":"2026-02-01T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":130.0,"reps":15},{"weight":130.0,"reps":15},{"weight":130.0,"reps":15}]},{"date":"2026-02-01T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":12.0,"reps":9},{"weight":12.0,"reps":9},{"weight":12.0,"reps":9}]},{"date":"2026-02-01T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":12.0,"reps":8},{"weight":12.0,"reps":9},{"weight":12.0,"reps":8}]},{"date":"2026-02-01T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":21.25,"reps":10},{"weight":21.25,"reps":10},{"weight":21.25,"reps":10}]},{"date":"2026-01-31T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":22.0,"reps":12},{"weight":22.0,"reps":12},{"weight":22.0,"reps":12}]},{"date":"2026-01-31T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":20.0,"reps":12},{"weight":20.0,"reps":12},{"weight":20.0,"reps":12}]},{"date":"2026-01-31T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":23.75,"reps":15},{"weight":23.75,"reps":15},{"weight":23.75,"reps":15}]},{"date":"2026-01-31T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":20.0,"reps":14},{"weight":20.0,"reps":14},{"weight":20.0,"reps":14}]},{"date":"2026-01-31T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":11},{"weight":0.0,"reps":11},{"weight":0.0,"reps":11}]},{"date":"2026-01-30T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":50.0,"reps":8},{"weight":50.0,"reps":8},{"weight":50.0,"reps":12}]},{"date":"2026-01-30T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":20.0,"reps":12},{"weight":20.0,"reps":12},{"weight":20.0,"reps":12}]},{"date":"2026-01-30T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":33.5,"reps":8},{"weight":33.5,"reps":8},{"weight":33.5,"reps":8}]},{"date":"2026-01-30T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":14.0,"reps":8},{"weight":14.0,"reps":8},{"weight":14.0,"reps":8}]},{"date":"2026-01-30T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":61.0,"reps":10},{"weight":61.0,"reps":10},{"weight":61.0,"reps":10}]},{"date":"2026-01-30T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":20.0,"reps":12},{"weight":20.0,"reps":12},{"weight":20.0,"reps":12}]},{"date":"2026-01-28T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":42.5,"reps":9},{"weight":42.5,"reps":9},{"weight":42.5,"reps":8}]},{"date":"2026-01-28T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":120.0,"reps":15},{"weight":120.0,"reps":15},{"weight":120.0,"reps":15}]},{"date":"2026-01-28T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":57.0,"reps":12},{"weight":57.0,"reps":12},{"weight":57.0,"reps":12}]},{"date":"2026-01-28T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":10.0,"reps":10},{"weight":10.0,"reps":10},{"weight":10.0,"reps":10}]},{"date":"2026-01-28T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":10.0,"reps":10},{"weight":10.0,"reps":10},{"weight":10.0,"reps":9}]},{"date":"2026-01-28T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":18.75,"reps":10},{"weight":18.75,"reps":10},{"weight":18.75,"reps":12}]},{"date":"2026-01-27T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":20.0,"reps":12},{"weight":20.0,"reps":12},{"weight":20.0,"reps":12}]},{"date":"2026-01-27T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":21.25,"reps":15},{"weight":21.25,"reps":15},{"weight":21.25,"reps":15}]},{"date":"2026-01-27T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":20.0,"reps":10},{"weight":20.0,"reps":10},{"weight":20.0,"reps":10}]},{"date":"2026-01-27T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":11},{"weight":0.0,"reps":11},{"weight":0.0,"reps":11}]},{"date":"2026-01-27T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":20.0,"reps":12}]},{"date":"2026-01-26T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":20.0,"reps":10},{"weight":20.0,"reps":10},{"weight":20.0,"reps":10}]},{"date":"2026-01-26T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":28.5,"reps":10},{"weight":28.5,"reps":10},{"weight":28.5,"reps":10}]},{"date":"2026-01-26T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":45.0,"reps":8},{"weight":45.0,"reps":8},{"weight":45.0,"reps":8}]},{"date":"2026-01-26T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":12.0,"reps":10},{"weight":12.0,"reps":10},{"weight":12.0,"reps":10}]},{"date":"2026-01-26T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":54.0,"reps":12},{"weight":54.0,"reps":12},{"weight":54.0,"reps":12}]},{"date":"2026-01-26T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":17.5,"reps":12},{"weight":17.5,"reps":12},{"weight":17.5,"reps":12}]},{"date":"2026-01-24T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":42.5,"reps":8},{"weight":42.5,"reps":8},{"weight":42.5,"reps":7}]},{"date":"2026-01-24T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":110.0,"reps":15},{"weight":110.0,"reps":15},{"weight":110.0,"reps":15}]},{"date":"2026-01-24T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":57.0,"reps":10},{"weight":57.0,"reps":10},{"weight":57.0,"reps":10}]},{"date":"2026-01-24T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":8.0,"reps":15},{"weight":8.0,"reps":15},{"weight":8.0,"reps":15}]},{"date":"2026-01-24T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":10.0,"reps":9},{"weight":10.0,"reps":9},{"weight":10.0,"reps":9}]},{"date":"2026-01-24T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":16.25,"reps":15},{"weight":16.25,"reps":15},{"weight":16.25,"reps":15}]},{"date":"2026-01-23T09:00:00.000Z","exercise":"Incline DB Bench","session":"C","sets":[{"weight":18.0,"reps":12},{"weight":18.0,"reps":12},{"weight":18.0,"reps":12}]},{"date":"2026-01-23T09:00:00.000Z","exercise":"Cable Face Pull","session":"C","sets":[{"weight":18.75,"reps":15},{"weight":18.75,"reps":15},{"weight":18.75,"reps":15}]},{"date":"2026-01-23T09:00:00.000Z","exercise":"Single Arm Cable Row","session":"C","sets":[{"weight":16.5,"reps":24},{"weight":16.5,"reps":24},{"weight":16.5,"reps":24}]},{"date":"2026-01-23T09:00:00.000Z","exercise":"Weighted Crunch","session":"C","sets":[{"weight":20.0,"reps":12},{"weight":20.0,"reps":12}]},{"date":"2026-01-23T09:00:00.000Z","exercise":"Hanging Knee Raise","session":"C","sets":[{"weight":0.0,"reps":11},{"weight":0.0,"reps":11}]},{"date":"2026-01-22T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":18.0,"reps":10},{"weight":18.0,"reps":10},{"weight":18.0,"reps":10}]},{"date":"2026-01-22T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":28.5,"reps":9},{"weight":28.5,"reps":9},{"weight":28.5,"reps":9}]},{"date":"2026-01-22T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":35.0,"reps":9},{"weight":35.0,"reps":10},{"weight":35.0,"reps":10}]},{"date":"2026-01-22T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":12.0,"reps":8},{"weight":12.0,"reps":8},{"weight":12.0,"reps":8}]},{"date":"2026-01-22T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":54.0,"reps":10},{"weight":54.0,"reps":10},{"weight":54.0,"reps":10}]},{"date":"2026-01-20T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":100.0,"reps":15},{"weight":100.0,"reps":15},{"weight":100.0,"reps":15}]},{"date":"2026-01-20T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":40.0,"reps":8},{"weight":40.0,"reps":8},{"weight":40.0,"reps":8}]},{"date":"2026-01-20T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":47.0,"reps":12},{"weight":47.0,"reps":12},{"weight":47.0,"reps":12}]},{"date":"2026-01-20T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":8.0,"reps":14},{"weight":8.0,"reps":14},{"weight":8.0,"reps":14}]},{"date":"2026-01-20T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":16.25,"reps":14},{"weight":16.25,"reps":14},{"weight":16.25,"reps":10}]},{"date":"2026-01-20T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":8.0,"reps":12},{"weight":8.0,"reps":12}]},{"date":"2026-01-17T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":30.0,"reps":10},{"weight":30.0,"reps":10},{"weight":30.0,"reps":10}]},{"date":"2026-01-17T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":23.5,"reps":11},{"weight":23.5,"reps":11},{"weight":23.5,"reps":11}]},{"date":"2026-01-17T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":18.0,"reps":9},{"weight":18.0,"reps":10},{"weight":18.0,"reps":8}]},{"date":"2026-01-17T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":47.0,"reps":12},{"weight":47.0,"reps":12},{"weight":47.0,"reps":12}]},{"date":"2026-01-17T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":10.0,"reps":12},{"weight":10.0,"reps":12},{"weight":10.0,"reps":12}]},{"date":"2026-01-16T09:00:00.000Z","exercise":"Leg Press","session":"A","sets":[{"weight":80.0,"reps":10},{"weight":90.0,"reps":10},{"weight":90.0,"reps":15}]},{"date":"2026-01-16T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":35.0,"reps":9},{"weight":35.0,"reps":9},{"weight":35.0,"reps":9}]},{"date":"2026-01-16T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":47.0,"reps":10},{"weight":47.0,"reps":11},{"weight":47.0,"reps":10}]},{"date":"2026-01-16T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":8.0,"reps":12},{"weight":8.0,"reps":12},{"weight":8.0,"reps":12}]},{"date":"2026-01-16T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":13.75,"reps":14},{"weight":13.75,"reps":14}]},{"date":"2026-01-14T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":16.0,"reps":12},{"weight":16.0,"reps":12},{"weight":16.0,"reps":12}]},{"date":"2026-01-14T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":17.5,"reps":10},{"weight":17.5,"reps":10},{"weight":17.5,"reps":10}]},{"date":"2026-01-14T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":23.5,"reps":8},{"weight":23.5,"reps":8},{"weight":23.5,"reps":8}]},{"date":"2026-01-14T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":47.0,"reps":8},{"weight":47.0,"reps":8},{"weight":47.0,"reps":8}]},{"date":"2026-01-14T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":9.0,"reps":12},{"weight":9.0,"reps":12},{"weight":9.0,"reps":12}]},{"date":"2026-01-11T09:00:00.000Z","exercise":"Flat Bench Press","session":"A","sets":[{"weight":30.0,"reps":10},{"weight":30.0,"reps":10},{"weight":30.0,"reps":10}]},{"date":"2026-01-11T09:00:00.000Z","exercise":"Seated Cable Row","session":"A","sets":[{"weight":33.0,"reps":10},{"weight":40.0,"reps":10},{"weight":40.0,"reps":10}]},{"date":"2026-01-11T09:00:00.000Z","exercise":"Lateral DB Raise","session":"A","sets":[{"weight":8.0,"reps":10},{"weight":8.0,"reps":10},{"weight":8.0,"reps":10}]},{"date":"2026-01-11T09:00:00.000Z","exercise":"Rope Pushdown","session":"A","sets":[{"weight":13.75,"reps":10},{"weight":13.75,"reps":10}]},{"date":"2026-01-11T09:00:00.000Z","exercise":"Incline DB Curl","session":"A","sets":[{"weight":8.0,"reps":9},{"weight":8.0,"reps":9},{"weight":8.0,"reps":9}]},{"date":"2026-01-09T09:00:00.000Z","exercise":"Deadlift","session":"B","sets":[{"weight":40.0,"reps":8},{"weight":40.0,"reps":8},{"weight":40.0,"reps":8}]},{"date":"2026-01-09T09:00:00.000Z","exercise":"Barbell Curl","session":"B","sets":[{"weight":15.0,"reps":10},{"weight":15.0,"reps":10},{"weight":15.0,"reps":10}]},{"date":"2026-01-09T09:00:00.000Z","exercise":"Lat Pulldown","session":"B","sets":[{"weight":20.0,"reps":10},{"weight":20.0,"reps":10},{"weight":20.0,"reps":10}]},{"date":"2026-01-09T09:00:00.000Z","exercise":"Leg Extension","session":"B","sets":[{"weight":40.0,"reps":10},{"weight":40.0,"reps":10},{"weight":40.0,"reps":10}]},{"date":"2026-01-09T09:00:00.000Z","exercise":"Seated DB Press","session":"B","sets":[{"weight":16.0,"reps":10},{"weight":16.0,"reps":10},{"weight":16.0,"reps":10}]},{"date":"2026-01-09T09:00:00.000Z","exercise":"Hammer Curl","session":"B","sets":[{"weight":9.0,"reps":10},{"weight":9.0,"reps":10},{"weight":9.0,"reps":10}]}];
@@ -1624,7 +1486,6 @@ function goBack() {
       break;
     }
     case 'exercise': setState({ view: 'workout', activeExercise: null, sets: [], repInput: '', editingSetIdx: null, restEndsAt: null }); break;
-    case 'summary':  setState({ view: 'select', summary: null }); break;
     case 'history':  setState({ view: 'select' }); break;
     case 'settings': setState({ view: 'select' }); break;
     case 'workouts':    setState({ view: 'select' }); break;
@@ -1794,34 +1655,7 @@ function getQuickStats() {
     lastWorkout: daysAgo === 0 ? 'Today' : daysAgo === 1 ? 'Yesterday' : `${daysAgo}d ago`,
     totalSessions,
     thisWeek,
-    streak: computeWeekStreak(state.history),
   };
-}
-
-// The Monday 00:00 that starts the calendar week containing `d`.
-function weekStartMonday(d) {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  const dow = (x.getDay() + 6) % 7; // Mon=0 ... Sun=6
-  x.setDate(x.getDate() - dow);
-  return x;
-}
-
-// Consecutive-week training streak: how many weeks in a row (ending this week,
-// or last week if this week has no session yet) contain at least one workout.
-// An empty in-progress week does NOT break the streak — you have until Sunday.
-function computeWeekStreak(history) {
-  if (!history.length) return 0;
-  const key   = m => `${m.getFullYear()}-${m.getMonth()}-${m.getDate()}`;
-  const weeks = new Set(history.map(e => key(weekStartMonday(new Date(e.date)))));
-  const cursor = weekStartMonday(new Date());
-  if (!weeks.has(key(cursor))) cursor.setDate(cursor.getDate() - 7);
-  let streak = 0;
-  while (weeks.has(key(cursor))) {
-    streak++;
-    cursor.setDate(cursor.getDate() - 7);
-  }
-  return streak;
 }
 
 function getBestSet(exerciseName) {
@@ -1945,34 +1779,7 @@ function completeSession() {
   // then attempt an immediate drain.
   enqueueSyncBatch(entries.map(({ workoutId, ...rest }) => rest));
   drainSyncQueue();
-  setState({ view: 'summary', summary: buildSessionSummary(validExercises, workout), sessionType: null, activeSession: null, history });
-}
-
-// Recap of the just-finished session, computed from the in-memory sets (which
-// still carry their per-set `prs` from when they were logged). Numbers only —
-// rendered by renderSummary and animated by the count-up on the summary view.
-function buildSessionSummary(validExercises, workout) {
-  let totalSets = 0, totalVolume = 0, totalReps = 0, prCount = 0, top = null;
-  validExercises.forEach(ex => {
-    ex.sets.forEach(s => {
-      const w = Number(s.weight) || 0, r = Number(s.reps) || 0;
-      totalSets++;
-      totalReps  += r;
-      totalVolume += w * r;
-      prCount    += (s.prs && s.prs.length) || 0;
-      if (!top || w > top.weight || (w === top.weight && r > top.reps)) {
-        top = { weight: w, reps: r, exercise: ex.exercise };
-      }
-    });
-  });
-  const startedMs = new Date(state.activeSession?.startedAt).getTime();
-  const durationMin = Number.isFinite(startedMs)
-    ? Math.max(1, Math.round((Date.now() - startedMs) / 60000))
-    : null;
-  return {
-    workoutName: workout?.name ?? 'Workout',
-    totalSets, totalVolume, totalReps, prCount, durationMin, top,
-  };
+  setState({ view: 'select', sessionType: null, activeSession: null, history });
 }
 
 function selectExercise(idx) {
@@ -2064,21 +1871,6 @@ function addSet() {
   const restTotalSec = parseRestSeconds(state.activeExercise?.rest);
   const restEndsAt = Date.now() + restTotalSec * 1000;
   setState({ sets, repInput, activeSession: session, restEndsAt, restTotalSec });
-  flashOrb();   // brief flare on the load orb as visual confirmation the set landed
-}
-
-// One-shot flare on the exercise load orb — the confirmation that a set was
-// logged. Retrigger-safe: strip the class and force a reflow before re-adding
-// so a fast tapper gets a fresh animation each set rather than a dead one.
-// The CSS keyframe lives behind prefers-reduced-motion: no-preference, so a
-// reduced-motion user simply sees nothing move here.
-function flashOrb() {
-  const orb = document.querySelector('.ex-orb');
-  if (!orb) return;
-  orb.classList.remove('flare');
-  void orb.offsetWidth;          // reflow so removing + re-adding restarts the animation
-  orb.classList.add('flare');
-  setTimeout(() => orb.classList.remove('flare'), 600);
 }
 
 // ============================================================
@@ -2673,162 +2465,61 @@ function buildCalendarHTML() {
 // ============================================================
 // SELECT SCREEN (tabbed: Workout | Progress)
 // ============================================================
-function renderSelect() {
-  const tab = state.homeTab;
-
-  const tabBar = `
-    <div class="tab-bar mb-0" role="tablist" aria-label="Home tabs">
-      <button type="button" class="tab-btn ${tab === 'workout' ? 'active' : ''}" role="tab" aria-selected="${tab === 'workout'}" onclick="setState({homeTab:'workout'})">Workout</button>
-      <button type="button" class="tab-btn ${tab === 'progress' ? 'active' : ''}" role="tab" aria-selected="${tab === 'progress'}" onclick="setState({homeTab:'progress'})">Progress</button>
-    </div>`;
-
-  if (tab === 'progress') {
-    const dateStr = new Date().toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'short'});
-    return `
-      <div class="screen">
-        <div class="container container--home">
-          <div class="text-center mb-4">
-            <div class="label mb-1">MATT · ${dateStr}</div>
-            <h1 class="title-xl mb-4">Workout Tracker</h1>
-            ${tabBar}
-          </div>
-          ${renderProgressContent()}
-        </div>
-      </div>`;
-  }
-
-  // ── Workout tab ──
-  const stats   = getQuickStats();
-  const session = state.activeSession;
-
-  const statsHTML = stats ? `
-    <div class="card card--glow mb-4">
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="metric-value numeric">${stats.lastWorkout}</div>
-          <div class="label mt-1">Last session</div>
-        </div>
-        <div class="stat-item">
-          <div class="metric-value numeric sun-val js-countup">${stats.totalSessions}</div>
-          <div class="label mt-1">Total sessions</div>
-        </div>
-        <div class="stat-item">
-          <div class="metric-value numeric pos-val js-countup">${stats.thisWeek}</div>
-          <div class="label mt-1">This week</div>
-        </div>
-      </div>
-    </div>` : `
-    <div class="empty-state mb-4">
-      <div class="empty-state-icon">🏋️</div>
-      <div class="empty-state-title">No sessions yet</div>
-      <div class="empty-state-sub">Pick a session below to get started.<br>Your stats will appear here after your first workout.</div>
-    </div>`;
-
-  // Week streak — shown only from 2+ weeks, where it becomes motivating rather
-  // than noise. Copper "keep it alive" accent (see .streak-banner).
-  const streakHTML = (stats && stats.streak >= 2) ? `
-    <div class="streak-banner mb-4">
-      <span class="streak-flame" aria-hidden="true">🔥</span>
-      <span class="streak-num numeric">${stats.streak}</span>
-      <span class="streak-text">week streak</span>
-      <span class="streak-tail">keep it alive</span>
-    </div>` : '';
-
-  const resumeWorkout = session ? workoutById(session.sessionType) : null;
-  const rDone  = session?.exercises?.length ?? 0;
-  const rTotal = resumeWorkout?.exercises.length ?? 0;
-  const rFrac  = rTotal > 0 ? Math.min(1, rDone / rTotal) : 0;
-  const rC     = 2 * Math.PI * 26;
-  const resumeHTML = sessionHasProgress(session) ? `
-    <div class="card card--glow resume-card resume-banner mb-4">
-      <div class="resume-ring">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <circle class="resume-ring-bg" cx="32" cy="32" r="26"></circle>
-          <circle class="resume-ring-fg" cx="32" cy="32" r="26"
-                  style="stroke-dasharray:${rC.toFixed(1)};stroke-dashoffset:${(rC * (1 - rFrac)).toFixed(1)}"
-                  transform="rotate(-90 32 32)"></circle>
-        </svg>
-        <span class="resume-ring-num">${rDone}/${rTotal}</span>
-      </div>
-      <div class="resume-info">
-        <div class="label">In progress</div>
-        <div class="resume-title">${esc(resumeWorkout?.name ?? 'Workout')}</div>
-        <div class="flex-row resume-actions">
-          <button type="button" class="btn-resume" onclick="resumeSession()">RESUME</button>
-          <button type="button" class="btn-abandon" onclick="abandonSession()">ABANDON</button>
-        </div>
-      </div>
-    </div>` : '';
-
-  const startBtnHTML = state.workouts.length === 0 ? `
-    <div class="empty-state mb-6">
-      <div class="empty-state-icon">📋</div>
-      <div class="empty-state-title">No workouts yet</div>
-      <div class="empty-state-sub">Create a workout to start tracking sessions.</div>
-      <button type="button" class="btn-primary empty-state-action" onclick="setState({view:'workoutNew'})">${icons.plus} New Workout</button>
-    </div>` : `
-    <div class="mb-6">
-      <button type="button" class="btn-primary" onclick="setState({view:'workouts'})">${icons.chevron} START WORKOUT</button>
-    </div>`;
-
-  return `
-    <div class="screen">
-      <div class="container container--home">
-        <div class="text-center mb-4">
-          <div class="label mb-1">MATT · ${new Date().toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'short'})}</div>
-          <h1 class="title-xl mb-4">Workout Tracker</h1>
-          ${tabBar}
-        </div>
-        ${statsHTML}
-        ${streakHTML}
-        ${resumeHTML}
-        ${startBtnHTML}
-        ${buildCalendarHTML()}
-        <div class="space-y-2">
-          <button type="button" class="btn-nav" onclick="setState({view:'workoutNew'})">${icons.plus} New Workout</button>
-          <button type="button" class="btn-nav" onclick="setState({view:'history'})">View History</button>
-          <button type="button" class="btn-nav settings-link" onclick="setState({view:'settings'})">⚙ Settings</button>
-        </div>
-      </div>
-    </div>`;
+function renderBetaNav(active = 'today') {
+  return `<nav class="beta-bottom-nav" aria-label="Primary navigation">
+    <button type="button" class="${active === 'today' ? 'active' : ''}" onclick="setState({view:'select',homeTab:'workout'})">Today</button>
+    <button type="button" class="${active === 'train' ? 'active' : ''}" onclick="setState({view:'workouts'})">Train</button>
+    <button type="button" class="${active === 'insights' ? 'active' : ''}" onclick="setState({view:'select',homeTab:'progress'})">Insights</button>
+  </nav>`;
 }
 
-// ============================================================
-// SESSION SUMMARY (post-workout recap)
-// ============================================================
-function renderSummary() {
-  const s = state.summary;
-  if (!s) return renderSelect();   // safety: reload/deep-link with no recap → home
+function renderSelect() {
+  const tab = state.homeTab;
+  const dateStr = new Date().toLocaleDateString('en-AU', {weekday:'long', day:'numeric', month:'short'});
 
-  const prBanner = s.prCount > 0
-    ? `<div class="summary-pr">🏆 ${s.prCount} new PR${s.prCount > 1 ? 's' : ''} this session</div>`
-    : '';
-  const topLine = s.top
-    ? `<div class="summary-top">Top set · <span class="numeric">${esc(s.top.exercise)} — ${s.top.weight}kg × ${s.top.reps}</span></div>`
-    : '';
-  const timeTile = s.durationMin
-    ? `<div class="summary-tile"><div class="summary-tile-val numeric js-countup">${s.durationMin}min</div><div class="summary-tile-lbl">Time</div></div>`
-    : '';
+  if (tab === 'progress') {
+    return `<div class="screen"><div class="container container--home">
+      <header class="beta-brand"><div class="beta-kicker">Performance archive</div><h1 class="beta-wordmark">Your <em>signal</em></h1></header>
+      ${renderProgressContent()}
+      <div class="beta-section-head"><h3>Session log</h3><span>Full history</span></div>
+      <button type="button" class="btn-nav" onclick="setState({view:'history'})">Open training history ${icons.chevron}</button>
+      <button type="button" class="btn-nav settings-link mt-2" onclick="setState({view:'settings'})">Settings ${icons.chevron}</button>
+    </div>${renderBetaNav('insights')}</div>`;
+  }
 
-  return `
-    <div class="screen">
-      <div class="container container--home">
-        <div class="summary-head">
-          <div class="summary-check">${icons.check24}</div>
-          <div class="label">Session complete</div>
-          <h1 class="title-xl summary-name">${esc(s.workoutName)}</h1>
-        </div>
-        ${prBanner}
-        <div class="summary-grid">
-          <div class="summary-tile"><div class="summary-tile-val numeric js-countup">${Math.round(s.totalVolume)}kg</div><div class="summary-tile-lbl">Volume</div></div>
-          <div class="summary-tile"><div class="summary-tile-val numeric js-countup">${s.totalSets}</div><div class="summary-tile-lbl">Sets</div></div>
-          <div class="summary-tile"><div class="summary-tile-val numeric js-countup">${s.totalReps}</div><div class="summary-tile-lbl">Reps</div></div>
-          ${timeTile}
-        </div>
-        ${topLine}
-        <button type="button" class="btn-primary mt-4" onclick="setState({view:'select', summary:null})">${icons.check} DONE</button>
-      </div>
-    </div>`;
+  const stats = getQuickStats();
+  const session = state.activeSession;
+  const resumeWorkout = session ? workoutById(session.sessionType) : null;
+  const rDone = completedExercises().length;
+  const rTotal = resumeWorkout?.exercises.length ?? 0;
+  const suggested = resumeWorkout || state.workouts[0] || null;
+  const style = suggested ? wkStyle(suggested.color) : '';
+
+  const resumeHTML = sessionHasProgress(session) ? `<div class="card beta-resume resume-banner mt-3">
+    <div class="label" style="color:var(--amber)">Live session · ${rDone}/${rTotal} movements</div>
+    <div class="resume-title">${esc(resumeWorkout?.name ?? 'Workout')}</div>
+    <div class="flex-row resume-actions"><button type="button" class="btn-resume" onclick="resumeSession()">Resume signal →</button><button type="button" class="btn-abandon" onclick="abandonSession()">Abandon</button></div>
+  </div>` : '';
+
+  const hero = suggested ? `<section class="beta-hero" style="${style}">
+    <div class="beta-eyebrow">${sessionHasProgress(session) ? 'Continue training' : 'Recommended next'}</div>
+    <h2>${esc(suggested.name)}</h2>
+    <div class="beta-meta">${suggested.exercises.length} movements · ${suggested.label || 'Custom'} protocol</div>
+    <button type="button" class="beta-start" onclick="${sessionHasProgress(session) ? 'resumeSession()' : `startSession('${suggested.id}')`}"><span>${sessionHasProgress(session) ? 'Resume workout' : 'Start training'}</span><span>→</span></button>
+  </section>` : `<section class="beta-hero"><div class="beta-eyebrow">Build your system</div><h2>No protocol yet</h2><div class="beta-meta">Create a workout to begin tracking.</div><button type="button" class="beta-start" onclick="setState({view:'workoutNew'})"><span>Create workout</span><span>+</span></button></section>`;
+
+  return `<div class="screen"><div class="container container--home">
+    <header class="beta-brand"><div class="beta-kicker">${dateStr} · Ready</div><h1 class="beta-wordmark">Command <em>center</em></h1></header>
+    ${hero}${resumeHTML}
+    <div class="beta-section-head"><h3>Live signals</h3><span>This cycle</span></div>
+    <div class="beta-signals">
+      <div class="beta-signal"><strong>${stats?.thisWeek ?? 0}</strong><small>This week</small></div>
+      <div class="beta-signal"><strong>${stats?.totalSessions ?? 0}</strong><small>Sessions</small></div>
+      <div class="beta-signal"><strong>${stats?.lastWorkout ?? '—'}</strong><small>Last trained</small></div>
+    </div>
+    <div class="beta-section-head"><h3>Activity map</h3><span>Tap a day</span></div>
+    ${buildCalendarHTML()}
+  </div>${renderBetaNav('today')}</div>`;
 }
 
 // ============================================================
@@ -2850,7 +2541,6 @@ function renderWorkout() {
     const skipped    = isSkipped(ex.name);
 
     let recentHTML = '';
-    let cardAccent = '';   // trend-tinted left edge on the card (see .exercise-item.ex-*)
     if (recent && !isDone) {
       const lastWeight  = recent.sets[0]?.weight;
       const lastReps    = recent.sets.map(s => s.reps).join('-');
@@ -2865,12 +2555,6 @@ function renderWorkout() {
         else if (lastWeight < prevWeight) { trendIcon = '↓'; trendClass = 'trend--down'; }
         else if (lastMaxReps > prevMaxReps) { trendIcon = '↑'; trendClass = 'trend--up'; }
         else if (lastMaxReps < prevMaxReps) { trendIcon = '↓'; trendClass = 'trend--down'; }
-      }
-
-      // Only tint the card when it has no other status treatment (partial gets
-      // its own cyan bar; skipped is dimmed) so the signals never collide.
-      if (!isPartial && !skipped) {
-        cardAccent = trendClass === 'trend--up' ? 'ex-up' : trendClass === 'trend--down' ? 'ex-down' : '';
       }
 
       recentHTML = `
@@ -2893,7 +2577,7 @@ function renderWorkout() {
 
     return `
       <div class="exercise-row-wrap" data-idx="${idx}">
-        <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''} ${skipped ? 'skipped' : ''} ${cardAccent}" onclick="selectExercise(${idx})">
+        <button type="button" class="exercise-item ${isDone ? 'done' : isPartial ? 'partial' : ''} ${skipped ? 'skipped' : ''}" onclick="selectExercise(${idx})">
           <div class="row-main">
             <div class="row-heading">
               <div class="exercise-name ${isDone ? 'is-complete' : ''}">${esc(ex.name)}</div>
@@ -2969,18 +2653,9 @@ function renderExercise() {
   const orbR = 110, orbC = 2 * Math.PI * orbR;
   const orbFrac = target > 0 ? Math.min(1, state.sets.length / target) : 0;
 
-  // Set-progress pips beside the "Sets X/Y" header — one dot per target set,
-  // lit as sets are logged. Capped so an unusually high target set count can't
-  // overflow the header row.
-  const setPipsHTML = (target > 0 && target <= 10)
-    ? `<span class="set-pips" aria-hidden="true">${
-        Array.from({ length: target }, (_, i) =>
-          `<span class="set-pip${i < state.sets.length ? ' done' : ''}"></span>`).join('')}</span>`
-    : '';
-
   // Last session
   const lastHTML = lastSession ? `
-    <div class="card--deep last-session mb-3">
+    <div class="card--deep mb-3">
       <div class="label mb-1">Last session</div>
       <div class="body-copy numeric">${lastSession.sets.map(s => s.reps).join('-')} @ ${lastSession.sets[0]?.weight ?? '?'}kg</div>
     </div>` : '';
@@ -3076,32 +2751,14 @@ function renderExercise() {
 
   const notesHTML = ex.notes ? `<div class="note-box mb-3">💡 ${esc(ex.notes)}</div>` : '';
 
-  // Previous sessions — newest first. Each row shows a weight trend vs. the
-  // session before it (the next-older row), so history reads as a progression
-  // rather than a flat ledger. The oldest row has nothing to compare against.
-  const histRows = history.slice(1);
   const historyHTML = history.length > 1 ? `
     <div class="section-label"><span>Previous sessions</span></div>
     <div class="space-y-2">
-      ${histRows.map((entry, i) => {
-        const w    = Number(entry.sets[0]?.weight);
-        const older = histRows[i + 1];
-        const wOld = older ? Number(older.sets[0]?.weight) : NaN;
-        let rowCls = '', trend = '';
-        if (Number.isFinite(w) && Number.isFinite(wOld)) {
-          if (w > wOld)      { rowCls = ' hist-up';   trend = `<span class="hist-trend up">▲</span>`; }
-          else if (w < wOld) { rowCls = ' hist-down'; trend = `<span class="hist-trend down">▼</span>`; }
-          else               { trend = `<span class="hist-trend flat">–</span>`; }
-        }
-        return `
-        <div class="card--inner hist-row${rowCls}">
-          <div class="hist-row-main">
-            <div class="label mb-1">${new Date(entry.date).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>
-            <div class="history-value numeric">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0]?.weight ?? '?'}kg</div>
-          </div>
-          ${trend}
-        </div>`;
-      }).join('')}
+      ${history.slice(1).map(entry => `
+        <div class="card--inner">
+          <div class="label mb-1">${new Date(entry.date).toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>
+          <div class="history-value numeric">${entry.sets.map(s => s.reps).join('-')} @ ${entry.sets[0]?.weight ?? '?'}kg</div>
+        </div>`).join('')}
     </div>` : '';
 
   return `
@@ -3136,10 +2793,7 @@ function renderExercise() {
         ${renderRestTimer()}
 
         <div class="card card--glow mb-3">
-          <div class="sets-head mb-3">
-            <span class="title-sm">Sets ${state.sets.length}/${target}</span>
-            ${setPipsHTML}
-          </div>
+          <div class="title-sm mb-3">Sets ${state.sets.length}/${target}</div>
           ${state.sets.length > 0 ? `<div class="space-y-2 mb-3">${setsHTML}</div>` : setsHTML}
           ${removeHTML}
           ${progHTML}
@@ -3312,15 +2966,15 @@ function renderProgressContent() {
       statsHTML = `
         <div class="graph-stat-row">
           <div class="graph-stat">
-            <div class="graph-stat-val js-countup">${fmt(latest)}${unit}</div>
+            <div class="graph-stat-val">${fmt(latest)}${unit}</div>
             <div class="graph-stat-lbl">Current</div>
           </div>
           <div class="graph-stat">
-            <div class="graph-stat-val peak-val js-countup">${fmt(peak)}${unit}</div>
+            <div class="graph-stat-val peak-val">${fmt(peak)}${unit}</div>
             <div class="graph-stat-lbl">Peak</div>
           </div>
           <div class="graph-stat ${gain >= 0 ? 'stat-change--positive' : 'stat-change--negative'}">
-            <div class="graph-stat-val js-countup">${gain >= 0 ? '+' : ''}${fmt(gain)}${unit}</div>
+            <div class="graph-stat-val">${gain >= 0 ? '+' : ''}${fmt(gain)}${unit}</div>
             <div class="graph-stat-lbl">Progress</div>
           </div>
         </div>`;
@@ -3405,12 +3059,11 @@ function buildGraphSVG(points, mode) {
   const lastI = points.length - 1;
   const dots = points.map((p, i) => {
     const cx = xScale(i).toFixed(1), cy = yScale(p.val).toFixed(1);
-    const delay = `style="animation-delay:${(i * 0.04).toFixed(2)}s"`;
     if (i === lastI) {
-      return `<circle class="graph-dot" ${delay} cx="${cx}" cy="${cy}" r="7" fill="var(--amber)" opacity="0.16" />`
-           + `<circle class="graph-dot" ${delay} cx="${cx}" cy="${cy}" r="3.8" fill="var(--amber)" stroke="var(--bg-card)" stroke-width="1.5" />`;
+      return `<circle cx="${cx}" cy="${cy}" r="7" fill="var(--amber)" opacity="0.16" />`
+           + `<circle cx="${cx}" cy="${cy}" r="3.8" fill="var(--amber)" stroke="var(--bg-card)" stroke-width="1.5" />`;
     }
-    return `<circle class="graph-dot" ${delay} cx="${cx}" cy="${cy}" r="3" fill="var(--cyan)" />`;
+    return `<circle cx="${cx}" cy="${cy}" r="3" fill="var(--cyan)" />`;
   }).join('');
 
   return `
@@ -3421,8 +3074,8 @@ function buildGraphSVG(points, mode) {
           <stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/>
         </linearGradient>
       </defs>
-      <path class="graph-area" d="${areaPath}" fill="url(#gfill)" />
-      <path class="graph-line" pathLength="1" d="${linePath}" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${areaPath}" fill="url(#gfill)" />
+      <path d="${linePath}" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       ${dots}
       ${yTicks.join('')}
       ${xTicks.join('')}
@@ -3467,6 +3120,7 @@ function renderWorkouts() {
         ${items}
         <button type="button" class="btn-primary mt-4" onclick="setState({view:'workoutNew'})">${icons.plus} New Workout</button>
       </div>
+      ${renderBetaNav('train')}
     </div>`;
 }
 
@@ -3666,7 +3320,6 @@ function render() {
 
   switch (state.view) {
     case 'select':      app.innerHTML = renderSelect();      break;
-    case 'summary':     app.innerHTML = renderSummary();     break;
     case 'workout':     app.innerHTML = renderWorkout();     break;
     case 'exercise':    app.innerHTML = renderExercise();    break;
     case 'history':     app.innerHTML = renderHistory();     break;
@@ -3694,45 +3347,6 @@ function render() {
   } else {
     clearRestInterval();
   }
-
-  animateCountUps();
-}
-
-// Count the graph stat numbers up from zero to their final value on each
-// render of the progress view. Purely decorative: every element already
-// contains its exact final text, so we snapshot that, parse out an optional
-// leading sign, the number, and any trailing unit ("kg"), then animate only
-// the numeric part before restoring the original string verbatim — the DOM
-// never ends on a rounded or reformatted value. Skipped entirely under
-// prefers-reduced-motion, which leaves the final text untouched.
-function animateCountUps() {
-  const els = document.querySelectorAll('.js-countup');
-  if (!els.length) return;
-  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  els.forEach(el => {
-    const finalText = el.textContent;
-    const m = finalText.match(/^([+-]?)(\d+(?:\.\d+)?)(.*)$/);
-    if (!m) return;
-    const sign = m[1], target = parseFloat(m[2]), suffix = m[3];
-    const decimals = (m[2].split('.')[1] || '').length;
-    if (!Number.isFinite(target)) return;
-
-    const DURATION = 550;
-    const start = performance.now();
-    const step = now => {
-      const t = Math.min(1, (now - start) / DURATION);
-      const eased = 1 - Math.pow(1 - t, 3);   // easeOutCubic
-      if (t < 1) {
-        el.textContent = sign + (target * eased).toFixed(decimals) + suffix;
-        requestAnimationFrame(step);
-      } else {
-        el.textContent = finalText;           // restore the exact original string
-      }
-    };
-    el.textContent = sign + (0).toFixed(decimals) + suffix;
-    requestAnimationFrame(step);
-  });
 }
 
 // ============================================================
@@ -3748,7 +3362,7 @@ window.addEventListener('online', () => drainSyncQueue());
 // ============================================================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW registration failed:', e));
+    navigator.serviceWorker.register('../sw.js').catch(e => console.warn('SW registration failed:', e));
   });
 }
 </script>
