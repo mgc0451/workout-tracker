@@ -48,11 +48,18 @@ The runner starts its own server and runs all 9 suites (164 checks).
 
 ```
 index.html            the whole app — markup, CSS and JS
+beta/                 opt-in Command Center redesign (same saved data)
 sw.js                 service worker (offline support)
 manifest.webmanifest  PWA manifest
 tests/                Playwright suites + runner
 CLAUDE.md             architecture notes and gotchas for contributors
 ```
+
+The **Beta** link opens the redesigned app without replacing the classic UI.
+Both experiences deliberately use the same validated `localStorage` schema,
+so workouts, history and an active session move between them. Beta-only UI
+preferences must use `beta:`-prefixed keys. The root service worker caches both
+shells and selects the matching offline fallback for each path.
 
 ## Data
 
